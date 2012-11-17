@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 __author__ = 'viteck.dudin'
 __mail__ = 'viteck.dudin@yandex.ru'
 
@@ -12,9 +14,13 @@ class Word:
     parent_index = -1
 
     def __init__(self, text):
-        if not isinstance(text, str):
+        if isinstance(text, str):
+            self.text = text.decode('utf-8')
+        elif isinstance(text, unicode):
+            self.text = text
+        else:
             raise Exception("Input word is not a string (input: " + str(text) + ")")
-        self.text = (str(text)).upper()
+        self.text = self.text.upper()
 
 
 class Dictionary:
@@ -46,12 +52,14 @@ class Dictionary:
 
         for line in fin:
             for text in line.split():
+                text = text.decode('utf-8')
                 # Make checks for text
                 if text[-1] == '\n':
                     text = text[:-1]
                 # Save only that words, which have the same length with start_word and end_word
                 if len(text) != self.word_length and len(text) > 0:
-                    print "Word [" + text + "] not added into dictionary (reason: incorrect length)"
+                    print "Word [" + text + "] not added into dictionary (reason: incorrect length, "\
+                          + str(len(text)) + " instead of " + str(self.word_length) + ")"
                     continue
                 # All ok, create new Word
                 word = Word(text)
@@ -61,7 +69,7 @@ class Dictionary:
 
     def __add_word_into_dictionary(self, word):
         bucket = self.__calc_words_dif(word, self.end_word)
-        Word(word).bucket_number = bucket
+        word.bucket_number = bucket
 
         if bucket not in self.words_buckets:
             self.words_buckets[bucket] = []
@@ -74,14 +82,19 @@ class Dictionary:
             self.words_buckets[bucket].append(word)
 
     def __check_unique(self, word, word_list):
-        # TODO: Need to be released
-        raise Exception("Unsupported operation")
+        for existing_word in word_list:
+            if existing_word.text == word.text:
+                return False
+        return True
 
     def __calc_words_dif(self, word1, word2):
-        length = len(word1)
+        text1 = word1.text
+        text2 = word2.text
+
+        length = len(text1)
         dif = 0
         for x in xrange(length):
-            if word1[x] != word2[x]:
+            if text1[x] != text2[x]:
                 dif += 1
         return dif
 
@@ -91,6 +104,14 @@ class Dictionary:
         self.words_queue.append(self.start_word)
 
         # TODO: need to be released
-        raise Exception("Unsupported operation")
+        #raise Exception("Unsupported operation")
+        self.__print_dictionary()
+
+    def __print_dictionary(self):
+        for key in self.words_buckets.keys():
+            ls = self.words_buckets[key]
+            print "Key is " + str(key)
+            for word in ls:
+                print word.text
 
 
