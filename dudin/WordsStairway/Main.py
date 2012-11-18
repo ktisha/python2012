@@ -7,30 +7,29 @@ import sys
 import Dictionary
 
 
-def main(start_word, end_word):
-    start_word = start_word.decode('utf-8')
-    end_word = end_word.decode('utf-8')
-    dictionary_filename = 'dictionaries/dict_' + str(len(start_word)) + '.txt'
-    dictionary_filename = str(dictionary_filename).decode('utf-8')
-
+def main(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        start_word = lines[0].decode('utf-8')
+        end_word = lines[1].decode('utf-8')
     if start_word[-1] == '\n':
         start_word = start_word[:-1]
     if end_word[-1] == '\n':
         end_word = end_word[:-1]
-    if dictionary_filename[-1] == '\n':
-        dictionary_filename = dictionary_filename[:-1]
 
-    words_dict = Dictionary.Dictionary(start_word, end_word, dictionary_filename)
-    print "words_dict is loaded\n"
+    dict_filename = 'dictionaries/dict_' + str(len(start_word)) + '.txt'
+    dict_filename = dict_filename.decode('utf-8')
+
+    words_dict = Dictionary.Dictionary(start_word, end_word, dict_filename)
+    print "Dictionary is loaded"
+
     words_stairway = words_dict.create_stairway()
-#    for word in words_stairway:
-#        print word
-
+    for word in words_stairway:
+        print word
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 2:
         print "Wrong number of parameters"
-        print "Usage: start_word end_word dictionary_filename"
+        print "Usage: target_words_filename"
     else:
-        #main(sys.argv[1], sys.argv[2], sys.argv[3])
-        main('пень', 'горб')
+        main(sys.argv[1])
