@@ -39,7 +39,9 @@ class Dictionary:
         # Add start_word into dictionary
         self.words_buckets = {}
         self.start_word.global_index = 0
-        self.words_buckets[self.__calc_words_dif(self.start_word, self.end_word)] = [self.start_word]
+        self.start_word.bucket_number = self.__calc_words_dif(self.start_word, self.end_word)
+        self.start_word.parent_index = -2   # unique index. using it, we won't get parent for start_word
+        self.words_buckets[self.start_word.bucket_number] = [self.start_word]
         # Add end_word into dictionary
         self.end_word.global_index = 1
         self.words_buckets[0] = [self.end_word]
@@ -63,8 +65,6 @@ class Dictionary:
                     continue
                 # All ok, create new Word
                 word = Word(text)
-                word.global_index = self.dictionary_size
-                self.dictionary_size += 1
                 self.__add_word_into_dictionary(word)
 
     def __add_word_into_dictionary(self, word):
@@ -79,6 +79,8 @@ class Dictionary:
         if self.check_unique_words_in_dictionary:
             all_ok = self.__check_unique(word, self.words_buckets[bucket])
         if all_ok:
+            word.global_index = self.dictionary_size
+            self.dictionary_size += 1
             self.words_buckets[bucket].append(word)
 
     def __check_unique(self, word, word_list):
@@ -99,13 +101,75 @@ class Dictionary:
         return dif
 
     def create_stairway(self):
+        self.__create_stairway()
+        print "Stairway is created"
+
+        self.__restore_stairway()
+        text_ls = []
+        for word in self.stairway_ls:
+            text_ls.append(word.text)
+        return text_ls
+
+    def __create_stairway(self):
         # create stairway, using analog of bfs in graphs
         self.words_queue = []
         self.words_queue.append(self.start_word)
+        self.words_queue_cur_index = 0
+        while self.end_word.parent_index == -1 and self.words_queue_cur_index < len(self.words_queue):
+            self.__make_next_stairway_step()
 
-        # TODO: need to be released
-        #raise Exception("Unsupported operation")
-        self.__print_dictionary()
+    def __make_next_stairway_step(self):
+        #print "In __make_next_stairway_step"
+        cur_word = self.words_queue[self.words_queue_cur_index]
+        self.words_queue_cur_index += 1
+
+        # we need to check only words from buckets, which differ from current bucket
+        # by no more than 1
+        cur_bucket = cur_word.bucket_number
+        # 0. check, that we in 1 step to end_word
+        if cur_bucket == 1:
+            self.end_word.parent_index = cur_word.global_index
+            return
+        # 1. check bucket with smaller number
+        self.__process_bucket_in_stairway_step(cur_word, cur_bucket - 1)
+        # 2. check bucket with same number. don't need to check bucket existence
+        self.__process_bucket_in_stairway_step(cur_word, cur_bucket)
+        # 3. check bucket with higher number, if it exists
+        self.__process_bucket_in_stairway_step(cur_word, cur_bucket + 1)
+
+    def __process_bucket_in_stairway_step(self, cur_word, bucket_index):
+        if bucket_index in self.words_buckets.keys():
+            for next_word in self.words_buckets[bucket_index]:
+                if next_word.parent_index == -1 and self.__differ_by_one(cur_word, next_word):
+                    next_word.parent_index = cur_word.global_index
+                    self.words_queue.append(next_word)
+
+    def __differ_by_one(self, word1, word2):
+        # TODO: improvement check should be done there
+        if word1 is word2:
+            return False
+        dif = self.__calc_words_dif(word1, word2)
+        return dif == 1
+
+    def __restore_stairway(self):
+        if self.end_word.parent_index == -1:
+            print "Impossible to build stairway from " + self.start_word.text + " to " + self.end_word.text
+            exit()
+
+        # collect all Words in one list, so it is easier to restore stairway
+        all_words = []
+        for word_list in self.words_buckets.values():
+            all_words += word_list
+        all_words.sort(key=lambda x : x.global_index)
+
+        # restore stairway, saving it into self.stairway_ls
+        self.stairway_ls = [self.end_word]
+        cur_parent_index = self.end_word.parent_index
+        while cur_parent_index != -2:
+            prev_word = all_words[cur_parent_index]
+            cur_parent_index = prev_word.parent_index
+            self.stairway_ls.append(prev_word)
+        self.stairway_ls = self.stairway_ls[::-1]
 
     def __print_dictionary(self):
         for key in self.words_buckets.keys():
@@ -113,5 +177,3 @@ class Dictionary:
             print "Key is " + str(key)
             for word in ls:
                 print word.text
-
-
