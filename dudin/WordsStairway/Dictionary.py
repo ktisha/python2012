@@ -55,9 +55,6 @@ class Dictionary:
         for line in fin:
             for text in line.split():
                 text = text.decode('utf-8')
-                # Make checks for text
-                if text[-1] == '\n':
-                    text = text[:-1]
                 # Save only that words, which have the same length with start_word and end_word
                 if len(text) != self.word_length and len(text) > 0:
                     print "Word [" + text + "] not added into dictionary (reason: incorrect length, "\
