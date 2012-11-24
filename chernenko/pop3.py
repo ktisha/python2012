@@ -41,13 +41,6 @@ class POP3:
 		logging.debug('reply: ' + reply)
 		return reply
 
-	def getMessageSize(self, index):
-		reply = self.sendCommand('LIST', str(index) + '\r\n')
-		tokens = reply.split()
-		if tokens[0] != '+OK':
-			raise Exception('Something went wrong. Try later')
-		return int(tokens[2])
-
 	def copyContent(self, key_word, original, stop_word = '\r\n'):
 		start = original.find(key_word)		
 		end = original.find(stop_word, start)		
@@ -73,7 +66,30 @@ class POP3:
 			raise Exception('This pop3 server is unsupported') #TODO
 		return reply
 
-	def recieveText(self, index):
+	def truncate(self, msg):
+		#убираем последнюю непустую строку - служебный разделитель
+		spaces = set(' \t\r\n')		
+		for index, char in enumerate(reversed(msg)):			
+			if char not in spaces:
+				p = msg[:len(msg) - index].rfind('\n')
+				return msg[:p]
+
+
+	def parseMessage(self, msg):
+		#отрезаем лишнее, оставляем только чистый текст
+		key_phrase = 'Content-Type: text/plain'
+		p_start = msg.find(key_phrase)		
+		if p_start == -1:
+			if msg.find('Content-Type: ') != -1:
+				return 'This message format is unsupported'
+			return msg
+		
+		p_start = msg.find('\n', p_start) + 1
+		p_end = msg.find('Content-Type: ', p_start)
+		return self.truncate(text)
+
+
+	def recieveMessageText(self, index):
 		self.socket.send('TOP ' + str(index) + ' 0' + '\r\n')
 		logging.debug('TOP ' + str(index) + ' 0' + ' cmd sent')
 		reply = self.getBigReply()
@@ -83,6 +99,7 @@ class POP3:
 		logging.debug('RETR ' + str(index) + ' cmd sent')
 		reply = self.getBigReply()
 		msg = reply[len(header):len(reply) - 3]
+		msg = self.parseMessage(msg)
 		print msg
 
 
@@ -91,7 +108,7 @@ class POP3:
 		self.sendCommand('PASS', password)
 		self.sendCommand('STAT')
 
-		self.recieveText(1)
+		self.recieveMessageText(17)
 		self.sendCommand('QUIT')
 
 	def recieveMessages(self, username, password):
