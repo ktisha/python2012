@@ -1,7 +1,6 @@
 __author__ = 'Anton M Alexeyev'
 
 from blist import sortedset
-from nltk.corpus import stopwords
 
 class WordMatrix:
     """
@@ -59,7 +58,7 @@ class WordMatrix:
         n = len(self.token_set)
         coolset = sortedset()
         for word in self.token_set:
-            if not word in stopwords.words('english'):
+            if word <> "*":
                 coolset.add((dist_func(target_column, word), word))
         array = list(coolset[1 : k + 1])
         return array
@@ -69,7 +68,7 @@ class WordMatrix:
         n = len(self.token_set)
         coolset = sortedset()
         for word in self.token_set:
-            if not word in stopwords.words('english'):
+            if word <> "*":
                 coolset.add((self.get(target_column, word), word))
         array = list(coolset[len(coolset) - k : len(coolset)])
         array.reverse()
