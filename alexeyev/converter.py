@@ -3,30 +3,38 @@ __author__ = 'Anton M Alexeyev'
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
 from matrix_management import WordMatrix
+import re
+import nltk
 
 # todo: filter after processing
 # todo: pucntuation + not-a-word tokens to be thrown away (regexp probably)
-# todo: text = text.lower()?
-stopwords = []
 
-text = "What goes around comes around"
-print "Initial text: " + text
-print
+input_text = open("testtext", "r")
+text = ""
+
+for line in input_text:
+    text += line.lower() + " "
+
+print "Text loaded"
 
 # maybe should first do sent_tokenize, then word_tokenize
-tokens = word_tokenize(text)
-normalized_tokens = []
 
 # i chose the one everybody knows
 stemmer = PorterStemmer()
 
-# tokenization and stemming
-for token in tokens:
-    normalized_tokens += [stemmer.stem(token)]
+# dumb tokenization
+tokens = re.findall(r"[A-Za-z]+", text)
+print "Tokens set built :", tokens
 
-window_size = 5
+# stemming
+#normalized_tokens = [stemmer.stem(token) for token in tokens if token not in stopwords.words('english')]
+normalized_tokens = [stemmer.stem(token) for token in tokens]
 
+print "Tokens set filtered and stemmed :", normalized_tokens
+
+window_size = 10
 matrix = WordMatrix()
 
 win_start = 0
@@ -42,14 +50,30 @@ while win_start + window_size <= len(normalized_tokens):
         first += 1
     win_start += 1
 
+print "Co-occurence counted"
+print "Keys quantity:", len(matrix.get_tokens())
 # todo: tabs stuff, cool printing
-s = "    "
+#s = "    "
+#
+#s += " " + " ".join(matrix.get_tokens())
 
-s += " " + " ".join(matrix.get_tokens())
+for key in matrix.get_tokens():
+    if not key in stopwords.words('english'):
+        print key, matrix.kn_cooccurences(key, 6)
 
+print "Now to more sophisticated analysis"
+
+for key in matrix.get_tokens():
+    if not key in stopwords.words('english'):
+        print key, matrix.kn_columns(key, 6, matrix.dist_cols_euclidean)
+
+print "Done"
+
+"""
 for token0 in matrix.get_tokens():
     s += "\n" + token0
     for token1 in matrix.get_tokens():
         s += " " + str(matrix.get(token0, token1))
 
 print s
+"""
