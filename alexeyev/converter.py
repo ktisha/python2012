@@ -28,9 +28,16 @@ stemmer = PorterStemmer()
 tokens = re.findall(r"[A-Za-z]+", text)
 print "Tokens set built :", tokens
 
+tokens_filtered = []
+for token in tokens:
+    if token in stopwords.words('english'):
+        tokens_filtered += ["*"]
+    else:
+        tokens_filtered += [ token ]
+
 # stemming
 #normalized_tokens = [stemmer.stem(token) for token in tokens if token not in stopwords.words('english')]
-normalized_tokens = [stemmer.stem(token) for token in tokens]
+normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
 
 print "Tokens set filtered and stemmed :", normalized_tokens
 
@@ -52,19 +59,15 @@ while win_start + window_size <= len(normalized_tokens):
 
 print "Co-occurence counted"
 print "Keys quantity:", len(matrix.get_tokens())
-# todo: tabs stuff, cool printing
-#s = "    "
-#
-#s += " " + " ".join(matrix.get_tokens())
 
 for key in matrix.get_tokens():
-    if not key in stopwords.words('english'):
+    if key <> "*":
         print key, matrix.kn_cooccurences(key, 6)
 
 print "Now to more sophisticated analysis"
 
 for key in matrix.get_tokens():
-    if not key in stopwords.words('english'):
+    if key <> "*":
         print key, matrix.kn_columns(key, 6, matrix.dist_cols_euclidean)
 
 print "Done"
