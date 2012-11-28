@@ -1,0 +1,73 @@
+/* Base template */
+
+body {
+  font-family: "monospace";
+}
+
+h2, h3 {
+  text-align: center;
+}
+
+div.panel {
+  left: 0px;
+  right:0px;
+  position: absolute;
+}
+
+div#header {
+  top: 0px;
+  height: 50px;
+}
+
+div#main {
+  bottom: 30px;
+  top: 80px;
+}
+
+div#footer {
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  heigth: 30px;
+}
+
+p#copyright {
+  text-align: center;
+  width: 100%;
+}
+
+div#left-author, div#right-author {
+  font-size: large;
+  position: absolute;
+  
+  bottom: 0px;
+  height: 20px;
+  width: 40%;
+}
+
+div#left-author {
+  text-align: left;
+  left: 0px;
+}
+
+div#right-author {
+  text-align: right;
+  right: 0px;
+}
+
+/* Home template */
+div#links {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+}
+
+div#upload-link {
+  margin: auto;
+  width: 50%;
+}
+
+/* Upload template */
+div#upload-form form {
+  text-align: center;
+}

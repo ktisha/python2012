@@ -1,0 +1,22 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:tal="http://xml.zope.org/namespaces/tal"
+    xmlns:metal="http://xml.zope.org/namespaces/metal"
+    metal:use-macro="base">
+
+<tal:block metal:fill-slot="content">
+
+<h3>Choose picture to upload:</h3>
+
+<div id="upload-form">
+  ${form.begin(request.route_path('upload'), multipart = True, name = 'PictureUpload')}
+
+  ${form.errorlist('picture')}
+  ${form.label('picture', 'Choose picture to upload', style = 'display: none;')}
+  ${form.file('picture')}
+
+  ${form.submit('form_submitted', 'Upload', class_ = 'submit')}
+  ${form.end()}
+</div>
+
+</tal:block>
+</html>
