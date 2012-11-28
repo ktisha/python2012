@@ -5,6 +5,7 @@ import MySQLdb
 import redis
 import re
 import sys
+import subprocess
 from nltk.tokenize import wordpunct_tokenize
 
 FILE_FOR_NORMALIZER = "file_for_normalizer"
@@ -43,8 +44,7 @@ def normalize(word_bag):
         file_for_normalizer.write(word.encode('utf-8') + "\n")
     file_for_normalizer.close()
 
-    # launch normalizer
-    # to do
+    subprocess.call('cat '+ FILE_FOR_NORMALIZER +'| ./normalizer.sh >' + FILE_FROM_NORMALIZER , shell = True)
 
 
 def redis_normal_index(redis):
@@ -53,7 +53,8 @@ def redis_normal_index(redis):
 
     for pair in zip(file_for_normalizer, file_from_normalizer):
         redis.set(pair[0].strip(), pair[1].strip())
-        print(pair[0].strip() +" " + pair[1].strip())
+        #print(pair[0].strip() +" " + pair[1].strip())
+
 def create_normalized_index(data, redis):
     #stop_list = read_stop_list(sys.argv[1])
 
