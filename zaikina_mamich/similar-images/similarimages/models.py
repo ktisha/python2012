@@ -1,3 +1,5 @@
+__author__ = 'ksenia'
+
 from sqlalchemy import (
   Column,
   Float,

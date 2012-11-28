@@ -1,3 +1,5 @@
+__author__ = 'ksenia'
+
 from pyramid.view import view_config
 
 import formencode
