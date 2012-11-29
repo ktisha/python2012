@@ -49,7 +49,8 @@ def upload_view(request):
 
       (_, extension) = os.path.splitext(filename)
       extension.lower()
-      if extension == 'jpeg' and extension == 'jpg':
+      logger.debug('Received file with extension "{0}"'.format(extension))
+      if extension == '.jpeg' or extension == '.jpg':
         # Search
         image = DBManager.retrieve_image_by_name(filename)
 
