@@ -30,7 +30,6 @@ class DatabaseManager:
 
   @classmethod
   def __path_to_image(cls, id, name):
-    part = id % cls.__image_distribution_modulo
     path = 'similarimages{0}{1}'.format(
       os.sep,
       cls.path_to_image(id=id, name=name)
@@ -42,8 +41,6 @@ class DatabaseManager:
 
   @classmethod
   def __path_to_image_preview(cls, id, name):
-    part = id % cls.__image_distribution_modulo
-    (n, ext) = os.path.splitext(name)
     return 'similarimages{0}{1}'.format(
       os.sep,
       cls.path_to_image_preview(id=id, name=name)
