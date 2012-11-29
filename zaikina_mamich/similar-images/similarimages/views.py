@@ -81,11 +81,12 @@ def upload_view(request):
             dispersion=image_parameters['dispersion'],
             std_dev=image_parameters['standard_deviation']
           )
-        else:
-          message = 'red'
 
         request.session['image'] = image
         return HTTPFound(location=route_path('result', request))
+
+      else:
+        message = 'red'
 
   return {
     'form': FormRenderer(form),
