@@ -4,8 +4,12 @@ body {
     font-family: "monospace";
 }
 
-h2, h3 {
+h2, h3, p#message {
     text-align: center;
+}
+
+p#message.red {
+    color: red;
 }
 
 div.panel {
