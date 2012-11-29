@@ -39,6 +39,7 @@ class PictureUploadSchema(formencode.Schema):
 @view_config(route_name='upload', renderer='templates/upload.pt')
 def upload_view(request):
   form = Form(request, schema=PictureUploadSchema)
+  message = ''
 
   if 'form_submitted' in request.POST:
     if form.validate():
@@ -49,9 +50,7 @@ def upload_view(request):
       (_, extension) = os.path.splitext(filename)
       extension.lower()
       if extension == 'jpeg' and extension == 'jpg':
-
-
-        # Should be searched
+        # Search
         image = DBManager.retrieve_image_by_name(filename)
 
         # If found then do nothing
@@ -82,12 +81,15 @@ def upload_view(request):
             dispersion=image_parameters['dispersion'],
             std_dev=image_parameters['standard_deviation']
           )
+        else:
+          message = 'red'
 
         request.session['image'] = image
         return HTTPFound(location=route_path('result', request))
 
   return {
     'form': FormRenderer(form),
+    'message': message,
     'page_name': 'Upload'
   }
 

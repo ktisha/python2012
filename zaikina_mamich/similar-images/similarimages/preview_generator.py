@@ -23,4 +23,4 @@ def generate_preview(image_path, preview_path):
   preview = image.resize(new_size, Image.ANTIALIAS)
 
   logger.info('Preview path: {0}'.format(preview_path))
-  image.save(preview_path, "JPEG")
+  preview.save(preview_path, "JPEG")

@@ -6,6 +6,7 @@
 <tal:block metal:fill-slot="content">
 
 <h3>Choose picture to upload:</h3>
+<p id="message" class="${message}">Application accepts only .jpg and .jpeg images</p>
 
 <div id="upload-form">
   ${form.begin(request.route_path('upload'), multipart = True, name = 'PictureUpload')}
