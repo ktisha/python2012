@@ -56,12 +56,6 @@ class DatabaseManager:
     img.close()
 
   @classmethod
-  def __save_preview_to_filesystem(cls, id, filename, content):
-    preview = open(cls.__path_to_image_preview(id=id, name=filename), mode='w')
-    preview.write(content)
-    preview.close()
-
-  @classmethod
   def __load_image_from_filesystem(cls, id, filename):
     img = open(cls.__path_to_image(id=id, name=filename))
     content = img.read()
@@ -83,11 +77,10 @@ class DatabaseManager:
     cls.__save_image_to_filesystem(id=img.id, filename=filename, content=content)
 
     # Generate preview and save it to filesystem
-    preview = generate_preview(
+    generate_preview(
       cls.__path_to_image(id=img.id, name=filename),
       cls.__path_to_image_preview(id=img.id, name=filename)
     )
-    cls.__save_preview_to_filesystem(id=img.id, filename=filename, content=preview)
     return img
 
 
