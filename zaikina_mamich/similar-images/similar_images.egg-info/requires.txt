@@ -7,3 +7,5 @@ zope.sqlalchemy
 waitress
 formencode
 pyramid_simpleform
+pyramid_beaker
+PIL

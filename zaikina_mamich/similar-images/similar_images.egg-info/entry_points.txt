@@ -1,5 +1,5 @@
-      [paste.app_factory]
-      main = similarimages:main
-      [console_scripts]
-      populate_similar-images = similarimages.scripts.populate:main
-      
+  [paste.app_factory]
+  main = similarimages:main
+  [console_scripts]
+  populate_similar-images = similarimages.scripts.populate:main
+  
