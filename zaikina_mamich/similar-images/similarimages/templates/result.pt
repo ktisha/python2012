@@ -13,12 +13,17 @@
   </a>
 </div>
 
-<div id="images" tal:repeat="img images">
-  <div class="image-entry">
-    <a href="${request.static_path('similarimages:' + img['path'])}" rel="lightbox[similar]" title="${img['name']}">
-      <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
-    </a>
-  </div>
+<br />
+<h3>Following are result images</h3>
+
+<div id="images">
+  <span tal:repeat="img images">
+    <div class="image-entry">
+      <a href="${request.static_path('similarimages:' + img['path'])}" rel="lightbox[similar]" title="${img['name']}">
+        <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
+      </a>
+    </div>
+  </span>
 </div>
 
 </tal:block>

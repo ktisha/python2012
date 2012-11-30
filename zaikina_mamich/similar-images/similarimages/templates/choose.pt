@@ -7,11 +7,22 @@
 
 <h3>Choose picture from database</h3>
 
-<div id="images" tal:repeat="img images">
-  <div class="image-entry">
-    <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
-  </div>
-</div
+
+${form.begin(request.route_path('choose'), multipart = True, name = 'PictureChoosing')}
+${form.errorlist('picture')}
+
+<div id="images">
+ <span tal:repeat="img images">
+   <div class="image-entry">
+     <input type="radio" name="picture" value="${img['name']}">
+       <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
+     </input>
+   </div>
+ </span>
+</div>
+
+${form.submit('form_submitted', 'Choose', class_ = 'submit')}
+${form.end()}
 
 </tal:block>
 </html>
