@@ -48,7 +48,7 @@ def upload_view(request):
       content = field.value
 
       (_, extension) = os.path.splitext(filename)
-      extension.lower()
+      extension = extension.lower()
       logger.debug('Received file with extension "{0}"'.format(extension))
       if extension == '.jpeg' or extension == '.jpg':
         # Search
@@ -96,21 +96,35 @@ def upload_view(request):
   }
 
 
+class PictureChoosingSchema(formencode.Schema):
+  allow_extra_fields = True
+  picture = formencode.validators.NotEmpty()
+
 @view_config(route_name='choose', renderer='templates/choose.pt')
 def choose_view(request):
+  form = Form(request, schema=PictureChoosingSchema)
+  if form.validate():
+    name = request.POST.get('picture')
+    image = DBManager.retrieve_image_by_name(name=name)
+    request.session['image'] = image
+    return HTTPFound(location=route_path('result', request))
+
   return {
     'page_name': 'Choose',
+    'form': FormRenderer(form),
     'images': DBManager.retrieve_all_images()
   }
 
 
 @view_config(route_name='result', renderer='templates/result.pt')
 def result_view(request):
-  image = request.session['image']
+  image = request.session.get('image')
   if not image:
-    return HTTPFound(location=route_path('home'))
+    return HTTPFound(location=route_path('home', request))
 
-  images = DBManager.retrieve_all_except_one(image_id=image['id'], image_name=image['name'])
+  # images = DBManager.retrieve_suitable_images()
+
+  images = DBManager.retrieve_all_except_one(image_id=image['id'])
 
   return {
     'image': image,
