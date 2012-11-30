@@ -108,7 +108,7 @@ class DatabaseManager:
     return cls.__image_array_to_dictionary_array(Image.get_all())
 
   @classmethod
-  def retrieve_all_except_one(cls, image_id, image_name):
+  def retrieve_all_except_one(cls, image_id=None, image_name=None):
     if image_id:
       session = DBSession()
       return cls.__image_array_to_dictionary_array(
