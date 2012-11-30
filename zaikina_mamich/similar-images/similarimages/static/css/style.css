@@ -75,3 +75,14 @@ div#upload-link {
 div#upload-form form {
     text-align: center;
 }
+
+div#images {
+    left: 0px;
+    right: 0px;
+}
+
+div.image-entry {
+    left: 10px;
+    right: 10px;
+    margin: auto;
+}

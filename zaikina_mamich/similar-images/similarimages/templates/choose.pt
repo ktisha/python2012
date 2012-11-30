@@ -7,7 +7,11 @@
 
 <h3>Choose picture from database</h3>
 
-
+<div id="images" tal:repeat="img images">
+  <div class="image-entry">
+    <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
+  </div>
+</div
 
 </tal:block>
 </html>

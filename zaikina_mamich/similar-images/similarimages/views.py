@@ -99,7 +99,8 @@ def upload_view(request):
 @view_config(route_name='choose', renderer='templates/choose.pt')
 def choose_view(request):
   return {
-    'page_name': 'Choose'
+    'page_name': 'Choose',
+    'images': DBManager.retrieve_all_images()
   }
 
 
@@ -109,8 +110,10 @@ def result_view(request):
   if not image:
     return HTTPFound(location=route_path('home'))
 
-
+  images = DBManager.retrieve_all_except_one(image_id=image['id'], image_name=image['name'])
 
   return {
+    'image': image,
+    'images': images,
     'page_name': 'Result'
   }

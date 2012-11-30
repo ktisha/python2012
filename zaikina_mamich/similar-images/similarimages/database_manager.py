@@ -19,13 +19,13 @@ class DatabaseManager:
   @classmethod
   def path_to_image(cls, id, name):
     part = id % cls.__image_distribution_modulo
-    return 'static{0}images{0}{1}{0}{2}'.format(os.sep, part, name)
+    return 'static{0}db_images{0}{1}{0}{2}'.format(os.sep, part, name)
 
   @classmethod
   def path_to_image_preview(cls, id, name):
     part = id % cls.__image_distribution_modulo
     (n, ext) = os.path.splitext(name)
-    return 'static{0}images{0}{1}{0}{2}{3}{4}'.format(os.sep, part, n, '-small', ext)
+    return 'static{0}db_images{0}{1}{0}{2}{3}{4}'.format(os.sep, part, n, '-small', ext)
 
 
   @classmethod
@@ -89,7 +89,9 @@ class DatabaseManager:
       'histogram': image.histogram,
       'expectation_value': image.expectation_value,
       'dispersion': image.dispersion,
-      'standard_deviation': image.standard_deviation
+      'standard_deviation': image.standard_deviation,
+      'path': cls.path_to_image(id=image.id, name=image.name),
+      'preview': cls.path_to_image_preview(id=image.id, name=image.name)
     }
 
   @classmethod
@@ -106,7 +108,7 @@ class DatabaseManager:
     return cls.__image_array_to_dictionary_array(Image.get_all())
 
   @classmethod
-  def retrieve_all_except_one(cls, image_name, image_id):
+  def retrieve_all_except_one(cls, image_id, image_name):
     if image_id:
       session = DBSession()
       return cls.__image_array_to_dictionary_array(
