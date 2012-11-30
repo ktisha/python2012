@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:tal="http://xml.zope.org/namespaces/tal"
+    xmlns:metal="http://xml.zope.org/namespaces/metal"
+    metal:use-macro="base">
+
+<tal:block metal:fill-slot="content">
+
+<h3>Results</h3>
+
+<div id="image" class="image-entry">
+  <a href="${request.static_path('similarimages:' + image['path'])}" rel="lightbox" title="${image['name']}">
+    <img src="${request.static_path('similarimages:' + image['preview'])}" height="200" width="400" title="${image['name']}"/>
+  </a>
+</div>
+
+<br />
+<h3>Following are result images</h3>
+
+<div id="images">
+  <span tal:repeat="img images">
+    <div class="image-entry">
+      <a href="${request.static_path('similarimages:' + img['path'])}" rel="lightbox[similar]" title="${img['name']}">
+        <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
+      </a>
+    </div>
+  </span>
+</div>
+
+</tal:block>
+</html>

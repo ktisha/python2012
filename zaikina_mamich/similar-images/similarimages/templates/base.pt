@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"	
+      xmlns:metal="http://xml.zope.org/namespaces/metal">
+
+<head>
+  <title>[SImage: Similar Image Chooser] ${page_name}</title>
+
+  <link rel="stylesheet" href="${request.static_path('similarimages:static/css/style.css')}" type="text/css" media="screen" charset="utf-8" />
+  <link rel="stylesheet" href="${request.static_path('similarimages:static/css/lightbox.css')}" type="text/css" media="screen" charset="utf-8" />
+
+  <script language="javascript" type="text/javascript" src="${request.static_path('similarimages:static/js/jquery-1.7.2.min.js')}"></script>
+  <script language="javascript" type="text/javascript" src="${request.static_path('similarimages:static/js/lightbox.js')}"></script>
+</head>
+
+<body>
+
+  <div id="header" class="panel">
+    <h2>${page_name}</h2>
+    <h3><a href="/">Home</a></h3>
+  </div>
+  
+  <div id="main" class="panel">
+    <span metal:define-slot="content">
+    </span>
+  </div>
+  
+  <div id="footer" class="panel">
+    <p id="copyright">&copy; Copyright 2012</p>
+    <div id="left-author">Zaikina Katerina</div>
+    <div id="right-author">Mamich Ksenia</div>
+  </div>
+
+</body>
+
+</html>
