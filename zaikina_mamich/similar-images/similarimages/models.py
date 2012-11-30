@@ -47,7 +47,7 @@ class Image(Base):
 
   @classmethod
   def get_all(cls):
-    return DBSession.query(cls)
+    return DBSession.query(cls).all()
 
   @classmethod
   def get_all_except_one_with_id(cls, id):
