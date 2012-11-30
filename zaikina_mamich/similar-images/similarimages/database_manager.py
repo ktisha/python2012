@@ -96,10 +96,10 @@ class DatabaseManager:
 
   @classmethod
   def __image_array_to_dictionary_array(cls, images):
-    images = []
+    result = []
     for image in images:
-      images.append(cls.__image_to_dictionary(image))
-    return images
+      result.append(cls.__image_to_dictionary(image))
+    return result
 
 
   @classmethod
