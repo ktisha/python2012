@@ -1,15 +1,25 @@
 /* Base template */
 
 body {
-    font-family: "monospace";
+    font-family: "Consolas";
+    background-color: #f8f8ff;
 }
 
 h2, h3, p#message {
     text-align: center;
+    margin: 5px;;
 }
 
 p#message.red {
     color: red;
+}
+
+a {
+    color: #4682b4;
+}
+
+a:visited {
+    color: #2d4a6b;
 }
 
 div.panel {
@@ -19,8 +29,10 @@ div.panel {
 }
 
 div#header {
+    background-color: #c5dae2;
+    border-bottom: solid 1px #9eacb4;
     top: 0px;
-    height: 50px;
+    height: 70px;
 }
 
 div#main {
@@ -29,10 +41,13 @@ div#main {
 }
 
 div#footer {
+    background-color: #c5dae2;
+    border-top: solid 1px #9eacb4;
+    position: fixed;
     left: 0px;
     right: 0px;
     bottom: 0px;
-    heigth: 30px;
+    height: 40px;
 }
 
 p#copyright {
@@ -42,6 +57,7 @@ p#copyright {
 
 div#left-author, div#right-author {
     font-size: large;
+    font-variant: ornament;
     position: absolute;
 
     bottom: 0px;
@@ -66,9 +82,24 @@ div#links {
     right: 0px;
 }
 
+div#upload-link, div#choose-link {
+    display: inline-block;
+    position: absolute;
+    width: 49%;
+}
+
 div#upload-link {
-    margin: auto;
-    width: 50%;
+    left: 0px;
+    text-align: right;
+}
+
+div#choose-link {
+    right: 0px;
+    text-align: left;
+}
+
+div#upload-link a, div#choose-link a {
+    width: 100%;
 }
 
 /* Upload template */
@@ -76,13 +107,18 @@ div#upload-form form {
     text-align: center;
 }
 
+/* Result & choose templates */
 div#images {
     left: 0px;
     right: 0px;
 }
 
 div.image-entry {
-    left: 10px;
-    right: 10px;
+    display: inline-block;
+    margin: 10px;
+}
+
+/* Result template */
+div#image {
     margin: auto;
 }
