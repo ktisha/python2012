@@ -1,0 +1,11 @@
+pyramid
+SQLAlchemy
+transaction
+pyramid_tm
+pyramid_debugtoolbar
+zope.sqlalchemy
+waitress
+formencode
+pyramid_simpleform
+pyramid_beaker
+PIL
