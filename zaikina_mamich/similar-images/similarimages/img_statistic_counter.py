@@ -170,6 +170,19 @@ class ImgStatisticCounter:
   #        s += pow(expectation_value, 2) * (ImgStatisticCounter.__colour_num_ - len(histogram))
   #        return s / (ImgStatisticCounter.__colour_num_ + 0.0)
 
+
+  @classmethod
+  def distance(cls, ref, image):
+    result = 0
+    l = len(image['main_colors'])
+    for i in ref['main_colors']:
+      arr = [cls.color_distance(i, j) for j in image['main_colors']]
+      result += min(arr)
+
+    expectation_values_distance = cls.color_distance(ref['expectation_value'], image['expectation_value'])
+    return (l / 2) * expectation_values_distance + result
+
+
   def distance(self, ref_statistic):
   #        return [ImgStatisticCounter.__distance_(ref_statistic)]
     result = 0
