@@ -25,14 +25,14 @@ class Image(Base):
 
   id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
   name = Column(Text, unique=True, nullable=False)
-  histogram = Column(Text, nullable=False)
-  expectation_value = Column(Float, nullable=False)
-  dispersion = Column(Float, nullable=False)
-  standard_deviation = Column(Float, nullable=False)
+  main_colors = Column(Text, nullable=True)
+  expectation_value = Column(Text, nullable=True)
+  dispersion = Column(Text, nullable=True)
+  standard_deviation = Column(Text, nullable=True)
 
-  def __init__(self, name, hist, exp_value, dispersion, std_dev):
+  def __init__(self, name, main_colors=None, exp_value=None, dispersion=None, std_dev=None):
     self.name = name
-    self.histogram = hist
+    self.main_colors = main_colors
     self.expectation_value = exp_value
     self.dispersion = dispersion
     self.standard_deviation = std_dev

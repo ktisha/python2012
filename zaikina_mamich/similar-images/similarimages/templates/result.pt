@@ -7,10 +7,12 @@
 
 <h3>Results</h3>
 
-<div id="image" class="image-entry">
-  <a href="${request.static_path('similarimages:' + image['path'])}" rel="lightbox" title="${image['name']}">
-    <img src="${request.static_path('similarimages:' + image['preview'])}" height="200" width="400" title="${image['name']}"/>
-  </a>
+<div>
+  <div id="image">
+    <a href="${request.static_path('similarimages:' + image['path'])}" rel="lightbox" title="${image['name']}">
+      <img src="${request.static_path('similarimages:' + image['preview'])}" height="200" width="400" title="${image['name']}"/>
+    </a>
+  </div>
 </div>
 
 <br />
