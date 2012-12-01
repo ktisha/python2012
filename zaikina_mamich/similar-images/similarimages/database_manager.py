@@ -1,5 +1,6 @@
 __author__ = 'ksenia'
 
+import ast
 import os
 import transaction
 
@@ -9,6 +10,7 @@ from .models import (
   )
 
 from .preview_generator import generate_preview
+from .img_statistic_counter import ImgStatisticCounter
 
 import logging
 
@@ -57,10 +59,12 @@ class DatabaseManager:
     img.close()
 
   @classmethod
-  def create_image(cls, filename, content, histogram, exp_value, dispersion, std_dev):
-    # Save data to database file
+  def create_image(cls, filename, content):
+    # Save image to database file
     session = DBSession()
-    img = Image(name=filename, hist=histogram, exp_value=exp_value, dispersion=dispersion, std_dev=std_dev)
+    img = Image(
+      name=filename
+    )
     session.add(img)
     session.flush()
     transaction.commit()
@@ -69,6 +73,17 @@ class DatabaseManager:
     session = DBSession()
     img = Image.get_by_name(filename)
     cls.__save_image_to_filesystem(id=img.id, filename=filename, content=content)
+
+    # Calculate image parameters & save to database
+    image_parameters = ImgStatisticCounter(path=cls.__path_to_image(id=img.id, name=img.name))
+    img.main_colors = image_parameters.main_colors,
+    img.exp_value = image_parameters.expectation_value,
+    img.dispersion = image_parameters.dispersion,
+    img.std_dev = image_parameters.standard_deviation
+
+    session.add(img)
+    session.flush()
+    transaction.commit()
 
     # Generate preview and save it to filesystem
     generate_preview(
@@ -83,10 +98,10 @@ class DatabaseManager:
     return {
       'id': image.id,
       'name': image.name,
-      'histogram': image.histogram,
-      'expectation_value': image.expectation_value,
-      'dispersion': image.dispersion,
-      'standard_deviation': image.standard_deviation,
+      'main_colors': ast.literal_eval(image.main_colors) if image.main_colors is not None else None,
+      'expectation_value': ast.literal_eval(image.expectation_value) if image.expectation_value is not None else None,
+      'dispersion': ast.literal_eval(image.dispersion) if image.dispersion is not None else None,
+      'standard_deviation': ast.literal_eval(image.standard_deviation) if image.standard_deviation is not None else None,
       'path': cls.path_to_image(id=image.id, name=image.name),
       'preview': cls.path_to_image_preview(id=image.id, name=image.name)
     }
@@ -121,7 +136,7 @@ class DatabaseManager:
   def retrieve_image_by_name(cls, name):
     session = DBSession()
     image = Image.get_by_name(name=name)
-    if image:
+    if image is not None:
       return cls.__image_to_dictionary(image)
 
 
