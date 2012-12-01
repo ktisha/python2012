@@ -102,6 +102,7 @@ class PictureChoosingSchema(formencode.Schema):
   allow_extra_fields = True
   picture = formencode.validators.NotEmpty()
 
+
 @view_config(route_name='choose', renderer='templates/choose.pt')
 def choose_view(request):
   logger.info("choose_view")
