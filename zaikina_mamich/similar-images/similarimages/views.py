@@ -11,12 +11,8 @@ from pyramid_simpleform import Form
 from pyramid_simpleform.renderers import FormRenderer
 from pyramid.url import route_path
 
-from .models import (
-  DBSession,
-  Image,
-  )
-
 from .database_manager import DBManager
+from .img_statistic_counter import ImgStatisticCounter
 
 import logging
 
@@ -59,30 +55,9 @@ def upload_view(request):
         # If found then do nothing
         # Otherwise it should be processed and saved to database
         if image is None:
-          # Call of processing function
-          # Parameter: content
-          # Returned dictionary:
-          #   'histogram' (string)
-          #   'expectation_value' (float)
-          #   'dispersion' (float)
-          #   'standard_deviation' (float)
-
-          image_parameters = {
-            'histogram': '',
-            'expectation_value': 0.0,
-            'dispersion': 0.0,
-            'standard_deviation': 0.0
-          }
-
-          # image_parameters = image_processing_module.process_image(content)
-
           image = DBManager.create_image(
             filename=filename,
-            content=content,
-            histogram=image_parameters['histogram'],
-            exp_value=image_parameters['expectation_value'],
-            dispersion=image_parameters['dispersion'],
-            std_dev=image_parameters['standard_deviation']
+            content=content
           )
 
         request.session['image'] = image
@@ -127,9 +102,14 @@ def result_view(request):
   if not image:
     return HTTPFound(location=route_path('home', request))
 
-  # images = DBManager.retrieve_suitable_images()
+  def retrieve_similar_images(ref, images):
+    images.sort(key=lambda image: ImgStatisticCounter.distance_between_two_images(ref, image))
+    return images[:21]
 
-  images = DBManager.retrieve_all_except_one(image_id=image['id'])
+  images = retrieve_similar_images(
+    ref=image,
+    images=DBManager.retrieve_all_except_one(image_id=image['id'])
+  )
 
   return {
     'image': image,
