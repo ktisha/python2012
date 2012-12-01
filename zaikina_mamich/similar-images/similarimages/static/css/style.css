@@ -121,4 +121,6 @@ div.image-entry {
 /* Result template */
 div#image {
     margin: auto;
+    height: 200px;
+    width: 400px;
 }
