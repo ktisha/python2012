@@ -26,6 +26,7 @@ logger.setLevel(logging.DEBUG)
 
 @view_config(route_name='home', renderer='templates/home.pt')
 def home_view(request):
+  logger.info('home_view')
   return {
     'page_name': 'Home'
   }
@@ -38,6 +39,7 @@ class PictureUploadSchema(formencode.Schema):
 
 @view_config(route_name='upload', renderer='templates/upload.pt')
 def upload_view(request):
+  logger.info("upload_view")
   form = Form(request, schema=PictureUploadSchema)
   message = ''
 
@@ -102,6 +104,7 @@ class PictureChoosingSchema(formencode.Schema):
 
 @view_config(route_name='choose', renderer='templates/choose.pt')
 def choose_view(request):
+  logger.info("choose_view")
   form = Form(request, schema=PictureChoosingSchema)
   if form.validate():
     name = request.POST.get('picture')
@@ -118,6 +121,7 @@ def choose_view(request):
 
 @view_config(route_name='result', renderer='templates/result.pt')
 def result_view(request):
+  logger.info("result_view")
   image = request.session.get('image')
   if not image:
     return HTTPFound(location=route_path('home', request))
