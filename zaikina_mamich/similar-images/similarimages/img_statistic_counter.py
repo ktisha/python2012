@@ -172,7 +172,7 @@ class ImgStatisticCounter:
 
 
   @classmethod
-  def distance(cls, ref, image):
+  def distance_between_two_images(cls, ref, image):
     result = 0
     l = len(image['main_colors'])
     for i in ref['main_colors']:
