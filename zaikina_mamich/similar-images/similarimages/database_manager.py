@@ -10,6 +10,10 @@ from .models import (
 
 from .preview_generator import generate_preview
 
+import logging
+
+logger = logging.getLogger("database_manager")
+logger.setLevel(logging.DEBUG)
 
 class DatabaseManager:
   # Constant for image storing
@@ -51,13 +55,6 @@ class DatabaseManager:
     img = open(cls.__path_to_image(id=id, name=filename), mode='w')
     img.write(content)
     img.close()
-
-  @classmethod
-  def __load_image_from_filesystem(cls, id, filename):
-    img = open(cls.__path_to_image(id=id, name=filename))
-    content = img.read()
-    img.close()
-    return content
 
   @classmethod
   def create_image(cls, filename, content, histogram, exp_value, dispersion, std_dev):
