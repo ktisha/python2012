@@ -45,11 +45,14 @@ def findToken(token,path):
     dictionary = open(''.join([path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
     for line in dictionary.readlines():
         line = unicode(line, 'utf-8')
-        if token in line:
+        if ''.join([token,'	']) in line[0:len(token)+1]:
+            print 'Found token in  OpCorp:\n'
             print line
 
 
+
+
 #divideDictionary('/home/amarch/Documents/CSCenter/Python')
-findToken(u'ЗЕБРА', '/home/amarch/Documents/CSCenter/Python')
+findToken(u'УЛИЦА', '/home/amarch/Documents/CSCenter/Python')
 
 
