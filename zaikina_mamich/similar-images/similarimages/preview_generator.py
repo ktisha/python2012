@@ -8,6 +8,7 @@ logger = logging.getLogger('preview_generator')
 logger.setLevel(logging.DEBUG)
 
 def generate_preview(image_path, preview_path):
+  logger.info('generate_preview() entered')
   logger.info('Image path: {0}'.format(image_path))
   image = Image.open(image_path)
   logger.info('Image size: {0}'.format(image.size))
@@ -20,7 +21,10 @@ def generate_preview(image_path, preview_path):
 
   new_size = (real_width * coefficient, real_height * coefficient)
 
+  logger.info('Preview path: {0}'.format(preview_path))
+  logger.info('Preview size: {0}'.format(new_size))
+
   preview = image.resize(new_size, Image.ANTIALIAS)
 
-  logger.info('Preview path: {0}'.format(preview_path))
   preview.save(preview_path, "JPEG")
+  logger.info('generate_preview() exited')
