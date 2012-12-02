@@ -1,0 +1,136 @@
+/* Base template */
+
+body {
+    font-family: "Consolas";
+    background-color: #f8f8ff;
+    text-align: center;
+}
+
+h2, h3, p#message {
+    text-align: center;
+    margin: 5px;;
+}
+
+p#message.red {
+    color: red;
+}
+
+a {
+    color: #4682b4;
+}
+
+a:visited {
+    color: #2d4a6b;
+}
+
+div.panel {
+    left: 0px;
+    right: 0px;
+    position: absolute;
+}
+
+div#header {
+    background-color: #c5dae2;
+    border-bottom: solid 1px #9eacb4;
+    top: 0px;
+    height: 70px;
+}
+
+div#main {
+    bottom: 30px;
+    top: 80px;
+}
+
+div#footer {
+    background-color: #c5dae2;
+    border-top: solid 1px #9eacb4;
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: 40px;
+}
+
+p#copyright {
+    text-align: center;
+    width: 100%;
+}
+
+div#left-author, div#right-author {
+    font-size: large;
+    font-variant: ornament;
+    position: absolute;
+
+    bottom: 0px;
+    height: 20px;
+    width: 40%;
+}
+
+div#left-author {
+    text-align: left;
+    left: 0px;
+}
+
+div#right-author {
+    text-align: right;
+    right: 0px;
+}
+
+/* Home template */
+div#links {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+}
+
+div#upload-link, div#choose-link {
+    display: inline-block;
+    position: absolute;
+    width: 49%;
+}
+
+div#upload-link {
+    left: 0px;
+    text-align: right;
+}
+
+div#choose-link {
+    right: 0px;
+    text-align: left;
+}
+
+div#upload-link a, div#choose-link a {
+    width: 100%;
+}
+
+/* Upload template */
+div#upload-form form {
+    text-align: center;
+}
+
+/* Result & choose templates */
+div#images {
+    left: 0px;
+    right: 0px;
+}
+
+div.image-entry {
+    text-align: center;
+}
+
+table.main-colors {
+    width: 500px;
+    height: 15px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+/* Result template */
+div#image, div.image-entry {
+    margin: 50px;
+}
+
+.ref-img {
+    height: 200px;
+    width: 400px;
+}

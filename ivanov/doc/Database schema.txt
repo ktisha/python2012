@@ -1,0 +1,50 @@
+----MongoDB DB schema---
+
+----Database name:----
+achievements_of_life
+
+
+achievements:
+{
+    _id,
+	name: “name of achievement”,
+    description: “some text how to achieve”,
+    category: “name of category”,
+    tags: [“tag name”, ...]
+}
+
+
+users:
+{
+    _id: “username”,
+    password: “hash value for password”,
+
+    friends: [“friend username (users _id)”, ...],
+    friends_requests: [“friend's (who requested a friendship) username (users _id)”, ...],
+
+    challanges_requests_from_friends:  [
+		{
+			achievement: “achievement _id”,
+			from: “friend username (users _id)”
+		}, ...
+	],
+    achievements_requests_from_friends:  [
+		{
+			achievement: “achievement _id”,
+			from: “friend username (users _id)”
+		}, ...
+	],
+	challanges: [“achievement _id”, …],
+
+	achievements: [
+		{
+			achievement: “achievement _id”
+		}, ...
+	]
+}
+
+sessions:
+{
+    _id: "session_id",
+	username: “username (users _id)”    
+}
