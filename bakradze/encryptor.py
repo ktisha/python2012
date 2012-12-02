@@ -10,12 +10,12 @@ def encrypt():
 			the second row: the key written under the letter it substitutes
 	"""
 	keyFile = open(argv[2], "r")
-	alphabet = keyFile.readline().strip()
+	letters = keyFile.readline().strip()
 	chipher = keyFile.readline().strip()
 	keyFile.close()
 	keys = {}
-	for i in xrange(len(alphabet)):
-		keys[alphabet[i]] = chipher[i]
+	for i in xrange(len(letters)):
+		keys[letters[i]] = chipher[i]
 	f = open(argv[1], "r")
 	g = open("ciphertext.txt", "w")
 	data = f.read()
