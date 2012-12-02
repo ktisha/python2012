@@ -3,7 +3,7 @@ __author__ = 'amarch'
 import sys
 import os
 
-tagsDictionary = {'С':'NOUN', 'Г':'VERB' }
+tagsDictionary = {'S':'NOUN', 'V':'VERB', 'A':'ADV' }
 
 class OpCorpDict():
     path = ''
@@ -113,8 +113,10 @@ class OpCorpDict():
                 newEntity = True
         return forms
 
-if __name__ == '__main__':
 
+
+
+if __name__ == '__main__':
     #Examples
     opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
     #opcordict.findWord(u'Мама мыла раму')
@@ -124,14 +126,12 @@ if __name__ == '__main__':
 #        print 'New form:\n'
 #        for ind in form:
 #            print ind['form'], ind['info']
-    print opcordict.getGramInfo(u'работая')
-    all =  opcordict.getAllForms(u'работая')
-    print all
+#    print opcordict.getGramInfo(u'злословия')
+#    all =  opcordict.getAllForms(u'злословия')
+#    print all
 #    for ent in all:
 #        for x in ent:
 #            print x['form']
 
     # ITS A TRAP!
     #opcordict.findWord(u'Выходить')
-
-
