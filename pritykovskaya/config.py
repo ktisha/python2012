@@ -14,5 +14,5 @@ MYSQL_CHARSET="utf8"
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
-# other
+#other
 STOP_LIST_FILE = "stop_list"

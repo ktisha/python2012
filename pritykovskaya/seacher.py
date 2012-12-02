@@ -1,59 +1,15 @@
 # coding=utf-8
-__author__ = 'pritykovskaya'
 
-import time
+from config import STOP_LIST_FILE
+from normalizer import normalize_tag
+from redis_utils import redis_connect
+from utils import check_if_one_symbol_word, read_stop_list, filter_bag_of_words, filter_cyrillic
 from collections import Counter
 
-from utils import *
-from config import *
-from mysql_utils import *
-from redis_utils import *
-from normalizer import *
+IDBAG_LENGTH = redis_connect(3)
+IDBAG_BAG = redis_connect(4)
+WORD_IDS = redis_connect(2)
 
-#create normalized index
-def redis_normal_index(redis, words, normalized_words):
-    for pair in zip(words, normalized_words):
-        redis.set(pair[0].strip(), pair[1].strip())
-def create_normalized_index():
-    db = connect_db()
-    cursor = db.cursor()
-    data = get_all_data_from_db(cursor)
-    redis = redis_connect(0)
-
-    stop_list = read_stop_list(STOP_LIST_FILE)
-    words = parse_data(data, stop_list)
-    redis_normal_index(redis, words, normalize_bag_of_words(words))
-
-def create_indexes():
-    db = connect_db()
-    cursor = db.cursor()
-    data = get_all_data_from_db(cursor)
-
-    norm_redis = redis_connect(0)
-    id_item_redis = redis_connect(1)
-    word_ids_redis = redis_connect(2)
-    idBag_length_redis = redis_connect(3)
-
-    idBag_bag = redis_connect(4)
-
-    stop_list = read_stop_list(STOP_LIST_FILE)
-    for rec in data:
-        id = rec[0]
-        name = rec[1]
-        print str(id)  + " " + name
-        id_item_redis.set(id, name)
-
-        for i in range(1, 4):
-            #print rec[i]
-            cur_bag_of_words =  filter_bag_of_words(normalize_bag_of_words_with_index(parse_line(rec[i]), norm_redis),  stop_list)
-
-            idBag_length_redis.set((id - 1)*3 + i - 1, len(cur_bag_of_words))
-            idBag_bag.set((id - 1)*3 + i - 1, rec[i])
-
-            for word in cur_bag_of_words:
-                word_ids_redis.sadd(word, (id - 1)*3 + i - 1)
-
-    disconnect_db(db)
 
 def choose_keys_passed_threshold(id_freq, original_len):
     idBag_length_redis = redis_connect(3)
@@ -214,8 +170,8 @@ def aggregate_tag(tag):
         print (best_original_ids)
 
     for id in best_original_ids.keys():
-        print tag + "*" + id_item_redis.get(id) +"*" + str(id) + "*" + str(best_original_ids[id][0]) \
-                                                                + "*" + str(best_original_ids[id][1])
+        print tag + "*" + id_item_redis.get(id) +"*" + str(id) + "*" + str(best_original_ids[id][0])\
+              + "*" + str(best_original_ids[id][1])
 
 
 # version for test
@@ -246,7 +202,7 @@ def aggregate_tag_for_test(tag, stop_list):
     if len(bag_of_words_ids) != 0:
         for id in bag_of_words_ids.keys():
             answers.add(tag + "*" + str(IDBAG_BAG.get(id)).lower() +"*" + '%.2f' % (bag_of_words_ids[id][0])\
-                            + "*" + '%.2f' % (bag_of_words_ids[id][1]) + "*" + str(int(id) % 3))
+                        + "*" + '%.2f' % (bag_of_words_ids[id][1]) + "*" + str(int(id) % 3))
     return answers
 
 def choose_keys_passed_threshold_for_test(id_freq, original_len):
@@ -303,76 +259,4 @@ def find_items_for_tag_for_test(bag_of_words):
         bag_ids_passed_threshold = choose_keys_passed_threshold_with_one_symbol_words_for_test(id_wordsInfo, original_len)
         return bag_ids_passed_threshold
 
-
-
-#print aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
-
-def test():
-    tags = []
-    f = open("2.5_tag", "r")
-    for line in f:
-        tags.append(line.strip())
-    f.close()
-    print("Finish reading")
-
-    output = open("test_res", "w")
-    stop_list = read_stop_list(STOP_LIST_FILE)
-    c = 0
-    start_time=time.time()
-
-    for tag in tags:
-        c += 1
-        answers = aggregate_tag_for_test(tag, stop_list)
-        for answer in answers:
-            output.write(answer + "\n")
-        if c % 100 == 0:
-            print (c)
-            print (time.time() - start_time, "seconds")
-            start_time = time.time()
-
-    output.close()
-
-# create_normalized_index()
-# create_indexes()
-
-IDBAG_LENGTH = redis_connect(3)
-IDBAG_BAG = redis_connect(4)
-WORD_IDS = redis_connect(2)
-
-test()
-
-#key = "logitech"
-#print r.smembers(key)
-
-#key = r.randomkey()
-#print key
-
-#aggregate_tag("ежики мылились 1 1 1 3 4 5")
-#aggregate_tag_for_test("ежики мылились 1 1 1 3 4 5")
-
-#aggregate_tag("000021 1 2 3 941 driving force gt logitech")
-#aggregate_tag("black ericsson mini sony st15i xperia")
-#aggregate_tag("Стильный и функциональный пылесос от известного производителя!")
-#aggregate_tag("Пылесосы и пылесборники")
-#aggregate_tag("nikon Coolpix S8200")
-#aggregate_tag("8 blackbox xdevice видеорегистратор")
-#aggregate_tag("325 clp")
-#aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
-#aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
-
-#aggregate_tag("oregon scientific")
-#r = redis_connect(1)
-#print r.get("8990")
-#print r.get("8991")
-#print r.get("8992")
-#print r.get("8993")
-
-'''
-aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
-f = open("example", "r")
-for line in f:
-    aggregate_tag(line.strip())
-
-f.close()
-'''
 
