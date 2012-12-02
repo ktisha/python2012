@@ -18,7 +18,7 @@ def parse_line(line):
 def filter_bag_of_words(bag, stop_list):
     return set(filter(lambda x: x not in stop_list, bag))
 
-def normalize_bag_of_words(bag, norm_index):
+def normalize_bag_of_words_with_index(bag, norm_index):
     new_bag = set()
     for word in bag:
         if norm_index.exists(word):

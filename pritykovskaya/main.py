@@ -2,7 +2,6 @@
 __author__ = 'pritykovskaya'
 
 import time
-from subprocess import Popen, PIPE, STDOUT
 from collections import Counter
 
 from utils import *
@@ -11,23 +10,10 @@ from mysql_utils import *
 from redis_utils import *
 from normalizer import *
 
-FILE_FOR_NORMALIZER = "file_for_normalizer"
-FILE_FROM_NORMALIZER = "file_from_normalizer"
-
 #create normalized index
-def prepare_file_for_normalizer(word_bag):
-    file_for_normalizer = open(FILE_FOR_NORMALIZER, "w")
-    for word in word_bag:
-        file_for_normalizer.write(word.encode('utf-8') + "\n")
-    file_for_normalizer.close()
-def redis_normal_index(redis):
-    file_for_normalizer = open(FILE_FOR_NORMALIZER, "r")
-    file_from_normalizer = open(FILE_FROM_NORMALIZER, "r")
-
-    for pair in zip(file_for_normalizer, file_from_normalizer):
-        #if pair[0].strip() != pair[1].strip():
-            redis.set(pair[0].strip(), pair[1].strip())
-        #print(pair[0].strip() +" " + pair[1].strip())
+def redis_normal_index(redis, words, normalized_words):
+    for pair in zip(words, normalized_words):
+        redis.set(pair[0].strip(), pair[1].strip())
 def create_normalized_index():
     db = connect_db()
     cursor = db.cursor()
@@ -35,9 +21,8 @@ def create_normalized_index():
     redis = redis_connect(0)
 
     stop_list = read_stop_list(STOP_LIST_FILE)
-    prepare_file_for_normalizer(parse_data(data, stop_list))
-    call_normalizer(FILE_FOR_NORMALIZER, FILE_FROM_NORMALIZER)
-    redis_normal_index(redis)
+    words = parse_data(data, stop_list)
+    redis_normal_index(redis, words, normalize_bag_of_words(words))
 
 def create_indexes():
     db = connect_db()
@@ -60,7 +45,7 @@ def create_indexes():
 
         for i in range(1, 4):
             #print rec[i]
-            cur_bag_of_words =  filter_bag_of_words(normalize_bag_of_words(parse_line(rec[i]), norm_redis),  stop_list)
+            cur_bag_of_words =  filter_bag_of_words(normalize_bag_of_words_with_index(parse_line(rec[i]), norm_redis),  stop_list)
 
             idBag_length_redis.set((id - 1)*3 + i - 1, len(cur_bag_of_words))
             idBag_bag.set((id - 1)*3 + i - 1, rec[i])
@@ -213,9 +198,8 @@ def aggregate_tag(tag):
     stop_list = read_stop_list(STOP_LIST_FILE)
 
     # parse, normalize and filter tag
-    cmd = 'echo '+ tag + '|' + NORMALIZER_SCRIPT
-    p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    bag_of_words = filter_bag_of_words(p.stdout.read().replace("\n", "").split("+"), stop_list)
+    # normalize
+    bag_of_words = filter_bag_of_words(normalize_tag(tag).replace("\n", "").split("+"), stop_list)
 
     # link tag and items
     best_original_ids = find_items_for_tag(bag_of_words)
