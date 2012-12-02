@@ -77,9 +77,9 @@ class DatabaseManager:
     # Calculate image parameters & save to database
     image_parameters = ImgStatisticCounter(path=cls.__path_to_image(id=img.id, name=img.name))
     img.main_colors = str(image_parameters.main_colors),
-    img.exp_value = str(image_parameters.expectation_value),
+    img.expectation_value = str(image_parameters.expectation_value),
     img.dispersion = str(image_parameters.dispersion),
-    img.std_dev = str(image_parameters.standard_deviation)
+    img.standard_deviation = str(image_parameters.standard_deviation)
 
     session.add(img)
     session.flush()
