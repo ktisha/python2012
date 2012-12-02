@@ -3,6 +3,7 @@ __author__ = 'ksenia'
 import ast
 import os
 import transaction
+from img_statistic_counter import ColorValueTransform
 
 from .models import (
   Image,
@@ -101,7 +102,7 @@ class DatabaseManager:
 
   @classmethod
   def __image_to_dictionary(cls, image):
-    return {
+    result = {
       'id': image.id,
       'name': image.name,
       'main_colors': ast.literal_eval(image.main_colors) if image.main_colors is not None else None,
@@ -111,6 +112,9 @@ class DatabaseManager:
       'path': cls.path_to_image(id=image.id, name=image.name),
       'preview': cls.path_to_image_preview(id=image.id, name=image.name)
     }
+    if result['main_colors'] is not None:
+        result['main_colors_in_html_format'] = [ColorValueTransform.rgb_to_hex_string(c) for c in result['main_colors']]
+    return result
 
   @classmethod
   def __image_array_to_dictionary_array(cls, images):

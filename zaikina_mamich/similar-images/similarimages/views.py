@@ -105,7 +105,7 @@ def result_view(request):
 
   def retrieve_similar_images(ref, images):
     images.sort(key=lambda image: ImgStatisticCounter.distance_between_two_images(ref, image))
-    return images[:21]
+    return images[:3]
 
   images = retrieve_similar_images(
     ref=image,
