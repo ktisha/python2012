@@ -1,63 +1,17 @@
 # coding=utf-8
 __author__ = 'pritykovskaya'
 
-import MySQLdb
-import redis
 import subprocess
-import re
 import time
 from subprocess import Popen, PIPE, STDOUT
-from nltk.tokenize import wordpunct_tokenize
 from collections import Counter
 
-
-FILE_FOR_NORMALIZER = "file_for_normalizer"
-FILE_FROM_NORMALIZER = "file_from_normalizer"
-
-STOP_LIST_FILE = "stop_list"
-NORMALIZER = "/home/pritykovskaya/PycharmProjects/prototype_find_good/normalizer.sh"
+from utils import *
+from config import *
+from mysql_utils import *
+from redis_utils import *
 
 #utils
-def read_stop_list():
-    input = open(STOP_LIST_FILE, "r")
-    stop_list = set()
-
-    for line in input:
-        stop_list.add(line.lower().rstrip())
-    input.close()
-
-    return stop_list
-def parse_line(line):
-    return map(lambda x: x.lower(), wordpunct_tokenize(line))
-def filter_bag_of_words(bag, stop_list):
-    return set(filter(lambda x: x not in stop_list, bag))
-def normalize_bag_of_words(bag, norm_index):
-    new_bag = set()
-    for word in bag:
-        if norm_index.exists(word):
-            norm_word = norm_index.get(word)
-            if norm_word != "":
-                new_bag.add(norm_word)
-        else: pass
-    return new_bag
-def parse_data(data, stop_list):
-    word_bag = set()
-    for rec in data:
-        for text in rec[1:]:
-            #print text
-            word_bag |= set(parse_line(text)) #filter_bag_of_words(parse_line(text), stop_list)
-    return word_bag
-def contain_only_ascii(word):
-    if re.match("^[A-Za-z0-9]+$", word):
-        return word
-def filter_cyrillic(bag_of_words):
-    return filter(lambda x: contain_only_ascii(x), bag_of_words)
-def check_if_one_symbol_word(word):
-    if len(word) == 1:
-        return 1
-    else:
-        return 0
-
 #create normalized index
 def prepare_file_for_normalizer(word_bag):
     file_for_normalizer = open(FILE_FOR_NORMALIZER, "w")
@@ -76,7 +30,7 @@ def redis_normal_index(redis):
         #print(pair[0].strip() +" " + pair[1].strip())
 def create_normalized_index():
     db = connect_db()
-    cursor = get_cursor(db)
+    cursor = db.cursor()
     data = get_all_data_from_db(cursor)
     redis = redis_connect(0)
 
@@ -85,37 +39,9 @@ def create_normalized_index():
     call_normalizer()
     redis_normal_index(redis)
 
-# SQL stuff
-def connect_db():
-    # подключаемся к базе данных (не забываем указать кодировку, а то в базу запишутся иероглифы)
-    #db = MySQLdb.connect(host="localhost", user="root", passwd="booW1ham", db="goods_db", charset='utf8')
-    db = MySQLdb.connect(host="localhost", user="root", passwd="booW1ham", db="goods_db_with_cats", charset='utf8')
-    return db
-def get_cursor(db):
-    cursor = db.cursor()
-    return cursor
-def get_all_data_from_db(cursor):
-    # запрос к БД
-    sql = """select * from items; """
-
-    # выполняем запрос
-    cursor.execute(sql)
-
-    # получаем результат выполнения запроса
-    data =  cursor.fetchall()
-    return data
-def disconnect_db(db):
-    # закрываем соединение с БД
-    db.close()
-
-# redis stuff
-def redis_connect(db_id):
-    r = redis.StrictRedis(host='localhost', port=6379, db=db_id)
-    return r
-
 def create_indexes():
     db = connect_db()
-    cursor = get_cursor(db)
+    cursor = db.cursor()
     data = get_all_data_from_db(cursor)
 
     norm_redis = redis_connect(0)
@@ -154,7 +80,6 @@ def choose_keys_passed_threshold(id_freq, original_len):
         if inter_to_tag >= 0.8 and inter_to_bagOfWord >= 0.6:
             dict_ids_passed_threshold[key] = inter_to_tag + inter_to_bagOfWord
     return dict_ids_passed_threshold
-
 
 def return_back_to_original_ids(dict_ids_passed_threshold):
     maxes = {}
@@ -423,10 +348,8 @@ def test():
 
     output.close()
 
-
-
-#create_normalized_index()
-#create_indexes()
+# create_normalized_index()
+# create_indexes()
 
 IDBAG_LENGTH = redis_connect(3)
 IDBAG_BAG = redis_connect(4)
