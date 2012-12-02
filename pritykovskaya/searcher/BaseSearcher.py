@@ -12,6 +12,7 @@ class BaseSearcher(object):
     # todo: разобрать специальный формат для написания комментариев
     # принимает тег в виде bag of words
     # возвращает bag ids
+    # {bag_id : [intersection_size / tag_size, intersection_size / bag_size]}
     def find_bag_of_words_for_tag(self, bag_of_words):
         raise NotImplementedError()
 
