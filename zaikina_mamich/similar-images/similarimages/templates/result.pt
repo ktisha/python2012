@@ -10,8 +10,13 @@
 <div>
   <div id="image">
     <a href="${request.static_path('similarimages:' + image['path'])}" rel="lightbox" title="${image['name']}">
-      <img src="${request.static_path('similarimages:' + image['preview'])}" height="200" width="400" title="${image['name']}"/>
+      <img class="ref-img" src="${request.static_path('similarimages:' + image['preview'])}" height="200" width="400" title="${image['name']}"/>
     </a>
+    <table class="main-colors">
+        <span tal:repeat="color image['main_colors_in_html_format']">
+            <td style="background-color: ${color}">&nbsp</td>
+        </span>
+    </table>
   </div>
 </div>
 
@@ -24,6 +29,11 @@
       <a href="${request.static_path('similarimages:' + img['path'])}" rel="lightbox[similar]" title="${img['name']}">
         <img src="${request.static_path('similarimages:' + img['preview'])}" height="200" width="400" title="${img['name']}" />
       </a>
+      <table class="main-colors">
+        <span tal:repeat="color img['main_colors_in_html_format']">
+            <td style="background-color: ${color}">&nbsp</td>
+        </span>
+      </table>
     </div>
   </span>
 </div>
