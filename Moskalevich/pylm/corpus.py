@@ -1,23 +1,24 @@
-__author__ = 'happy'
+__author__ = 'Pavel Moskalevich'
 
-import fnmatch.fnmatch
-import os.path.isdir
-import os.walk
+from fnmatch import fnmatch
+from os.path import isdir
+from os import walk
 
 class Reader:
     ''' This class contains a number of files, which are then
     read one by one.
     '''
 
-    def __init__(self, path, pattern = '*\\.txt'):
+    def __init__(self, path, pattern = '*.txt'):
         self.files = []
         self.add_files(path, pattern)
 
     def add_files(self, path, pattern):
-        if not os.path.isdir(path):
+        if not isdir(path):
             return
-        for root, dirs, files in os.walk(path):
-            matched_files = filter(lambda x: fnmatch.fnmatch(x, pattern), files)
+        for root, dirs, files in walk(path):
+            matched_files = filter(lambda x: fnmatch(x, pattern), files)
+            matched_files = map(lambda x: path.join(root, x), matched_files)
             self.files.extend(matched_files)
 
     def __iter__(self):
