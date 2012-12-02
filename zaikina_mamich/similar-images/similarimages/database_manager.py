@@ -72,13 +72,15 @@ class DatabaseManager:
     # Save file contents to filesystem
     session = DBSession()
     img = Image.get_by_name(filename)
+    image_id = img.id
     cls.__save_image_to_filesystem(id=img.id, filename=filename, content=content)
 
     # Calculate image parameters & save to database
     image_parameters = ImgStatisticCounter(path=cls.__path_to_image(id=img.id, name=img.name))
-    img.main_colors = str(image_parameters.main_colors),
-    img.expectation_value = str(image_parameters.expectation_value),
-    img.dispersion = str(image_parameters.dispersion),
+
+    img.main_colors = str(image_parameters.main_colors)
+    img.expectation_value = str(image_parameters.expectation_value)
+    img.dispersion = str(image_parameters.dispersion)
     img.standard_deviation = str(image_parameters.standard_deviation)
 
     session.add(img)
@@ -90,7 +92,9 @@ class DatabaseManager:
       cls.__path_to_image(id=img.id, name=filename),
       cls.__path_to_image_preview(id=img.id, name=filename)
     )
-    return img
+
+    session = DBSession()
+    return cls.__image_to_dictionary(Image.get_by_id(image_id))
 
 
   @classmethod
