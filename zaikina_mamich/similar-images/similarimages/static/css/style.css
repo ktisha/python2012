@@ -37,8 +37,9 @@ div#header {
 }
 
 div#main {
-    bottom: 30px;
-    top: 80px;
+    bottom: 40px;
+    top: 70px;
+    overflow-y: auto;
 }
 
 div#footer {
