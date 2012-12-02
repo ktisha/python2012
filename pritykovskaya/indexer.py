@@ -17,7 +17,7 @@ def create_normalized_index():
     data = get_all_data_from_db(cursor)
     redis = connect_word_to_norm_word()
 
-    words = parse_data(data, STOP_LIST)
+    words = parse_data(data)
     redis_normal_index(redis, words, normalize_bag_of_words(words))
 
 def create_indexes():

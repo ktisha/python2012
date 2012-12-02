@@ -3,6 +3,7 @@ from indexer import create_normalized_index, create_indexes
 from search_runner import aggregate_tag_for_test, convert_tag_to_word_bag
 import time
 from searcher.PlainSearcher import PlainSearcher
+from utils import print_time
 
 def setup():
     create_normalized_index()
@@ -63,6 +64,14 @@ def test_tag_aggregation():
 
     assert aggregate_tag_for_test(searcher, "325 clp", True) == {'325 clp*samsung clp-325*1.00*0.67*0'}
 
+@print_time
+def aggregate_tags_with_timing(searcher, tags, output):
+    print "aggregate %d tags" % len(tags)
+    for tag in tags:
+        answers = aggregate_tag_for_test(searcher, tag, True)
+        for answer in answers:
+            output.write(answer + "\n")
+
 def test_execution_time():
     with open("2.5_tag", "r") as file:
         tags = map(str.strip, file.readlines())
@@ -71,20 +80,16 @@ def test_execution_time():
     searcher = PlainSearcher()
 
     with open("test_res", "w") as output:
-        c = 0
-        start_time = time.time()
+        current = []
         for tag in tags:
-            c += 1
-            answers = aggregate_tag_for_test(searcher, tag, True)
-            for answer in answers:
-                output.write(answer + "\n")
-            if c % 100 == 0:
-                print (c)
-                print (time.time() - start_time, "seconds")
-                start_time = time.time()
+            current.append(tag)
+            if len(current) == 100:
+                aggregate_tags_with_timing(searcher, current, output)
+                current = []
+        aggregate_tags_with_timing(searcher, current, output)
 
 if __name__ == "__main__":
     # setup()
     test_searcher()
     test_tag_aggregation()
-    # test_execution_time()
+    test_execution_time()

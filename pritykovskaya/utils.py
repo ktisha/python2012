@@ -1,6 +1,7 @@
 # coding=utf-8
 import re
 from nltk.tokenize import wordpunct_tokenize
+import time
 
 def read_stop_list(stop_list_file):
     input = open(stop_list_file, "r")
@@ -28,7 +29,7 @@ def normalize_bag_of_words_with_index(bag, norm_index):
         else: pass
     return new_bag
 
-def parse_data(data, stop_list):
+def parse_data(data):
     word_bag = set()
     for rec in data:
         for text in rec[1:]:
@@ -48,3 +49,13 @@ def count_one_symbol_words(bag_of_words):
 
 def is_one_symbol_word(word):
     return len(word) == 1
+
+"""сделано на основе http://stackoverflow.com/questions/1622943/timeit-versus-timing-decorator"""
+def print_time(func):
+    def wrapper(*arg,**kw):
+        t1 = time.time()
+        res = func(*arg,**kw)
+        t2 = time.time()
+        print "Time: %.2f seconds" % (t2-t1)
+        return res
+    return wrapper
