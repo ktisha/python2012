@@ -99,12 +99,20 @@ def choose_view(request):
 def result_view(request):
   logger.info("result_view")
   image = request.session.get('image')
+  logger.debug('From session got image: {0}'.format(image))
   if not image:
     return HTTPFound(location=route_path('home', request))
 
   def retrieve_similar_images(ref, images):
-    images.sort(key=lambda image: ImgStatisticCounter.distance_between_two_images(ref, image))
-    return images[:21]
+    img_distance_pairs = [(img, ImgStatisticCounter.distance_between_two_images(ref, img))
+                          for img in images]
+    img_distance_pairs.sort(key=lambda (image, distance): distance)
+    result = []
+    for pair in img_distance_pairs:
+        if pair[1] > ImgStatisticCounter.ARE_SIMILAR_THRESHOLD:
+            break
+        result.append(pair[0])
+    return result
 
   images = retrieve_similar_images(
     ref=image,

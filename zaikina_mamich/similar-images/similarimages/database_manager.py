@@ -3,6 +3,7 @@ __author__ = 'ksenia'
 import ast
 import os
 import transaction
+from img_statistic_counter import ColorValueTransform
 
 from .models import (
   Image,
@@ -62,6 +63,7 @@ class DatabaseManager:
   def create_image(cls, filename, content):
     # Save image to database file
     session = DBSession()
+    session.expire_on_commit = False
     img = Image(
       name=filename
     )
@@ -71,15 +73,18 @@ class DatabaseManager:
 
     # Save file contents to filesystem
     session = DBSession()
+    session.expire_on_commit = False
     img = Image.get_by_name(filename)
+    image_id = img.id
     cls.__save_image_to_filesystem(id=img.id, filename=filename, content=content)
 
     # Calculate image parameters & save to database
     image_parameters = ImgStatisticCounter(path=cls.__path_to_image(id=img.id, name=img.name))
-    img.main_colors = image_parameters.main_colors,
-    img.exp_value = image_parameters.expectation_value,
-    img.dispersion = image_parameters.dispersion,
-    img.std_dev = image_parameters.standard_deviation
+
+    img.main_colors = str(image_parameters.main_colors)
+    img.expectation_value = str(image_parameters.expectation_value)
+    img.dispersion = str(image_parameters.dispersion)
+    img.standard_deviation = str(image_parameters.standard_deviation)
 
     session.add(img)
     session.flush()
@@ -90,12 +95,14 @@ class DatabaseManager:
       cls.__path_to_image(id=img.id, name=filename),
       cls.__path_to_image_preview(id=img.id, name=filename)
     )
-    return img
+
+    session = DBSession()
+    return cls.__image_to_dictionary(Image.get_by_id(image_id))
 
 
   @classmethod
   def __image_to_dictionary(cls, image):
-    return {
+    result = {
       'id': image.id,
       'name': image.name,
       'main_colors': ast.literal_eval(image.main_colors) if image.main_colors is not None else None,
@@ -105,6 +112,9 @@ class DatabaseManager:
       'path': cls.path_to_image(id=image.id, name=image.name),
       'preview': cls.path_to_image_preview(id=image.id, name=image.name)
     }
+    if result['main_colors'] is not None:
+        result['main_colors_in_html_format'] = [ColorValueTransform.rgb_to_hex_string(c) for c in result['main_colors']]
+    return result
 
   @classmethod
   def __image_array_to_dictionary_array(cls, images):

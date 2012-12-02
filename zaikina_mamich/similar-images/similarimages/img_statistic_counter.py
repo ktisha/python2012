@@ -4,6 +4,10 @@ import Image
 import colorsys
 import math
 
+import logging
+
+logger = logging.getLogger('img_statistic_counter')
+logger.setLevel(logging.DEBUG)
 
 class ColorValueTransform:
   def __init__(self):
@@ -54,6 +58,8 @@ class ImgStatisticCounter:
 
   __colour_num_ = 256 #ColorValueTransform.rgb_to_number((255, 255, 255)) + 1
   __min_color_difference = ((pow(255, 3) * 3) ** (1 / 3.0)) * 0.01
+
+  ARE_SIMILAR_THRESHOLD = 300
 
   def __init__(self, image=None, path=""):
     if image is not None:
@@ -173,6 +179,10 @@ class ImgStatisticCounter:
 
   @classmethod
   def distance_between_two_images(cls, ref, image):
+    logger.info('distance_between_two_images() entered')
+    logger.debug('Reference: {0}'.format(ref))
+    logger.debug('Image: {0}'.format(image))
+
     result = 0
     l = len(image['main_colors'])
     for i in ref['main_colors']:
