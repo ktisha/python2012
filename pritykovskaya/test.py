@@ -1,6 +1,6 @@
 # coding=utf-8
 from indexer import create_normalized_index, create_indexes
-from result_analyser import aggregate_tag_for_test, aggregate_tag
+from search_runner import aggregate_tag_for_test, aggregate_tag, convert_tag_to_word_bag
 import time
 from searcher.PlainSearcher import PlainSearcher
 
@@ -10,18 +10,22 @@ def setup():
 
 def test_searcher():
     searcher = PlainSearcher()
+    tag = "galaxy gt i9001 plus s samsung отзыв"
+    assert len(searcher.find_bag_of_words_for_tag(convert_tag_to_word_bag(tag, True))) == 12
 
 def test():
     with open("2.5_tag", "r") as file:
         tags = map(str.strip, file.readlines())
     print("Finish reading")
 
+    searcher = PlainSearcher()
+
     with open("test_res", "w") as output:
         c = 0
         start_time=time.time()
         for tag in tags:
             c += 1
-            answers = aggregate_tag_for_test(tag)
+            answers = aggregate_tag_for_test(searcher, tag)
             for answer in answers:
                 output.write(answer + "\n")
             if c % 100 == 0:
@@ -29,14 +33,15 @@ def test():
                 print (time.time() - start_time, "seconds")
                 start_time = time.time()
 
-for e in aggregate_tag("galaxy gt i9001 plus s samsung отзыв"):
-    print e
-print("*")
-for e in aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв"):
-    print e
+#for e in aggregate_tag(PlainSearcher(), "galaxy gt i9001 plus s samsung отзыв"):
+#    print e
+#print("*")
+#for e in aggregate_tag_for_test(PlainSearcher(), "galaxy gt i9001 plus s samsung отзыв"):
+#    print e
 
 #setup()
-test()
+test_searcher()
+#test()
 
 #key = "logitech"
 #print r.smembers(key)
