@@ -62,6 +62,7 @@ class DatabaseManager:
   def create_image(cls, filename, content):
     # Save image to database file
     session = DBSession()
+    session.expire_on_commit = False
     img = Image(
       name=filename
     )
@@ -71,6 +72,7 @@ class DatabaseManager:
 
     # Save file contents to filesystem
     session = DBSession()
+    session.expire_on_commit = False
     img = Image.get_by_name(filename)
     image_id = img.id
     cls.__save_image_to_filesystem(id=img.id, filename=filename, content=content)
