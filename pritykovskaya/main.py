@@ -1,7 +1,6 @@
 # coding=utf-8
 __author__ = 'pritykovskaya'
 
-import subprocess
 import time
 from subprocess import Popen, PIPE, STDOUT
 from collections import Counter
@@ -10,16 +9,17 @@ from utils import *
 from config import *
 from mysql_utils import *
 from redis_utils import *
+from normalizer import *
 
-#utils
+FILE_FOR_NORMALIZER = "file_for_normalizer"
+FILE_FROM_NORMALIZER = "file_from_normalizer"
+
 #create normalized index
 def prepare_file_for_normalizer(word_bag):
     file_for_normalizer = open(FILE_FOR_NORMALIZER, "w")
     for word in word_bag:
         file_for_normalizer.write(word.encode('utf-8') + "\n")
     file_for_normalizer.close()
-def call_normalizer():
-    subprocess.call('cat '+ FILE_FOR_NORMALIZER + '|' + NORMALIZER + '>' + FILE_FROM_NORMALIZER , shell = True)
 def redis_normal_index(redis):
     file_for_normalizer = open(FILE_FOR_NORMALIZER, "r")
     file_from_normalizer = open(FILE_FROM_NORMALIZER, "r")
@@ -34,9 +34,9 @@ def create_normalized_index():
     data = get_all_data_from_db(cursor)
     redis = redis_connect(0)
 
-    stop_list = read_stop_list()
+    stop_list = read_stop_list(STOP_LIST_FILE)
     prepare_file_for_normalizer(parse_data(data, stop_list))
-    call_normalizer()
+    call_normalizer(FILE_FOR_NORMALIZER, FILE_FROM_NORMALIZER)
     redis_normal_index(redis)
 
 def create_indexes():
@@ -51,7 +51,7 @@ def create_indexes():
 
     idBag_bag = redis_connect(4)
 
-    stop_list = read_stop_list()
+    stop_list = read_stop_list(STOP_LIST_FILE)
     for rec in data:
         id = rec[0]
         name = rec[1]
@@ -210,10 +210,10 @@ def find_items_for_tag(bag_of_words):
     return best_original_ids
 
 def aggregate_tag(tag):
-    stop_list = read_stop_list()
+    stop_list = read_stop_list(STOP_LIST_FILE)
 
     # parse, normalize and filter tag
-    cmd = 'echo '+ tag + '|' + NORMALIZER
+    cmd = 'echo '+ tag + '|' + NORMALIZER_SCRIPT
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
     bag_of_words = filter_bag_of_words(p.stdout.read().replace("\n", "").split("+"), stop_list)
 
@@ -332,7 +332,7 @@ def test():
     print("Finish reading")
 
     output = open("test_res", "w")
-    stop_list = read_stop_list()
+    stop_list = read_stop_list(STOP_LIST_FILE)
     c = 0
     start_time=time.time()
 
