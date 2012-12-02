@@ -1,49 +1,57 @@
 __author__ = 'Pavel Moskalevich'
 
-class Trie:
-    ''' This class represents a trie data structure.
-    Every node contains a word, absolute count of corresponding n-gram
-    and probability along with back off weight (bow).
-    '''
+class Ngram:
+    def __init__(self, count = 0, prob = 0, bow = 0):
+        self.count = count
+        self.prob  = prob
+        self.bow   = bow
 
-    class TrieNode:
-        def __init__(self, count = 0, prob = 0, bow = 0):
-            self.children = {}
-            self.count    = count
-            self.prob     = prob
-            self.bow      = bow
+    def set_count(self, count):
+        self.count = count
 
-        def add_child(self, word, count = 0, prob = 0, bow = 0):
-            self.children[word] = Trie.TrieNode(count=count, prob=prob, bow=bow)
+    def set_count(self, prob):
+        self.prob = prob
 
-        def find_child(self, word):
-            if self.children.has_key(word):
-                return self.children[word]
-            return None
+    def set_count(self, bow):
+        self.bow = bow
 
+class NgramStorage:
     def __init__(self):
-        self.root = Trie.TrieNode()
+        self.n_grams = {}
 
-    def set_ngram(self, words, count = 0, prob = 0, bow = 0):
-        ''' Add or modify n-gram. '''
-        iter = self.root
+    def set_n_gram(self, words_tuple, ngram):
+        if not self.n_grams.has_key(len(words_tuple)):
+            self.n_grams[len(words_tuple)] = {}
+        self.n_grams[len(words_tuple)][words_tuple] = ngram
 
-        for w in words:
-            if iter.find_child(w) == None:
-                iter.add_child(w)
-            iter = iter.children[w]
+    def get_n_gram(self, words_tuple):
+        if not self.n_grams.has_key(len(words_tuple)) or not self.n_grams[len(words_tuple)].has_key(words_tuple):
+            return None
+        return self.n_grams[len(words_tuple)][words_tuple]
 
-        iter.count = count
-        iter.prob  = prob
-        iter.bow   = bow
+    def total_n_grams(self, order = 0):
+        ''' Returns total number of n-grams of order (sum of all counts).
+        If order is zero, than summarizes across all orders.
+        '''
+        if order == 0:
+            sum = 0
+            for ord in self.n_grams.keys():
+                sum = sum + reduce(lambda cum, x: cum + self.n_grams[ord][x].count, self.n_grams[ord].keys(), 0)
+            return sum
+        else:
+            if self.n_grams.has_key(order):
+                return reduce(lambda cum, x: cum + self.n_grams[order][x].count, self.n_grams[order].keys(), 0)
+            else:
+                return 0
 
-    def get_ngram(self, words):
-        ''' Get n-gram (to read count, prob, bow). '''
-        iter = self.root
-
-        for w in words:
-            if iter.find_child(w) == None:
-                return None
-            iter = iter.children[w]
-
-        return iter
+    def distinct_n_grams(self, order = 0):
+        ''' Returns number of distinct n-grams of order.
+        If order is zero, than counts across all orders.
+        '''
+        if order == 0:
+            return reduce(lambda cum, x: cum + len(self.n_grams[x]), self.n_grams.keys(), 0)
+        else:
+            if self.n_grams.has_key(order):
+                return len(self.n_grams[order])
+            else:
+                return 0
