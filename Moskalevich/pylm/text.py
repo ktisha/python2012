@@ -17,10 +17,11 @@ class Normalizer:
 
     @staticmethod
     def _replace_punc_(text):
-        text = re.sub('[\,:;!?\-\(\)\[\]\"\{\}<>=\+\*_\\/]+', ' <punc> ', text)
+        text = re.sub('[\,:;\-\(\)\[\]\"\{\}<>=\+\*_\\/]+', ' <punc> ', text)
         text = re.sub('^', '<s> ', text)
-        text = re.sub('\.$', ' </s>', text)
-        text = re.sub('\.', ' </s> <s> ', text)
+        endOfSent = '[\.!?]+'
+        text = re.sub(endOfSent + '$', ' </s>', text)
+        text = re.sub(endOfSent, ' </s> <s> ', text)
         return text
 
     @staticmethod
@@ -33,5 +34,5 @@ class Normalizer:
         return re.sub('\s+', ' ', text)
 
 
-text = Normalizer.normalize('test\\data\\hobbit.txt')
-print text
+#text = Normalizer.normalize('test\\data\\hobbit.txt')
+#print text
