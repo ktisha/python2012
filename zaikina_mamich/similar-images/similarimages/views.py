@@ -99,6 +99,7 @@ def choose_view(request):
 def result_view(request):
   logger.info("result_view")
   image = request.session.get('image')
+  logger.debug('From session got image: {0}'.format(image))
   if not image:
     return HTTPFound(location=route_path('home', request))
 
