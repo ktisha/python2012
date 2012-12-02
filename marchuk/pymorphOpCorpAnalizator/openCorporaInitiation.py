@@ -53,38 +53,71 @@ class OpCorpDict():
             wholeDictionary.close()
 
     def findWord(self, words):
+        matches = []
         for token in words.split():
             token = token.upper()
             key = ord(token[0])
             dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
-            print 'Founded next words, related to', token, ' in  OpCorp:\n',
+            print '\nFounded next words, related to', token, ' in  OpCorp:\n',
             for line in dictionary.readlines():
                 line = unicode(line, 'utf-8')
                 if ''.join([token,'	']) in line[0:len(token)+1]:
                     print line[:-2]
+                    matches.add(line[:-2])
+            if matches == []:
+                print 'Nothing >:(\n'
 
     def getGramInfo(self, word):
             word = word.upper()
-            key = ord(word[0])
-            dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
-            print 'Founded next words, related to', word, ' in  OpCorp:\n',
-            for line in dictionary.readlines():
-                line = unicode(line, 'utf-8')
-                if ''.join([word,'	']) in line[0:len(word)+1]:
-                    print line[:-2]
-                    #if line[:-2].isdigit():
-                    #    print line
+            forms = self.getAllForms(word)
+            graminfo = []
+            for version in forms:
+                for entity in version:
+                    if entity['form'] == word:
+                        print entity['form']
 
-    def getAllForms(self,word):
-        print ''
+            return graminfo
+
+
+
+
+    def getAllForms(self, word):
+        word = word.upper()
+        key = ord(word[0])
+        forms = []
+        tmp = []
+        newEntity = False
+        dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        for line in dictionary.readlines():
+            line = unicode(line, 'utf-8')
+            if line == '\n':
+                if newEntity:
+                    forms.append(tmp)
+                newEntity = False
+                tmp = []
+            else:
+                if not line[:-2].isdigit():
+                    tmp.append({  'form':line.split()[0], 'info':line[(line.split()[0].__len__()):]  })
+            if ''.join([word,'	']) in line[0:len(word)+1]:
+                newEntity = True
+        return forms
 
 
 
 if __name__ == '__main__':
+
+    #Examples
     opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
-    opcordict.findWord(u'Мама мыла раму')
-    info = opcordict.getGramInfo()
+    #opcordict.findWord(u'Мама мыла раму')
+    #opcordict.findWord(u'делаю')
+    all = opcordict.getAllForms(u'делала')
+#    for form in all:
+#        for ind in form:
+#           # print ind['form'], ind['info']
+
+    info = opcordict.getGramInfo(u'делала')
     print info
+
     # ITS A TRAP!
     #opcordict.findWord(u'Выходить')
 
