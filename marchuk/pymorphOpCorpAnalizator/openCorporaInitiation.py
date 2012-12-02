@@ -1,18 +1,29 @@
 __author__ = 'amarch'
 #-*- coding: utf-8 -*-
 import sys
+import os
 
 tagsDictionary = {'С':'NOUN', 'Г':'VERB' }
 
 
 class OpCorpDict():
     path = ''
-    divided = False
 
-    def __init__(self, path):
+    def __init__(self, path, divide=False):
         self.path = path
-        #if self.divided == False:
-        #    self.divideDictionary()
+        if divide:
+            try:
+                os.removedirs(''.join([path, '/dividedOpCorp']))
+                os.makedirs(''.join([path, '/dividedOpCorp']))
+                self.divideDictionary()
+            except Exception:
+                print 'Good news everyone!'
+        else:
+            if not os.path.exists(''.join([path, '/dividedOpCorp'])):
+                os.makedirs(''.join([path, '/dividedOpCorp']))
+                self.divideDictionary()
+        self.path = ''.join([path, '/dividedOpCorp'])
+
 
     def divideDictionary(self):
         print 'Start divide whole dictionary into small parts. Please wait.'
@@ -30,13 +41,13 @@ class OpCorpDict():
                             hash.append(ord(line[0]))
                     hash = list(set(hash))
                     for h in hash:
-                        dictPart = open(''.join([self.path,'/',str(h),'part.dict.opcorpora.txt']),'aw+')
+                        dictPart = open(''.join([self.path,'/dividedOpCorp/',str(h),'part.dict.opcorpora.txt']),'aw+')
                         dictPart.write("\n")
                         for word in wordSet:
                             try:
                                 dictPart.write(word.encode('utf-8'))
                             except IOError:
-                                print 'Can`t open file', ''.join([self.path,'/',str(hash),'part.dict.opcorpora.txt'])
+                                print 'Can`t open file', ''.join([self.path,'/dividedOpCorp/',str(hash),'part.dict.opcorpora.txt'])
                         dictPart.close()
                     hash = []
                     wordSet = []
@@ -72,14 +83,15 @@ class OpCorpDict():
             forms = self.getAllForms(word)
             graminfo = []
             for version in forms:
+                tmp = {}
+                tmp['norm'] = version[0]['form']
                 for entity in version:
                     if entity['form'] == word:
-                        print entity['form']
-
+                        splited = entity['info'].replace(',',' ').split()
+                        tmp['class'] = splited[0]
+                        tmp['info'] = splited[1:]
+                graminfo.append(tmp)
             return graminfo
-
-
-
 
     def getAllForms(self, word):
         word = word.upper()
@@ -110,14 +122,14 @@ if __name__ == '__main__':
     opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
     #opcordict.findWord(u'Мама мыла раму')
     #opcordict.findWord(u'делаю')
-    all = opcordict.getAllForms(u'делала')
+#    all = opcordict.getAllForms(u'военный')
 #    for form in all:
+#        print 'New form:\n'
 #        for ind in form:
-#           # print ind['form'], ind['info']
+#            print ind['form'], ind['info']
 
-    info = opcordict.getGramInfo(u'делала')
-    print info
-
+    print opcordict.getAllForms(u'работая')
+    print opcordict.getGramInfo(u'работая')
     # ITS A TRAP!
     #opcordict.findWord(u'Выходить')
 
