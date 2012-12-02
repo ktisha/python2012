@@ -43,8 +43,8 @@ def contain_only_ascii(word):
 def filter_cyrillic(bag_of_words):
     return filter(lambda x: contain_only_ascii(x), bag_of_words)
 
-def check_if_one_symbol_word(word):
-    if len(word) == 1:
-        return 1
-    else:
-        return 0
+def count_one_symbol_words(bag_of_words):
+    return len(filter(is_one_symbol_word, bag_of_words))
+
+def is_one_symbol_word(word):
+    return len(word) == 1

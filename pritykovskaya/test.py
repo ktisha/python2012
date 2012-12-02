@@ -1,11 +1,8 @@
 # coding=utf-8
-__author__ = 'pritykovskaya'
-
+from result_analyser import aggregate_tag_for_test, aggregate_tag
 import time
 from utils import *
 from config import *
-from seacher import *
-from indexer import *
 
 def test():
     with open("2.5_tag", "r") as file:
@@ -29,6 +26,12 @@ def test():
 
 #create_normalized_index()
 #create_indexes()
+
+stop_list = read_stop_list(STOP_LIST_FILE)
+aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
+print("*")
+aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв",stop_list)
+
 test()
 
 #key = "logitech"
@@ -46,8 +49,7 @@ test()
 #aggregate_tag("nikon Coolpix S8200")
 #aggregate_tag("8 blackbox xdevice видеорегистратор")
 #aggregate_tag("325 clp")
-#aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
-#aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
+
 
 #aggregate_tag("oregon scientific")
 #r = redis_connect(1)
