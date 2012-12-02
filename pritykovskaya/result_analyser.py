@@ -1,8 +1,8 @@
-from config import STOP_LIST_FILE
 from normalizer import normalize_tag
 from redises import connect_id_to_item, connect_bag_id_to_bag
 from searcher.PlainSearcher import PlainSearcher
-from utils import read_stop_list, filter_bag_of_words, filter_cyrillic
+from utils import filter_bag_of_words, filter_cyrillic
+from common import STOP_LIST
 
 ID_TO_ITEM_REDIS = connect_id_to_item()
 IDBAG_BAG = connect_bag_id_to_bag()
@@ -49,11 +49,9 @@ def intersected_only_with_cat(triplet):
 PLAIN_SEARCHER = PlainSearcher()
 
 def aggregate_tag(tag):
-    stop_list = read_stop_list(STOP_LIST_FILE)
-
     # parse, normalize and filter tag
     # normalize
-    bag_of_words = filter_bag_of_words(normalize_tag(tag).replace("\n", "").split("+"), stop_list)
+    bag_of_words = filter_bag_of_words(normalize_tag(tag).replace("\n", "").split("+"), STOP_LIST)
 
     # link tag and items
     best_original_ids = return_back_to_original_ids_filter_categories(PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words))
@@ -74,11 +72,10 @@ def aggregate_tag(tag):
               + "*" + str(best_original_ids[id][1])
 
 # version for test
-def aggregate_tag_for_test(tag, stop_list):
-
+def aggregate_tag_for_test(tag):
     # parse, normalize and filter tag
 #    tag = normalize_tag(tag)
-    bag_of_words = filter_bag_of_words(tag.split(" "), stop_list)
+    bag_of_words = filter_bag_of_words(tag.split(" "), STOP_LIST)
 
     # find bag of words
     bag_of_words_ids = PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words)
@@ -89,8 +86,7 @@ def aggregate_tag_for_test(tag, stop_list):
         if len(bag_of_words) != 0:
             bag_of_words_ids = PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words)
 
-    #create set of answres
-
+    #create set of answers
     answers = set()
 
     if len(bag_of_words_ids) != 0:

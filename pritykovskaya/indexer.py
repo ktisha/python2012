@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from common import *
 from utils import *
 from mysql_utils import *
 from redises import *
@@ -16,8 +17,7 @@ def create_normalized_index():
     data = get_all_data_from_db(cursor)
     redis = connect_word_to_norm_word()
 
-    stop_list = read_stop_list(STOP_LIST_FILE)
-    words = parse_data(data, stop_list)
+    words = parse_data(data, STOP_LIST)
     redis_normal_index(redis, words, normalize_bag_of_words(words))
 
 def create_indexes():
@@ -32,7 +32,6 @@ def create_indexes():
 
     idBag_bag = connect_bag_id_to_bag()
 
-    stop_list = read_stop_list(STOP_LIST_FILE)
     for rec in data:
         id = rec[0]
         name = rec[1]
@@ -41,7 +40,7 @@ def create_indexes():
 
         for i in range(1, 4):
             #print rec[i]
-            cur_bag_of_words =  filter_bag_of_words(normalize_bag_of_words_with_index(parse_line(rec[i]), norm_redis),  stop_list)
+            cur_bag_of_words =  filter_bag_of_words(normalize_bag_of_words_with_index(parse_line(rec[i]), norm_redis), STOP_LIST)
 
             idBag_length_redis.set((id - 1)*3 + i - 1, len(cur_bag_of_words))
             idBag_bag.set((id - 1)*3 + i - 1, rec[i])

@@ -1,22 +1,18 @@
 # coding=utf-8
 from result_analyser import aggregate_tag_for_test, aggregate_tag
 import time
-from utils import *
-from config import *
 
 def test():
     with open("2.5_tag", "r") as file:
         tags = map(str.strip, file.readlines())
     print("Finish reading")
 
-    stop_list = read_stop_list(STOP_LIST_FILE)
-
     with open("test_res", "w") as output:
         c = 0
         start_time=time.time()
         for tag in tags:
             c += 1
-            answers = aggregate_tag_for_test(tag, stop_list)
+            answers = aggregate_tag_for_test(tag)
             for answer in answers:
                 output.write(answer + "\n")
             if c % 100 == 0:
@@ -27,10 +23,9 @@ def test():
 #create_normalized_index()
 #create_indexes()
 
-stop_list = read_stop_list(STOP_LIST_FILE)
 aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
 print("*")
-aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв",stop_list)
+aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
 
 test()
 
