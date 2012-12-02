@@ -1,0 +1,43 @@
+body { background: #000000; color:#ffffff; }	
+	A:link { color:#ffffff;text-decoration: none}
+	A:visited { color:#ffffff; text-decoration: none}
+	A:active { color:#ffffff; text-decoration: none}
+	A:hover { color:#ffffff; font-weight:bold;}
+	H2 { color:#fffff; font-weight:bold; align:left} 
+
+	.label {text-align: right}
+	.error {color: red}
+	
+	.block {	 
+	background: #6B6766;
+	padding: 5px;
+	margin: 5px;
+	border: solid 1px black;	 
+	align:center;
+	}	
+		 
+	.cell {	 
+	background: #262626;
+	padding: 5px;
+	border: solid 1px black; 
+	float: left;
+	}	
+	
+	.green_button { 
+	width: 100px; 
+	height: 20px; 
+	background: #93BF06;
+	color: #35363A;
+	padding: 5px;
+	border: solid 1px black;	 
+	}	
+	
+	.cell_header { 
+	color:#ffffff;
+	font-weight:bold;	
+	}
+	
+	.cell_caption { 
+	color:#B0AEAC;
+	font-size: 80%;	
+	}  
