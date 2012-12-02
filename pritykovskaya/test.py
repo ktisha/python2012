@@ -4,34 +4,28 @@ __author__ = 'pritykovskaya'
 import time
 from utils import *
 from config import *
-from redis_utils import *
 from seacher import *
 from indexer import *
 
 def test():
-    tags = []
-    f = open("2.5_tag", "r")
-    for line in f:
-        tags.append(line.strip())
-    f.close()
+    with open("2.5_tag", "r") as file:
+        tags = map(str.strip, file.readlines())
     print("Finish reading")
 
-    output = open("test_res", "w")
     stop_list = read_stop_list(STOP_LIST_FILE)
-    c = 0
-    start_time=time.time()
 
-    for tag in tags:
-        c += 1
-        answers = aggregate_tag_for_test(tag, stop_list)
-        for answer in answers:
-            output.write(answer + "\n")
-        if c % 100 == 0:
-            print (c)
-            print (time.time() - start_time, "seconds")
-            start_time = time.time()
-
-    output.close()
+    with open("test_res", "w") as output:
+        c = 0
+        start_time=time.time()
+        for tag in tags:
+            c += 1
+            answers = aggregate_tag_for_test(tag, stop_list)
+            for answer in answers:
+                output.write(answer + "\n")
+            if c % 100 == 0:
+                print (c)
+                print (time.time() - start_time, "seconds")
+                start_time = time.time()
 
 create_normalized_index()
 create_indexes()
