@@ -48,47 +48,40 @@ def intersected_only_with_cat(triplet):
 
 PLAIN_SEARCHER = PlainSearcher()
 
-def aggregate_tag(tag):
+def run_searcher(tag, is_tag_normalized):
     # parse, normalize and filter tag
-    # normalize
-    bag_of_words = filter_bag_of_words(normalize_tag(tag).replace("\n", "").split("+"), STOP_LIST)
+    if is_tag_normalized:
+        tag_lego = tag.split(" ")
+    else:
+        tag_lego = normalize_tag(tag)
+    bag_of_words = filter_bag_of_words(tag_lego, STOP_LIST)
 
-    # link tag and items
-    best_original_ids = return_back_to_original_ids_filter_categories(PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words))
-    #best_original_ids = return_back_to_original_ids(bag_ids_passed_threshold)
-
-    print (best_original_ids)
-
-    id_item_redis = ID_TO_ITEM_REDIS
-
-    if len(best_original_ids) == 0:
-        #trying to cut cyrillic letters and start again
-        bag_of_words = filter_cyrillic(bag_of_words)
-        best_original_ids = return_back_to_original_ids_filter_categories(PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words))
-        print (best_original_ids)
-
-    for id in best_original_ids.keys():
-        print tag + "*" + id_item_redis.get(id) +"*" + str(id) + "*" + str(best_original_ids[id][0])\
-              + "*" + str(best_original_ids[id][1])
-
-# version for test
-def aggregate_tag_for_test(tag):
-    # parse, normalize and filter tag
-#    tag = normalize_tag(tag)
-    bag_of_words = filter_bag_of_words(tag.split(" "), STOP_LIST)
-
-    # find bag of words
     bag_of_words_ids = PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words)
 
     if len(bag_of_words_ids) == 0:
-        #trying to cut kirillic letters and start again
+        #trying to cut cyrillic letters and start again
         bag_of_words = filter_cyrillic(bag_of_words)
         if len(bag_of_words) != 0:
             bag_of_words_ids = PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words)
 
-    #create set of answers
-    answers = set()
+    return bag_of_words_ids
 
+# return set of text results in my specific form
+def aggregate_tag(tag):
+    bag_of_words_ids = run_searcher(tag, True)
+    best_original_ids = return_back_to_original_ids_filter_categories(bag_of_words_ids)
+
+    answers = set()
+    for id in best_original_ids.keys():
+        answers.add(tag + "*" + ID_TO_ITEM_REDIS.get(id) +"*" + str(id) + "*" + str(best_original_ids[id][0])\
+              + "*" + str(best_original_ids[id][1]))
+    return answers
+
+# return set of text results in test (like Kristina) specific form
+def aggregate_tag_for_test(tag):
+    bag_of_words_ids = run_searcher(tag, True)
+
+    answers = set()
     if len(bag_of_words_ids) != 0:
         for id in bag_of_words_ids.keys():
             answers.add(tag + "*" + str(IDBAG_BAG.get(id)).lower() +"*" + '%.2f' % (bag_of_words_ids[id][0])\

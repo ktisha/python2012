@@ -8,7 +8,7 @@ __NORMALIZER_SCRIPT = "./normalizer.sh"
 def normalize_tag(tag):
     cmd = 'echo '+ tag + '|' + __NORMALIZER_SCRIPT
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    return p.stdout.read()
+    return p.stdout.read().replace("\n", "").split("+")
 
 def normalize_bag_of_words(bag_of_words):
     FILE_FOR_NORMALIZER = "file_for_normalizer"

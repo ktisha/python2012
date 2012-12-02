@@ -1,6 +1,15 @@
 # coding=utf-8
+from indexer import create_normalized_index, create_indexes
 from result_analyser import aggregate_tag_for_test, aggregate_tag
 import time
+from searcher.PlainSearcher import PlainSearcher
+
+def setup():
+    create_normalized_index()
+    create_indexes()
+
+def test_searcher():
+    searcher = PlainSearcher()
 
 def test():
     with open("2.5_tag", "r") as file:
@@ -20,13 +29,13 @@ def test():
                 print (time.time() - start_time, "seconds")
                 start_time = time.time()
 
-#create_normalized_index()
-#create_indexes()
-
-aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
+for e in aggregate_tag("galaxy gt i9001 plus s samsung отзыв"):
+    print e
 print("*")
-aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
+for e in aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв"):
+    print e
 
+#setup()
 test()
 
 #key = "logitech"
