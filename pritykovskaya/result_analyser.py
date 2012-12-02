@@ -1,7 +1,8 @@
 from config import STOP_LIST_FILE
 from normalizer import normalize_tag
 from redises import connect_id_to_item, connect_bag_id_to_bag
-from seacher import find_bag_of_words_for_tag, find_items_for_tag_for_test
+from searcher.PlainSearcher import PlainSearcher
+from searcher.TestSearcher import TestSearcher
 from utils import read_stop_list, filter_bag_of_words, filter_cyrillic
 
 ID_TO_ITEM_REDIS = connect_id_to_item()
@@ -48,6 +49,8 @@ def intersected_only_with_cat(triplet):
     else:
         return False
 
+PLAIN_SEARCHER = PlainSearcher()
+TEST_SEARCHER = TestSearcher()
 
 def aggregate_tag(tag):
     stop_list = read_stop_list(STOP_LIST_FILE)
@@ -57,7 +60,7 @@ def aggregate_tag(tag):
     bag_of_words = filter_bag_of_words(normalize_tag(tag).replace("\n", "").split("+"), stop_list)
 
     # link tag and items
-    best_original_ids = return_back_to_original_ids_filter_categories(find_bag_of_words_for_tag(bag_of_words))
+    best_original_ids = return_back_to_original_ids_filter_categories(PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words))
     #best_original_ids = return_back_to_original_ids(bag_ids_passed_threshold)
 
     print (best_original_ids)
@@ -67,7 +70,7 @@ def aggregate_tag(tag):
     if len(best_original_ids) == 0:
         #trying to cut cyrillic letters and start again
         bag_of_words = filter_cyrillic(bag_of_words)
-        best_original_ids = return_back_to_original_ids_filter_categories(find_bag_of_words_for_tag(bag_of_words))
+        best_original_ids = return_back_to_original_ids_filter_categories(PLAIN_SEARCHER.find_bag_of_words_for_tag(bag_of_words))
         print (best_original_ids)
 
     for id in best_original_ids.keys():
@@ -78,21 +81,17 @@ def aggregate_tag(tag):
 def aggregate_tag_for_test(tag, stop_list):
 
     # parse, normalize and filter tag
-    #cmd = 'echo '+ tag + '|' + NORMALIZER
-    #p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+#    tag = normalize_tag(tag)
     bag_of_words = filter_bag_of_words(tag.split(" "), stop_list)
 
     # find bag of words
-    bag_of_words_ids = find_items_for_tag_for_test(bag_of_words)
-
-
+    bag_of_words_ids = TEST_SEARCHER.find_bag_of_words_for_tag(bag_of_words)
 
     if len(bag_of_words_ids) == 0:
         #trying to cut kirillic letters and start again
         bag_of_words = filter_cyrillic(bag_of_words)
         if len(bag_of_words) != 0:
-            bag_of_words_ids = find_items_for_tag_for_test(bag_of_words)
-
+            bag_of_words_ids = TEST_SEARCHER.find_bag_of_words_for_tag(bag_of_words)
 
     #create set of answres
 
