@@ -59,6 +59,8 @@ class ImgStatisticCounter:
   __colour_num_ = 256 #ColorValueTransform.rgb_to_number((255, 255, 255)) + 1
   __min_color_difference = ((pow(255, 3) * 3) ** (1 / 3.0)) * 0.01
 
+  ARE_SIMILAR_THRESHOLD = 300
+
   def __init__(self, image=None, path=""):
     if image is not None:
       self.image = image
