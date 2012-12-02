@@ -8,7 +8,7 @@ IDBAG_BAG = connect_bag_id_to_bag()
 
 def convert_tag_to_word_bag(tag, is_tag_normalized):
     if is_tag_normalized:
-        tag_lego = tag.split(" ")
+        tag_lego = tag.lower().split(" ")
     else:
         tag_lego = normalize_tag(tag)
     return filter_bag_of_words(tag_lego, STOP_LIST)
@@ -52,8 +52,8 @@ def intersected_only_with_cat(triplet):
         return False
 
 # return set of text results in my specific form
-def aggregate_tag(searcher, tag):
-    bag_of_words_ids = run_searcher(searcher, tag, True)
+def aggregate_tag(searcher, tag, tag_is_normalized):
+    bag_of_words_ids = run_searcher(searcher, tag, tag_is_normalized)
     best_original_ids = return_back_to_original_ids_filter_categories(bag_of_words_ids)
 
     answers = set()
@@ -63,8 +63,8 @@ def aggregate_tag(searcher, tag):
     return answers
 
 # return set of text results in test (like Kristina) specific form
-def aggregate_tag_for_test(searcher, tag):
-    bag_of_words_ids = run_searcher(searcher, tag, True)
+def aggregate_tag_for_test(searcher, tag, tag_is_normalized):
+    bag_of_words_ids = run_searcher(searcher, tag, tag_is_normalized)
 
     answers = set()
     if len(bag_of_words_ids) != 0:
