@@ -5,6 +5,7 @@ import MySQLdb
 import redis
 import subprocess
 import re
+import time
 from subprocess import Popen, PIPE, STDOUT
 from nltk.tokenize import wordpunct_tokenize
 from collections import Counter
@@ -28,10 +29,8 @@ def read_stop_list():
     return stop_list
 def parse_line(line):
     return map(lambda x: x.lower(), wordpunct_tokenize(line))
-
 def filter_bag_of_words(bag, stop_list):
     return set(filter(lambda x: x not in stop_list, bag))
-
 def normalize_bag_of_words(bag, norm_index):
     new_bag = set()
     for word in bag:
@@ -41,7 +40,6 @@ def normalize_bag_of_words(bag, norm_index):
                 new_bag.add(norm_word)
         else: pass
     return new_bag
-
 def parse_data(data, stop_list):
     word_bag = set()
     for rec in data:
@@ -49,6 +47,16 @@ def parse_data(data, stop_list):
             #print text
             word_bag |= set(parse_line(text)) #filter_bag_of_words(parse_line(text), stop_list)
     return word_bag
+def contain_only_ascii(word):
+    if re.match("^[A-Za-z0-9]+$", word):
+        return word
+def filter_cyrillic(bag_of_words):
+    return filter(lambda x: contain_only_ascii(x), bag_of_words)
+def check_if_one_symbol_word(word):
+    if len(word) == 1:
+        return 1
+    else:
+        return 0
 
 #create normalized index
 def prepare_file_for_normalizer(word_bag):
@@ -81,7 +89,7 @@ def create_normalized_index():
 def connect_db():
     # подключаемся к базе данных (не забываем указать кодировку, а то в базу запишутся иероглифы)
     #db = MySQLdb.connect(host="localhost", user="root", passwd="booW1ham", db="goods_db", charset='utf8')
-    db = MySQLdb.connect(host="localhost", user="root", passwd="root", db="goods_db_with_cats", charset='utf8')
+    db = MySQLdb.connect(host="localhost", user="root", passwd="booW1ham", db="goods_db_with_cats", charset='utf8')
     return db
 def get_cursor(db):
     cursor = db.cursor()
@@ -115,6 +123,8 @@ def create_indexes():
     word_ids_redis = redis_connect(2)
     idBag_length_redis = redis_connect(3)
 
+    idBag_bag = redis_connect(4)
+
     stop_list = read_stop_list()
     for rec in data:
         id = rec[0]
@@ -127,6 +137,7 @@ def create_indexes():
             cur_bag_of_words =  filter_bag_of_words(normalize_bag_of_words(parse_line(rec[i]), norm_redis),  stop_list)
 
             idBag_length_redis.set((id - 1)*3 + i - 1, len(cur_bag_of_words))
+            idBag_bag.set((id - 1)*3 + i - 1, rec[i])
 
             for word in cur_bag_of_words:
                 word_ids_redis.sadd(word, (id - 1)*3 + i - 1)
@@ -188,11 +199,6 @@ def return_back_to_original_ids(dict_ids_passed_threshold):
                 maxes[int(key)/3 + 1] = max_crit
     return maxes
 
-# todo
-# description следует рассматривать с другим порогом
-# например, если весь тег лежит в description - все
-# супер
-
 def intersected_only_with_cat(triplet):
     if triplet[0] == 0 and triplet[1] == 0:
         return True
@@ -221,19 +227,11 @@ def return_back_to_original_ids_filter_categories(dict_ids_passed_threshold):
                 best_ids[key] = [max, intersected_only_with_cat(my_dict[key])]
     return best_ids
 
-
-
-def check_if_one_symbol_word(word):
-    if len(word) == 1:
-        return 1
-    else:
-        return 0
-
-def create_wordInfo_one_symbol_words(bag_of_words, word_ids_redis):
+def create_wordInfo_one_symbol_words(bag_of_words):
     id_wordsInfo = {}
     for word in bag_of_words:
         is_one_word = check_if_one_symbol_word(word)
-        word_ids = word_ids_redis.smembers(word)
+        word_ids = WORD_IDS.smembers(word)
         for id in word_ids:
             if id in id_wordsInfo:
                 id_wordsInfo[id][0] += 1
@@ -311,18 +309,130 @@ def aggregate_tag(tag):
                                                                 + "*" + str(best_original_ids[id][1])
 
 
+# version for test
 
-def contain_only_ascii(word):
-    if re.match("^[A-Za-z0-9]+$", word):
-        return word
+def aggregate_tag_for_test(tag, stop_list):
 
-def filter_cyrillic(bag_of_words):
-    return filter(lambda x: contain_only_ascii(x), bag_of_words)
+    # parse, normalize and filter tag
+    #cmd = 'echo '+ tag + '|' + NORMALIZER
+    #p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+    bag_of_words = filter_bag_of_words(tag.split(" "), stop_list)
+
+    # find bag of words
+    bag_of_words_ids = find_items_for_tag_for_test(bag_of_words)
+
+
+
+    if len(bag_of_words_ids) == 0:
+        #trying to cut kirillic letters and start again
+        bag_of_words = filter_cyrillic(bag_of_words)
+        if len(bag_of_words) != 0:
+            bag_of_words_ids = find_items_for_tag_for_test(bag_of_words)
+
+
+    #create set of answres
+
+    answers = set()
+
+    if len(bag_of_words_ids) != 0:
+        for id in bag_of_words_ids.keys():
+            answers.add(tag + "*" + str(IDBAG_BAG.get(id)).lower() +"*" + '%.2f' % (bag_of_words_ids[id][0])\
+                            + "*" + '%.2f' % (bag_of_words_ids[id][1]) + "*" + str(int(id) % 3))
+    return answers
+
+def choose_keys_passed_threshold_for_test(id_freq, original_len):
+
+    dict_ids_passed_threshold = {}
+    for key in id_freq.keys():
+        inter_to_tag = id_freq[key]/float(original_len)
+        inter_to_bagOfWord = id_freq[key]/float(IDBAG_LENGTH.get(key))
+        if inter_to_tag >= 0.8 and inter_to_bagOfWord >= 0.6:
+            dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
+    return dict_ids_passed_threshold
+
+
+def choose_keys_passed_threshold_with_one_symbol_words_for_test(id_wordsInfo, original_len):
+
+    dict_ids_passed_threshold = {}
+    for key in id_wordsInfo.keys():
+        # прибавляем к длине тега (без односимвольных слов)
+        # количество односимвольных слов, которые
+        # лежат в рассматриваемом листе
+
+        actual_original_len = original_len + id_wordsInfo[key][1]
+
+        inter_to_tag = id_wordsInfo[key][0]/float(actual_original_len)
+        inter_to_bagOfWord = id_wordsInfo[key][0]/float(IDBAG_LENGTH.get(key))
+
+        if inter_to_tag >= 0.8 and inter_to_bagOfWord >= 0.6:
+            dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
+    return dict_ids_passed_threshold
+
+
+def find_items_for_tag_for_test(bag_of_words):
+    number_of_one_symbol_words = check_for_one_symbol_words(bag_of_words)
+    #print number_of_one_symbol_words
+
+    original_len = len(bag_of_words) - number_of_one_symbol_words
+    #original_len = len(bag_of_words)
+
+    if number_of_one_symbol_words == 0:
+
+        cur_ids = []
+        #find all bag ids, where words were mentioned
+        for word in bag_of_words:
+            cur_ids += WORD_IDS.smembers(word)
+
+        #for each bag id count how many words it has
+        id_freq = Counter(cur_ids)
+        if len(id_freq) != 0:
+            bag_ids_passed_threshold = choose_keys_passed_threshold_for_test(id_freq, original_len)
+            return bag_ids_passed_threshold
+        else: return set()
+    else:
+        id_wordsInfo = create_wordInfo_one_symbol_words(bag_of_words)
+        bag_ids_passed_threshold = choose_keys_passed_threshold_with_one_symbol_words_for_test(id_wordsInfo, original_len)
+        return bag_ids_passed_threshold
+
+
+
+#print aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
+
+def test():
+    tags = []
+    f = open("2.5_tag", "r")
+    for line in f:
+        tags.append(line.strip())
+    f.close()
+    print("Finish reading")
+
+    output = open("test_res", "w")
+    stop_list = read_stop_list()
+    c = 0
+    start_time=time.time()
+
+    for tag in tags:
+        c += 1
+        answers = aggregate_tag_for_test(tag, stop_list)
+        for answer in answers:
+            output.write(answer + "\n")
+        if c % 100 == 0:
+            print (c)
+            print (time.time() - start_time, "seconds")
+            start_time = time.time()
+
+    output.close()
+
+
 
 #create_normalized_index()
 #create_indexes()
 
+IDBAG_LENGTH = redis_connect(3)
+IDBAG_BAG = redis_connect(4)
+WORD_IDS = redis_connect(2)
 
+test()
 
 #key = "logitech"
 #print r.smembers(key)
@@ -331,6 +441,8 @@ def filter_cyrillic(bag_of_words):
 #print key
 
 #aggregate_tag("ежики мылились 1 1 1 3 4 5")
+#aggregate_tag_for_test("ежики мылились 1 1 1 3 4 5")
+
 #aggregate_tag("000021 1 2 3 941 driving force gt logitech")
 #aggregate_tag("black ericsson mini sony st15i xperia")
 #aggregate_tag("Стильный и функциональный пылесос от известного производителя!")
@@ -339,6 +451,8 @@ def filter_cyrillic(bag_of_words):
 #aggregate_tag("8 blackbox xdevice видеорегистратор")
 #aggregate_tag("325 clp")
 #aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
+#aggregate_tag_for_test("galaxy gt i9001 plus s samsung отзыв")
+
 #aggregate_tag("oregon scientific")
 #r = redis_connect(1)
 #print r.get("8990")
@@ -346,21 +460,12 @@ def filter_cyrillic(bag_of_words):
 #print r.get("8992")
 #print r.get("8993")
 
+'''
 aggregate_tag("galaxy gt i9001 plus s samsung отзыв")
 f = open("example", "r")
 for line in f:
     aggregate_tag(line.strip())
 
 f.close()
+'''
 
-#todo:
-# добавить список брендов
-# добавить проверку есть ли только цифры в пересечении
-# добавить проверку есть код в пересечении
-
-# подумать на делеммой искать и в категории vs
-# искать только в описании и имени, и если не нашлось,
-# то в категории, собрать соотв статистику
-
-# написать тест 
-# для этого сделать вывод того, с чем пересеклось
