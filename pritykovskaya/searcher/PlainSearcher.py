@@ -17,7 +17,7 @@ class PlainSearcher(BaseSearcher):
             cur_ids = []
             #find all bag ids, where words were mentioned
             for word in bag_of_words:
-                cur_ids += self.WORD_IDS.smembers(word)
+                cur_ids += self.word_to_bag_ids_redis.smembers(word)
 
             #for each bag id count how many words from tag it has
             if len(cur_ids) != 0:
@@ -29,13 +29,12 @@ class PlainSearcher(BaseSearcher):
 
         return bag_ids_passed_threshold
 
-    #добавить полиморфизм
     def choose_keys_passed_threshold(self, id_freq, original_len):
         dict_ids_passed_threshold = {}
         for key in id_freq.keys():
             inter_to_tag = id_freq[key]/float(original_len)
-            inter_to_bagOfWord = id_freq[key]/float(self.IDBAG_LENGTH.get(key))
-            if inter_to_tag >= 0.8 and inter_to_bagOfWord >= 0.6:
+            inter_to_bagOfWord = id_freq[key]/float(self.bag_id_to_length_redis.get(key))
+            if self.is_above_thresholds(inter_to_tag, inter_to_bagOfWord):
                 dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
         return dict_ids_passed_threshold
 
@@ -45,13 +44,12 @@ class PlainSearcher(BaseSearcher):
             # прибавляем к длине тега (без односимвольных слов)
             # количество односимвольных слов, которые
             # лежат в рассматриваемом листе
-
             actual_original_len = original_len + id_wordsInfo[key][1]
 
             inter_to_tag = id_wordsInfo[key][0]/float(actual_original_len)
-            inter_to_bagOfWord = id_wordsInfo[key][0]/float(self.IDBAG_LENGTH.get(key))
+            inter_to_bagOfWord = id_wordsInfo[key][0]/float(self.bag_id_to_length_redis.get(key))
 
-            if inter_to_tag >= 0.8 and inter_to_bagOfWord >= 0.6:
+            if self.is_above_thresholds(inter_to_tag, inter_to_bagOfWord):
                 dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
         return dict_ids_passed_threshold
 

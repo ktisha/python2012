@@ -6,8 +6,8 @@ __author__ = 'pritykovskaya'
 
 class BaseSearcher(object):
     def __init__(self):
-        self.IDBAG_LENGTH = connect_bag_id_to_length()
-        self.WORD_IDS = connect_word_to_bag_ids()
+        self.bag_id_to_length_redis = connect_bag_id_to_length()
+        self.word_to_bag_ids_redis = connect_word_to_bag_ids()
 
     # todo: разобрать специальный формат для написания комментариев
     # принимает тег в виде bag of words
@@ -16,10 +16,13 @@ class BaseSearcher(object):
     def find_bag_of_words_for_tag(self, bag_of_words):
         raise NotImplementedError()
 
+    def is_above_thresholds(self, intersection_to_tag_ratio, intersection_to_bag_ratio):
+        return intersection_to_tag_ratio >= 0.8 and intersection_to_bag_ratio >= 0.6
+
     def create_wordInfo_one_symbol_words(self, bag_of_words):
         id_wordsInfo = {}
         for word in bag_of_words:
-            word_ids = self.WORD_IDS.smembers(word)
+            word_ids = self.word_to_bag_ids_redis.smembers(word)
             for id in word_ids:
                 if id in id_wordsInfo:
                     id_wordsInfo[id][0] += 1
