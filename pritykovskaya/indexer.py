@@ -2,7 +2,7 @@
 
 from utils import *
 from mysql_utils import *
-from redis_utils import *
+from redises import *
 from normalizer import *
 
 #create normalized index
@@ -14,7 +14,7 @@ def create_normalized_index():
     db = connect_db()
     cursor = db.cursor()
     data = get_all_data_from_db(cursor)
-    redis = redis_connect(0)
+    redis = connect_word_to_norm_word()
 
     stop_list = read_stop_list(STOP_LIST_FILE)
     words = parse_data(data, stop_list)
@@ -25,12 +25,12 @@ def create_indexes():
     cursor = db.cursor()
     data = get_all_data_from_db(cursor)
 
-    norm_redis = redis_connect(0)
-    id_item_redis = redis_connect(1)
-    word_ids_redis = redis_connect(2)
-    idBag_length_redis = redis_connect(3)
+    norm_redis = connect_word_to_norm_word()
+    id_item_redis = connect_id_to_item()
+    word_ids_redis = connect_word_to_bag_ids()
+    idBag_length_redis = connect_bag_id_to_length()
 
-    idBag_bag = redis_connect(4)
+    idBag_bag = connect_bag_id_to_bag()
 
     stop_list = read_stop_list(STOP_LIST_FILE)
     for rec in data:

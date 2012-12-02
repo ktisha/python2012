@@ -27,8 +27,8 @@ def test():
                 print (time.time() - start_time, "seconds")
                 start_time = time.time()
 
-create_normalized_index()
-create_indexes()
+#create_normalized_index()
+#create_indexes()
 test()
 
 #key = "logitech"

@@ -1,18 +1,17 @@
 # coding=utf-8
-
 from config import STOP_LIST_FILE
 from normalizer import normalize_tag
-from redis_utils import redis_connect
+from redises import *
 from utils import check_if_one_symbol_word, read_stop_list, filter_bag_of_words, filter_cyrillic
 from collections import Counter
 
-IDBAG_LENGTH = redis_connect(3)
-IDBAG_BAG = redis_connect(4)
-WORD_IDS = redis_connect(2)
-
+IDBAG_LENGTH = connect_bag_id_to_length()
+IDBAG_BAG = connect_bag_id_to_bag()
+WORD_IDS = connect_word_to_bag_ids()
+ID_TO_ITEM_REDIS = connect_id_to_item()
 
 def choose_keys_passed_threshold(id_freq, original_len):
-    idBag_length_redis = redis_connect(3)
+    idBag_length_redis = IDBAG_LENGTH
 
     dict_ids_passed_threshold = {}
     for key in id_freq.keys():
@@ -50,7 +49,6 @@ def check_for_one_symbol_words(bag_of_words):
 # если tag пересекается с 2мя товарами, то
 # c одинаковым порогами, то
 # начинает играть роль в каком товаре он пересекся с большим количеством сущностей
-
 
 def return_back_to_original_ids(dict_ids_passed_threshold):
     maxes = {}
@@ -107,7 +105,7 @@ def create_wordInfo_one_symbol_words(bag_of_words):
     return id_wordsInfo
 
 def choose_keys_passed_threshold_with_one_symbol_words(id_wordsInfo, original_len):
-    idBag_length_redis = redis_connect(3)
+    idBag_length_redis = IDBAG_LENGTH
 
     dict_ids_passed_threshold = {}
     for key in id_wordsInfo.keys():
@@ -129,7 +127,7 @@ def find_items_for_tag(bag_of_words):
     print number_of_one_symbol_words
 
     original_len = len(bag_of_words) - number_of_one_symbol_words
-    word_ids_redis = redis_connect(2)
+    word_ids_redis = WORD_IDS
 
 
     if number_of_one_symbol_words == 0:
@@ -161,7 +159,7 @@ def aggregate_tag(tag):
     best_original_ids = find_items_for_tag(bag_of_words)
     print (best_original_ids)
 
-    id_item_redis = redis_connect(1)
+    id_item_redis = ID_TO_ITEM_REDIS
 
     if len(best_original_ids) == 0:
         #trying to cut kirillic letters and start again
@@ -173,9 +171,7 @@ def aggregate_tag(tag):
         print tag + "*" + id_item_redis.get(id) +"*" + str(id) + "*" + str(best_original_ids[id][0])\
               + "*" + str(best_original_ids[id][1])
 
-
 # version for test
-
 def aggregate_tag_for_test(tag, stop_list):
 
     # parse, normalize and filter tag
@@ -215,7 +211,6 @@ def choose_keys_passed_threshold_for_test(id_freq, original_len):
             dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
     return dict_ids_passed_threshold
 
-
 def choose_keys_passed_threshold_with_one_symbol_words_for_test(id_wordsInfo, original_len):
 
     dict_ids_passed_threshold = {}
@@ -232,7 +227,6 @@ def choose_keys_passed_threshold_with_one_symbol_words_for_test(id_wordsInfo, or
         if inter_to_tag >= 0.8 and inter_to_bagOfWord >= 0.6:
             dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
     return dict_ids_passed_threshold
-
 
 def find_items_for_tag_for_test(bag_of_words):
     number_of_one_symbol_words = check_for_one_symbol_words(bag_of_words)
@@ -258,5 +252,3 @@ def find_items_for_tag_for_test(bag_of_words):
         id_wordsInfo = create_wordInfo_one_symbol_words(bag_of_words)
         bag_ids_passed_threshold = choose_keys_passed_threshold_with_one_symbol_words_for_test(id_wordsInfo, original_len)
         return bag_ids_passed_threshold
-
-
