@@ -3,8 +3,8 @@ __author__ = 'derketzer'
 import SMART_ANT
 
 def main():
-    file_name = "t6.txt"
-    file = open(file_name, 'r', encoding='utf-8')
+    file_name = "tests/t1.txt"
+    file = open(file_name, 'r')
     generationSize = 1000
     survivedSize = 100
     apples = 0
