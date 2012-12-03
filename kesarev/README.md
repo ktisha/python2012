@@ -28,5 +28,5 @@ Usage:
 
 Использованая литература
 -----
-http://is.ifmo.ru/download/ant_ga_min_number_of_state.pdf
-http://rudocs.exdat.com/docs/index-229491.html
+1. http://is.ifmo.ru/download/ant_ga_min_number_of_state.pdf
+2. http://rudocs.exdat.com/docs/index-229491.html
