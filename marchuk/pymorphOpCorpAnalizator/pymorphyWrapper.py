@@ -34,7 +34,7 @@ class POCMorph():
             graminfo.append(self.get_graminfo(word))
         return graminfo
 
-    def get_graminfo(self, word, option = 'POC'):
+    def get_graminfo(self, word, option = 'POCM'):
         graminfo = []
         if option  == 'PYMORPHY':
             for form in self.morph.get_graminfo(word.upper()):
@@ -54,7 +54,7 @@ class POCMorph():
                 graminfo.append(tmp)
         if option == 'OPCORP':
             graminfo = self.opcorpdict.getGramInfo(word)
-        if option == 'POC':
+        if option == 'POCM':
             pygram = []
             for form in self.morph.get_graminfo(word.upper()):
                 tmp = {}
