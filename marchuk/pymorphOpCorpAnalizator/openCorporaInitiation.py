@@ -119,13 +119,13 @@ if __name__ == '__main__':
     #Examples
     opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
     #opcordict.findWord(u'Мама мыла раму')
-    #opcordict.findWord(u'делаю')
-#    all = opcordict.getAllForms(u'военный')
-#    for form in all:
-#        print 'New form:\n'
-#        for ind in form:
-#            print ind['form'], ind['info']
-    print opcordict.getGramInfo(u'делаю')
+#    opcordict.findWord(u'делаю')
+    all = opcordict.getAllForms(u'делаю')
+    for form in all:
+        print 'New form:\n'
+        for ind in form:
+            print ind['form'], ind['info']
+#    print opcordict.getGramInfo(u'делаю')
 #    all =  opcordict.getAllForms(u'злословия')
 #    print all
 #    for ent in all:

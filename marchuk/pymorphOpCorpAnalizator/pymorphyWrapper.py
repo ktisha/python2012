@@ -24,25 +24,70 @@ pymorph_to_opcorp_tags = { u'П' : u'ADJF',  u'С' : u'NOUN', u'мр' : u'masc',
 
 class POCMorph():
 
-    def __init__(self, path):
-        self.morph = pm.get_morph(path)
+    def __init__(self, pathPY, pathOPC):
+        self.morph = pm.get_morph(pathPY)
+        self.opcorpdict  = oci.OpCorpDict(pathOPC)
 
-    def get_graminfo_sentence(self, words):
+    def get_graminfo_sentence(self, words, option='POC'):
         graminfo = []
         for word in words.split():
             #word = word.encode('utf-8')
             word = word.upper()
-            graminfo.append(self.morph.get_graminfo(word))
+            graminfo.append(self.get_graminfo(word))
         return graminfo
 
-    def get_graminfo(self,word):
-        return self.morph.get_graminfo(word)
+    def get_graminfo(self, word, option = 'POC'):
+        graminfo = []
+        if option  == 'PYMORPHY':
+            for form in self.morph.get_graminfo(word.upper()):
+                tmp = {}
+                info = []
+                tmp['class'] = pymorph_to_opcorp_tags[form['class']]
+                tmp['norm'] = form['norm']
+                taglist = form['info'].replace(',',' ').split()
+                for tag in taglist:
+                    if pymorph_to_opcorp_tags.__contains__(tag):
+                        info.append(pymorph_to_opcorp_tags[tag])
+                tmp['info'] = info
+                graminfo.append(tmp)
+        if option == 'OPCORP':
+            graminfo = self.opcorpdict.getGramInfo(word)
+        if option == 'POC':
+            pygram = []
+            for form in self.morph.get_graminfo(word.upper()):
+                tmp = {}
+                info = []
+                tmp['class'] = pymorph_to_opcorp_tags[form['class']].encode('utf-8')
+                tmp['norm'] = form['norm'].encode('utf-8')
+                taglist = form['info'].replace(',',' ').split()
+                for tag in taglist:
+                    if pymorph_to_opcorp_tags.__contains__(tag):
+                        info.append(pymorph_to_opcorp_tags[tag])
+                tmp['info'] = info
+                pygram.append(tmp)
+            ocgram = self.opcorpdict.getGramInfo(word)
+            for form in pygram:
+                for version in ocgram:
+                    if unicode(form['norm'], 'utf-8') == version['norm']:
+                        if unicode(form['class'],'utf-8') == version['class']:
+                            form['class'] = unicode(form['class'],'utf-8')
+                            form['norm'] = unicode(form['norm'],'utf-8')
+                            containAll = True
+                            for tag in form['info']:
+                                if not version['info'].__contains__(tag):
+                                    containAll = False
+                                    break
+                            if containAll:
+                                graminfo.append(form)
+        return graminfo
 
 
 if __name__ == '__main__':
-    opcordict = oci.OpCorpDict('/home/amarch/Documents/CSCenter/Python')
-    morph = POCMorph('/home/amarch/Downloads/ru.sqlite-json')
-    info = morph.get_graminfo(u'ДЕЛАЮ')
+    morph = POCMorph('/home/amarch/Downloads/ru.sqlite-json','/home/amarch/Documents/CSCenter/Python')
+    info = morph.get_graminfo(u'мама','PYMORPHY')
     print info
-    print info[0]['info']
-    print morph.get_graminfo_sentence(u'Мама мыла раму')
+    info = morph.get_graminfo(u'мама','OPCORP')
+    print info
+    info = morph.get_graminfo(u'мама')
+    print info
+    #print morph.get_graminfo_sentence(u'Мама мыла раму')
