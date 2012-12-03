@@ -6,33 +6,29 @@ import string
 pygame.init()
 
 def BFS(G, start, end):
-    #G is graph in format [N, E]. N is number of vertices, E - list of edges
-    #in format [[a, b], ...]
-    # start end - vertices that we are looking for way between
     is_visited, dist, prev = {}, {}, {}
-    #standard BFS
-    for current in [x for x in range(G[0]) if x != start]:
-        is_visited[current], dist[current], prev[current] = False, "inf", None
+    for u in [x for x in range(G[0]) if x != start]:
+        is_visited[u], dist[u], prev[u] = False, "inf", None
     is_visited[start], dist[start], prev[start] = True, 0, None
     Q = [] # queue
     Q.append(start)
     while Q != []:
-        current = Q.pop(0)
-        for neighbour in [x[1] for x in G[1] if x[0] == current]:
-            if is_visited[neighbour] == False:
-                is_visited[neighbour], dist[neighbour], prev[neighbour] = True, dist[current] + 1, current
-                Q.append(neighbour)
-        is_visited[current] = True
-    path = [] # path from start to end
+        u = Q.pop(0)
+        for v in [x[1] for x in G[1] if x[0] == u]:
+            if is_visited[v] == False:
+                is_visited[v], dist[v], prev[v] = True, dist[u] + 1, u
+                Q.append(v)
+        is_visited[u] = True
+    path = []
     current = prev[end]
-    while current is not None:
+    while current != None:
         path.insert(0, current)
         current = prev[current]
     return (is_visited[end], dist[end], path)
 
 def draw_a_line(window, color, startx, starty, orientation):
     """Draws a line of length 1 cell in window starting in startx starty"""
-    #start_x start_y end_x end_y coordinats of start and end of line
+    global ed_pix
     start_x = ed_pix * (1 + startx)
     start_y = ed_pix * (1 + starty)
     if orientation == 0:
@@ -50,7 +46,7 @@ def draw_a_line(window, color, startx, starty, orientation):
         pygame.draw.line(window, (0, 255, 0), (start_x, start_y), (end_x, end_y), 3)
 
 def draw_entrance_and_exit(window, st_end, rows):
-    """Draws entrance and exit of labirint in window"""
+    """Draws entrance and exit in window"""
     answer = []
     for line in st_end:
         split_line = map(int, string.split(line))
@@ -64,17 +60,14 @@ def draw_entrance_and_exit(window, st_end, rows):
             draw_a_line(window, "black", split_line[0], split_line[1] + 1, 0)
         cell = rows * split_line[0] + split_line[1]
         answer.append(cell)
-    #in answer we get two ints - ord numbers of entrance and exit cells
+    #in answer we get to ints - ord numbers of entrance and exit cells
     return answer
 
 def draw_an_arrow(window, x, y, orientation):
     """Draws a small arrow in the center of cell with coordinates x and y"""
-    # x and y a coordinates of cell where to draw an arrow
-    #orientation is angle to rotate  arrow
+    global ed_pix
     size = int(round(0.5 * ed_pix))
-    #arrow_surface - small surface to draw arrow
-    arrow_surface = pygame.Surface((size, size))
-    #lots of coordinates
+    s = pygame.Surface((size, size))
     startx = int(round(size * 0.2))
     endx = int(round(size * 0.8))
     starty = int(round(size * 0.5))
@@ -82,13 +75,13 @@ def draw_an_arrow(window, x, y, orientation):
     starty2 = int(round(size * 0.4))
     starty3 = int(round(size * 0.6))
     startx2 = int(round(size * 0.7))
-    pygame.draw.line(arrow_surface, (255, 0, 0), (startx, starty), (endx, endy), 1)
-    pygame.draw.line(arrow_surface, (255, 0, 0), (startx2, starty2), (endx, endy), 1)
-    pygame.draw.line(arrow_surface, (255, 0, 0), (startx2, starty3), (endx, endy), 1)
-    arrow_surface = pygame.transform.rotate(arrow_surface, orientation)
+    pygame.draw.line(s, (255, 0, 0), (startx, starty), (endx, endy), 1)
+    pygame.draw.line(s, (255, 0, 0), (startx2, starty2), (endx, endy), 1)
+    pygame.draw.line(s, (255, 0, 0), (startx2, starty3), (endx, endy), 1)
+    s = pygame.transform.rotate(s, orientation)
     screenx = int(round((x + 1.25) * ed_pix))
     screeny = int(round((y + 1.25) * ed_pix))
-    window.blit(arrow_surface, (screenx, screeny))
+    window.blit(s, (screenx, screeny))
    
 def create_empty_labirint_graph(cols, rows):
     """Creates graph of a labirints with no walls inside"""
@@ -114,7 +107,8 @@ def create_empty_labirint_graph(cols, rows):
 
 def check_wall(window, first, next):
     """Check if there is a wall between cells first and next"""
-    # first and next are ord numbers of cells
+    global cols, rows
+    global walls
     is_wall = False
     orientation = 0
     diff = next - first
@@ -180,7 +174,6 @@ for str in input_strings[3:]:
 #construct a 3d graph with k levels
 edges_3d_graph  = []
 vertices_3d_graph = (bombs + 1) * cols * rows
-# constructing edges of 3d graph
 for edge in edges:
     for i in range(bombs + 1):
         edges_3d_graph.append([i * cols * rows + edge[0], i * cols * rows + edge[1]])
@@ -205,9 +198,9 @@ if BFS(Ghraph_3d, start, vertices_3d_graph)[0]:
             check_wall(window, k, next)
             #orientation of way to next cell
             next_orientation = check_wall(window, k, next)[1]
-            x_cord = k // rows
-            y_cord = k % rows
-            draw_an_arrow(window, x_cord, y_cord, next_orientation)
+            i = k // rows
+            j = k % rows
+            draw_an_arrow(window, i, j, next_orientation)
     #for finish we need special arrow-orientation
     finishx  = finish // rows
     finishy = finish % rows
