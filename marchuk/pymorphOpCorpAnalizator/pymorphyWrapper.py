@@ -1,9 +1,7 @@
 __author__ = 'amarch'
 # -*- coding: utf-8 -*-
-import sys
 import pymorphy as pm
 import openCorporaInitiation as oci
-import sys
 
 
 pymorph_to_opcorp_tags = { u'П' : u'ADJF',  u'С' : u'NOUN', u'мр' : u'masc', u'мр-жр' : u'Ms-f', u'ед' : u'sing',
@@ -42,7 +40,11 @@ class POCMorph():
             for form in self.morph.get_graminfo(word.upper()):
                 tmp = {}
                 info = []
-                tmp['class'] = pymorph_to_opcorp_tags[form['class']]
+                #print form['class']
+                if pymorph_to_opcorp_tags.__contains__(form['class']):
+                    tmp['class'] = pymorph_to_opcorp_tags[form['class']]
+                else:
+                    tmp['class'] = 'UNKNOWN'
                 tmp['norm'] = form['norm']
                 taglist = form['info'].replace(',',' ').split()
                 for tag in taglist:
@@ -57,8 +59,11 @@ class POCMorph():
             for form in self.morph.get_graminfo(word.upper()):
                 tmp = {}
                 info = []
-                tmp['class'] = pymorph_to_opcorp_tags[form['class']].encode('utf-8')
-                tmp['norm'] = form['norm'].encode('utf-8')
+                if pymorph_to_opcorp_tags.__contains__(form['class']):
+                    tmp['class'] = pymorph_to_opcorp_tags[form['class']]
+                else:
+                    tmp['class'] = 'UNKNOWN'
+                tmp['norm'] = form['norm']
                 taglist = form['info'].replace(',',' ').split()
                 for tag in taglist:
                     if pymorph_to_opcorp_tags.__contains__(tag):
@@ -68,10 +73,10 @@ class POCMorph():
             ocgram = self.opcorpdict.getGramInfo(word)
             for form in pygram:
                 for version in ocgram:
-                    if unicode(form['norm'], 'utf-8') == version['norm']:
-                        if unicode(form['class'],'utf-8') == version['class']:
-                            form['class'] = unicode(form['class'],'utf-8')
-                            form['norm'] = unicode(form['norm'],'utf-8')
+                    if form['norm'] == version['norm']:
+                        if form['class'] == version['class']:
+                            form['class'] = form['class']
+                            form['norm'] = form['norm']
                             containAll = True
                             for tag in form['info']:
                                 if not version['info'].__contains__(tag):

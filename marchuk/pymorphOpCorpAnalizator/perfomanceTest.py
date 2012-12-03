@@ -6,7 +6,7 @@ from pymorphyWrapper import *
 import time
 
 
-sentences =  getSentences_fromXML("/home/amarch/Documents/CSCenter/Python/corpus/annot.opcorpora.no_ambig.xml")
+sentences =  getSentences_fromXML("/home/amarch/Documents/CSCenter/Python/corpus/annot.opcorpora.no_ambig.xml",1500)
 morph = POCMorph('/home/amarch/Downloads/ru.sqlite-json','/home/amarch/Documents/CSCenter/Python')
 
 #for s in sentences:

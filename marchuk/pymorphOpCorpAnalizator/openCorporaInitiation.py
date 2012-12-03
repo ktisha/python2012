@@ -3,9 +3,6 @@ __author__ = 'amarch'
 import sys
 import os
 
-
-
-
 class OpCorpDict():
 
     path = ''
@@ -99,7 +96,10 @@ class OpCorpDict():
         forms = []
         tmp = []
         newEntity = False
-        dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        try:
+            dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        except IOError:
+            return []
         for line in dictionary.readlines():
             line = unicode(line, 'utf-8')
             if line == '\n':
@@ -113,7 +113,6 @@ class OpCorpDict():
             if ''.join([word,'	']) in line[0:len(word)+1]:
                 newEntity = True
         return forms
-
 
 if __name__ == '__main__':
     #Examples

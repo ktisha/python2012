@@ -11,7 +11,9 @@ def getSentences_fromXML(filepath, sentencesno=0):
     else:
         id_sentences = tree.xpath("//text/paragraphs/paragraph/sentence/@id")
         if sentencesno > 0:
-            id_sentences = id_sentences[0:min(len(id_sentences), sentencesno)]
+            q = min(len(id_sentences), sentencesno)
+            id_sentences = id_sentences[0:q]
+
         for id in id_sentences:
             tmp = []
             quer = ''.join(["//text/paragraphs/paragraph/sentence[@id = ",id,"]/source/text()"])
@@ -30,6 +32,7 @@ def getSentences_fromXML(filepath, sentencesno=0):
                 quer = ''.join(["//text/paragraphs/paragraph/sentence[@id = ",id,"]/tokens/token[@id=",t,"]/tfr/v/l/g/@v"])
                 info = tree.xpath(quer)
                 info = info[1:]
+                info = map(unicode, info)
                 token.append({'class':unicode(clas[0],'utf-8'), 'norm':norm[0], 'info':info})
                 tokens.append(token)
             tmp.append(tokens)
@@ -37,7 +40,7 @@ def getSentences_fromXML(filepath, sentencesno=0):
         return sentences
 
 if __name__ == "__main__":
-    sentences =  getSentences_fromXML("/home/amarch/Documents/CSCenter/Python/corpus/files/export/annot/small.xml")
+    sentences =  getSentences_fromXML("/home/amarch/Documents/CSCenter/Python/corpus/files/export/annot/small.xml", 1)
 
 
 
