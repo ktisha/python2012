@@ -30,10 +30,9 @@ for l in file.xreadlines():
   except:
     printError(i, l)
     exit()
+file.close()
 
-(radius, centre) = pointSet.minDisk()  
+(radius, centre) = pointSet.minDisk()
   
 print "centre = (" + str(centre) + ")"
 print "radius = " + str(radius)
-      
-      
