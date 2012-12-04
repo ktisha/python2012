@@ -80,10 +80,10 @@ def perfomanceTest(sentnum):
     print 'POCMorph score:  ', pocmorph_points, ' time ', poctime
     print 'OpCorp score:  ', opc_points, ' time ', opctime
 
-    print 'Time: for proceed',len(sentences),' sentences ', finish_sent_time - start_time, "seconds"
+    print 'Time: prepare ',len(sentences),' sentences during', finish_sent_time - start_time, "seconds"
     print 'Number of tokens: ', toknumber
     print 'Total time: ', time.time() - start_time
 
 
 if __name__ == "__main__":
-    perfomanceTest(10)
+    perfomanceTest(50)
