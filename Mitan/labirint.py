@@ -89,27 +89,30 @@ def draw_an_arrow(window, x, y, orientation):
     screenx = int(round((x + 1.25) * ed_pix))
     screeny = int(round((y + 1.25) * ed_pix))
     window.blit(arrow_surface, (screenx, screeny))
-   
+def is_in_field(i, j):
+    """Check if the cell with cordinates i j is in labirint"""
+    answer  = False
+    if i in range(cols) and j in range(rows):
+        answer = True
+    return answer
+
 def create_empty_labirint_graph(cols, rows):
-    """Creates graph of a labirints with no walls inside"""
+    """Creates graph of a labirint with no walls inside"""
     edges = []
-    #cells connected with corner cells
-    edges[0:0]  = [[0, 1], [0, rows]]
-    edges[0:0]  = [[rows - 1, 2 * rows - 1], [rows - 1, rows - 2]]
-    edges[0:0]  = [[rows * (cols - 1), rows * (cols - 2)], [rows * (cols - 1), rows * (cols - 1) + 1]]
-    edges[0:0]  = [[rows * cols - 1, rows * cols - 2], [rows * cols - 1, rows * (cols - 1) - 1]]
-    #cells near the border
-    for i in range(1, cols - 1):
-        edges[0:0]  = [[rows * i, rows * (i - 1)], [rows * i, rows * (i + 1)], [rows * i, rows * i + 1]]
-        edges[0:0]  = [[rows * (i + 1) - 1, rows * i - 1], [rows * (i + 1) - 1, rows * (i + 2) - 1], [rows * (i + 1) - 1, rows * (i + 1) - 2]]
-    for i in range(1, rows - 1):
-        edges[0:0]  = [[i, i - 1], [i, i + 1], [i, rows + i]]
-        edges[0:0]  = [[rows * (cols - 1) + i, rows * (cols - 1) + i - 1], [rows * (cols - 1) + i, rows * (cols - 1) + i + 1], [rows * (cols - 1) + i, rows * (cols - 2) + i]]
-    # Not border cells
-    for i in range(1, cols - 1):
-        for j in range(1, rows - 1):
-            edges[0:0]  = [[rows * i + j, rows * i + j - 1], [rows * i + j, rows * i + j + 1]]
-            edges[0:0]  = [[rows * i + j, rows * (i - 1) + j], [rows * i + j, rows * (i + 1) + j]]
+    # number of vertices in graph
+    vertices = cols * rows
+    for n in range(vertices):
+        #coordinates of cell
+        i = n // rows
+        j = n % rows
+        if is_in_field(i - 1, j):
+            edges[0:0] = [[n, n - rows]]
+        if is_in_field(i + 1, j):
+            edges[0:0] = [[n, n + rows]]
+        if is_in_field(i, j + 1):
+            edges[0:0] = [[n, n + 1]]
+        if is_in_field(i, j - 1):
+            edges[0:0] = [[n, n - 1]]
     return edges
 
 def check_wall(window, first, next):
@@ -140,7 +143,7 @@ def check_wall(window, first, next):
         orientation = 180
     return is_wall, orientation
 
-input_strings = open('input.txt', 'r').readlines()
+input_strings = open(sys.argv[1], 'r').readlines()
 cr_string = map(int, string.split(input_strings[0]))
 #in first string cols  rows bombs of labirint
 cols, rows, bombs = cr_string
