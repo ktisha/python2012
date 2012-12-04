@@ -21,30 +21,6 @@ class ColorValueTransform:
       result += hex_chars[int(i) / 16] + hex_chars[int(i) % 16]
     return "#" + result
 
-  @staticmethod
-  def hsv_to_hex_string(hsv):
-    rgb = colorsys.hsv_to_rgb(hsv[0], hsv[1], hsv[2])
-    print rgb
-    return ColorValueTransform.rgb_to_hex_string(rgb)
-
-  @staticmethod
-  def rgb_to_number(rgb):
-    result = 0
-    for i in rgb:
-      result += (result * 256) + i
-    return result
-
-  @staticmethod
-  def hsv_to_number(hsv):
-    return int(hsv[0] * 100 * 100 * 100 + hsv[1] * 100 + hsv[2])
-
-  @staticmethod
-  def number_to_hsv(num):
-    h = num / 10000
-    s = (num - h) / 100
-    v = num - h - s
-    return h, s, v
-
 
 class ImgStatisticCounter:
   image = None
@@ -58,7 +34,8 @@ class ImgStatisticCounter:
   __colour_num_ = 256
   __min_color_difference = ((pow(255, 3) * 3) ** (1 / 3.0)) * 0.01
 
-  ARE_SIMILAR_THRESHOLD = 300
+  UPPER_THRESHOLD = 500
+  LOWER_THRESHOLD = 250
 
   def __init__(self, image=None, path=""):
     if image is not None:
@@ -111,10 +88,6 @@ class ImgStatisticCounter:
       result += pow(int(math.fabs(rgb1[i] - rgb2[i])), 3)
     return result ** (1 / 3.0)
 
-  @staticmethod
-  def __get_hsv_(image):
-    data = image.getdata()
-    return [colorsys.rgb_to_hsv(r, g, b) for (r, g, b) in data]
 
   @staticmethod
   def __get_small_size_(size, deviation):
@@ -132,21 +105,14 @@ class ImgStatisticCounter:
 
   @staticmethod
   def __expectation_value_(histogram):
-    result = (0, 0, 0)
+    result = [0, 0, 0]
     s = 0
     for item in histogram:
-      result = (result[0] + (item[0][0] * item[1]),
-                result[1] + (item[0][1] * item[1]),
-                result[2] + (item[0][2] * item[1]))
+      result = [result[idx] + (item[0][idx] * item[1]) for idx in range(3)]
       s += item[1]
+    return [x / (s + 0.0) for x in result]
 
-    return (result[0] / (s + 0.0),
-            result[1] / (s + 0.0),
-            result[2] / (s + 0.0))
 
-  @staticmethod
-  def __expected_value_item_count_(item, result, idx):
-    return result[idx] + (item[0][idx] * item[1])
 
   @staticmethod
   def __dispersion_(histogram, expectation_value):
@@ -195,35 +161,21 @@ class ImgStatisticCounter:
     if counted_distance is None:
       counted_distance = cls.distance(ref, image)
 
-    if counted_distance > 500.0:
+    if counted_distance > cls.UPPER_THRESHOLD:
       return False
 
-    if counted_distance < 250.0:
+    if counted_distance < cls.LOWER_THRESHOLD:
       return True
 
     image = image.__dict__ if not isinstance(image, dict) else image
     ref = ref.__dict__ if not isinstance(ref, dict) else ref
 
     deviation_dist = cls.deviation_distance(image, ref)
-    return (deviation_dist < 0.9 and counted_distance < 300) or \
-            (deviation_dist < 0.5 and counted_distance < 350) or \
-            (deviation_dist < 0.25 and counted_distance < 400) or \
-            (deviation_dist < 0.11 and counted_distance < 450)
+    bounds = [(0.95, 300), (0.5, 350), (0.25, 400), (0.11, 450)]
+    f = lambda seed, (x, y) : seed or (deviation_dist < x and counted_distance < y)
 
+    return reduce(f, bounds, True)
 
-
-
-#  def distance(self, ref_statistic):
-#    result = 0
-#    l = len(ref_statistic.main_colors)
-#    for i in self.main_colors:
-#      arr = [ImgStatisticCounter.color_distance(i, j) for j in ref_statistic.main_colors]
-#      result += min(arr)
-#      #result += sum(arr) / l / 2.0
-#
-#    expected_values_distance = ImgStatisticCounter.color_distance(self.expectation_value,
-#                                                                  ref_statistic.expectation_value)
-#    return (l / 2) * expected_values_distance + result
 
   @classmethod
   def deviation_distance(cls, img1, img2):
@@ -233,63 +185,3 @@ class ImgStatisticCounter:
     result = cls.point_3d_distance(deviation1, deviation2)
     divisor = cls.point_3d_distance((0, 0, 0), [x + y for x, y in zip(deviation1, deviation2)])
     return result / divisor
-
-
-
-  @classmethod
-  def histogram_matching_distance(cls, hist1, hist2):
-    def value_at_point(histogram, point):
-      if histogram.has_key(point):
-        return histogram[point]
-      return 0
-
-    def inner_histogram_matching_distance(hist1, hist2,
-                 colour_num=ColorValueTransform.rgb_to_number((255, 255, 255)) + 1):
-      hist1_dict = dict(hist1)
-      hist2_dict = dict(hist2)
-      result = 0.0
-
-      for point in xrange(colour_num):
-        i = value_at_point(hist1_dict, point)
-        j = value_at_point(hist2_dict, point)
-        result += pow(i - j, 2) / (i + j + 0.0)
-      return result / 2.0
-
-    return inner_histogram_matching_distance(hist1, hist2)
-
-
-def show(statistic):
-  print "<ul>"
-  print "<li><img src=\"" + statistic.path + "\"></li>"
-  print "<li>expectation_value = ", statistic.expectation_value, "</li>"
-  print "<li>dispersion = ", statistic.dispersion, "</li>"
-  print "<li>standard_deviation = ", statistic.standard_deviation, "</li>"
-  print "<li>main colors"
-  for c in statistic.main_colors:
-    print "<p style=\"background-color: " + ColorValueTransform.rgb_to_hex_string(c) + "\">&nbsp</p>"
-  print "</li>"
-
-  print "</ul>"
-  print
-
-
-def process(img_id):
-  img_path = "test_images/" + str(img_id) + ".jpeg"
-  return ImgStatisticCounter(path=img_path)
-
-if __name__ == '__main__':
-  max_idx = 102
-
-  ref_image_path = "test_images/ref.jpeg"
-  ref_statistic = ImgStatisticCounter(path=ref_image_path)
-
-  print "<div><h3>Reference image:</h3>"
-  print "<img src=\"" + ref_image_path + "\">"
-  print "</div>"
-  print
-  print
-
-  statistics = [process(i) for i in xrange(max_idx)]
-  statistics.sort(key=lambda x: x.distance(ref_statistic))
-  for i in xrange(max_idx):
-    show(statistics[i])
