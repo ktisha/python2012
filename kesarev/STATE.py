@@ -7,8 +7,8 @@ class STATE:
         self.actionToMove0 = action0
         self.actionToMove1 = action1
 
-    def getOutState(self, id):
-        return self.outState0 if (id == 0) else self.outState1
+    def getOutState(self, i):
+        return self.outState0 if (i == 0) else self.outState1
 
-    def getAction(self, id):
-        return self.actionToMove0 if (id == 0) else self.actionToMove1
+    def getAction(self, i):
+        return self.actionToMove0 if (i == 0) else self.actionToMove1

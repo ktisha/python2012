@@ -1,0 +1,15 @@
+{% extends "template.html" %}
+
+{% block title %}Gecko library{% endblock %}
+
+{% block hader %}Список {% endblock %}
+
+{% block content %}
+    {% for form in forms %}
+        <br>
+        {{ form }}
+        <a href="/faculty_remove/{{ form.id }}">Удалить</a>
+        <a href="/faculty_edit/{{ form.id }}">Редактировать</a>
+        </br>
+    {% endfor %}
+{% endblock %}

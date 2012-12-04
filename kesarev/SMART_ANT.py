@@ -4,7 +4,7 @@ import random
 import STATE
 
 class SMART_ANT:
-    def __init__(self, generationSize, survived, genomeSize, maxStep, mapSize, apples, map):
+    def __init__(self, generationSize, survived, genomeSize, maxStep, mapSize, apples, tMap):
         random.seed(None)
         self.generationSize = generationSize
         self.genomeSize = genomeSize
@@ -13,7 +13,7 @@ class SMART_ANT:
         self.maxStepToAnt = maxStep
         self.sizeOfMap = mapSize
         self.appleNumber = apples
-        self.torMap = map
+        self.torMap = tMap
         self.survivedAnts = survived
         self.generationNumber = 0
 
@@ -46,15 +46,12 @@ class SMART_ANT:
     def makeLittleShake(self):
         gs = int(len(self.generation) / 10)
         for i in range(gs, len(self.generation)):
-                self.generation[i] =  ANT.ANT(self.genomeSize)
+            self.generation[i] =  ANT.ANT(self.genomeSize)
         print("Little Shake!\n")
 
     def makeBigShake(self):
         for i in range(0, len(self.generation)):
-            #if random.randint(0, 1) == 0:
-            #    self.makeMutation(i)
-            #else:
-            self.generation[i] =  ANT.ANT(self.genomeSize)
+            self.generation[i] = ANT.ANT(self.genomeSize)
         print("BIG SHAKE!\n")
 
     def makeMutation(self, a):
