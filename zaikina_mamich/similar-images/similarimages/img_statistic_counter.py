@@ -161,7 +161,10 @@ class ImgStatisticCounter:
     def saturation(rgb):
       return colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2])[1]
 
-    s = saturation(rgb1) + saturation(rgb2)
+    def value(rgb):
+      return 1 - colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2])[2]
+
+    s = (min(saturation(rgb1), saturation(rgb2)) + min(value(rgb1), value(rgb2)))
     s = s if s > 1 else 2
     return cls.point_3d_distance(rgb1, rgb2) / math.log(s)
 
@@ -182,8 +185,8 @@ class ImgStatisticCounter:
       arr = [cls.__color_distance_(i, j) for j in image['main_colors']]
       result += min(arr)
 
-    expectation_values_distance = cls.point_3d_distance(ref['expectation_value'], image['expectation_value'])
-    return (l / 5) * expectation_values_distance + result
+    expectation_values_distance = cls.__color_distance_(ref['expectation_value'], image['expectation_value'])
+    return (l / 2) * expectation_values_distance + result
 
 
   @classmethod
@@ -195,17 +198,17 @@ class ImgStatisticCounter:
     if counted_distance > 500.0:
       return False
 
-    if counted_distance < 300.0:
+    if counted_distance < 250.0:
       return True
 
     image = image.__dict__ if not isinstance(image, dict) else image
     ref = ref.__dict__ if not isinstance(ref, dict) else ref
 
     deviation_dist = cls.deviation_distance(image, ref)
-    return (deviation_dist < 0.9 and counted_distance < 350) or \
-            (deviation_dist < 0.5 and counted_distance < 400) or \
-            (deviation_dist < 0.25 and counted_distance < 450) or \
-            (deviation_dist < 0.11 and counted_distance < 500)
+    return (deviation_dist < 0.9 and counted_distance < 300) or \
+            (deviation_dist < 0.5 and counted_distance < 350) or \
+            (deviation_dist < 0.25 and counted_distance < 400) or \
+            (deviation_dist < 0.11 and counted_distance < 450)
 
 
 
