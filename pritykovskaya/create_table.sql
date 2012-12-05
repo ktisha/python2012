@@ -9,4 +9,3 @@ CREATE TABLE `items` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-mysql -u root -p goods_db < /home/pritykovskaya/Desktop/python_project/insert_script.sql
