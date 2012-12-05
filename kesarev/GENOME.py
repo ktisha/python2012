@@ -14,8 +14,8 @@ class GENOME:
             action1 = random.randint(0, 3)
             self.states.append(STATE.STATE(out0, out1, action0, action1))
 
-    def getState(self, id):
-        return self.states[id]
+    def getState(self, i):
+        return self.states[i]
 
     def getStartState(self):
         return self.states[self.startState]
