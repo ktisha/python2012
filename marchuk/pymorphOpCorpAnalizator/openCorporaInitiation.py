@@ -1,11 +1,10 @@
 __author__ = 'amarch'
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import sys
 import os
 
-tagsDictionary = {'S':'NOUN', 'V':'VERB', 'A':'ADV' }
-
 class OpCorpDict():
+
     path = ''
 
     def __init__(self, path, divide=False):
@@ -22,7 +21,6 @@ class OpCorpDict():
                 os.makedirs(''.join([path, '/dividedOpCorp']))
                 self.divideDictionary()
         self.path = ''.join([path, '/dividedOpCorp'])
-
 
     def divideDictionary(self):
         print 'Start divide whole dictionary into small parts. Please wait.'
@@ -73,7 +71,7 @@ class OpCorpDict():
                 line = unicode(line, 'utf-8')
                 if ''.join([token,'	']) in line[0:len(token)+1]:
                     print line[:-2]
-                    matches.add(line[:-2])
+                    matches.append(line[:-2])
             if matches == []:
                 print 'Nothing >:(\n'
 
@@ -98,7 +96,10 @@ class OpCorpDict():
         forms = []
         tmp = []
         newEntity = False
-        dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        try:
+            dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        except IOError:
+            return []
         for line in dictionary.readlines():
             line = unicode(line, 'utf-8')
             if line == '\n':
@@ -113,25 +114,21 @@ class OpCorpDict():
                 newEntity = True
         return forms
 
-
-
-
 if __name__ == '__main__':
     #Examples
     opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
     #opcordict.findWord(u'Мама мыла раму')
-    #opcordict.findWord(u'делаю')
-#    all = opcordict.getAllForms(u'военный')
-#    for form in all:
-#        print 'New form:\n'
-#        for ind in form:
-#            print ind['form'], ind['info']
-#    print opcordict.getGramInfo(u'злословия')
+#    opcordict.findWord(u'делаю')
+    all = opcordict.getAllForms(u'делаю')
+    for form in all:
+        print 'New form:\n'
+        for ind in form:
+            print ind['form'], ind['info']
+#    print opcordict.getGramInfo(u'делаю')
 #    all =  opcordict.getAllForms(u'злословия')
 #    print all
 #    for ent in all:
 #        for x in ent:
 #            print x['form']
-
     # ITS A TRAP!
-    #opcordict.findWord(u'Выходить')
+#    opcordict.findWord(u'Выходить')
