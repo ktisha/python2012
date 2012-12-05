@@ -2,36 +2,34 @@ import sys
 import random
 import Point
 
-list = sys.argv
-if len(list) != 3 and len(list) != 4:
-  print "Program need two or three input parameters: number of points, file name, <maximum coordinates (2^16 by default)>"
-  print "Example: GeneratePoints.py 100 1.txt <2 ** 16>"
-  exit(0)
-try:
-  n = int(list[1])
-except:
-  print "First parameter should be an integer"
-  print "Example: GeneratePoints.py 100 1.txt"
-  exit()
-filename = list[2]
+def wrongUsage():
+  print "Program needs two or three input parameters: number of points, file name, <maximum coordinates (2^16 by default)>"
+  print "Example: " + sys.argv[0] + " 100 1.txt <2 ** 16>"
+  exit(1)
 
-if len(list) == 3:
+lst = sys.argv
+if len(lst) != 3 and len(lst) != 4:
+  wrongUsage()
+try:
+  n = int(lst[1])
+except:
+  wrongUsage()
+
+if len(lst) == 3:
   max_coord = 2 ** 16
 else:
   try:
-    max_coord = int(list[3])
+    max_coord = int(lst[3])
   except:
-    print "Third parameter should be an integer (2^16 by default)"
-    print "Example: GeneratePoints.py 100 1.txt <2 ** 16>"
-    exit()
+    wrongUsage()
 
 pointSet = set()
 random.seed()
 while len(pointSet) < min(n, (max_coord + 1) ** 2):
   pointSet.add(Point.Point(random.randint(0, max_coord), random.randint(0, max_coord)))
   
-file = open(filename, 'w')
+outfile = open(lst[2], 'w')
 for p in pointSet:
-  file.write(str(p.x) + " " + str(p.y) + "\n")
-file.close()
+  outfile.write(str(p) + "\n")
+outfile.close()
 	  

@@ -1,9 +1,6 @@
 import math
 
-class Point:
-  x = 0
-  y = 0
-  
+class Point: 
   def __init__(self, x, y):
     self.x = x
     self.y = y
@@ -24,4 +21,4 @@ class Point:
     return not self.__eq__(other)
   
   def __hash__(self):
-    return self.x.__hash__()
+    return hash(hash(self.x) + hash(self.y))
