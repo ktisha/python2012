@@ -13,6 +13,7 @@ def main(global_config, **settings):
   """
   logger = logging.getLogger('__init__')
   logger.setLevel(logging.DEBUG)
+  logger.info('Application initialization...')
 
   engine = engine_from_config(settings, 'sqlalchemy.')
   DBSession.configure(bind=engine)
@@ -38,7 +39,6 @@ def main(global_config, **settings):
 
   config.scan()
 
-  logger.info('Application configuration finished.')
-
+  logger.info('Application initialization finished.')
   return config.make_wsgi_app()
 

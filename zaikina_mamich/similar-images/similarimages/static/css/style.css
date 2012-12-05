@@ -3,6 +3,7 @@
 body {
     font-family: "Consolas";
     background-color: #f8f8ff;
+    text-align: center;
 }
 
 h2, h3, p#message {
@@ -36,8 +37,9 @@ div#header {
 }
 
 div#main {
-    bottom: 30px;
-    top: 80px;
+    bottom: 40px;
+    top: 70px;
+    overflow-y: auto;
 }
 
 div#footer {
@@ -114,11 +116,22 @@ div#images {
 }
 
 div.image-entry {
-    display: inline-block;
-    margin: 10px;
+    text-align: center;
+}
+
+table.main-colors {
+    width: 500px;
+    height: 15px;
+    margin-left:auto;
+    margin-right:auto;
 }
 
 /* Result template */
-div#image {
-    margin: auto;
+div#image, div.image-entry {
+    margin: 50px;
+}
+
+.ref-img {
+    height: 200px;
+    width: 400px;
 }

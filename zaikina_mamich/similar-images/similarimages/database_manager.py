@@ -1,7 +1,9 @@
 __author__ = 'ksenia'
 
+import ast
 import os
 import transaction
+from img_statistic_counter import ColorValueTransform
 
 from .models import (
   Image,
@@ -9,7 +11,12 @@ from .models import (
   )
 
 from .preview_generator import generate_preview
+from .img_statistic_counter import ImgStatisticCounter
 
+import logging
+
+logger = logging.getLogger("database_manager")
+logger.setLevel(logging.DEBUG)
 
 class DatabaseManager:
   # Constant for image storing
@@ -53,46 +60,61 @@ class DatabaseManager:
     img.close()
 
   @classmethod
-  def __load_image_from_filesystem(cls, id, filename):
-    img = open(cls.__path_to_image(id=id, name=filename))
-    content = img.read()
-    img.close()
-    return content
-
-  @classmethod
-  def create_image(cls, filename, content, histogram, exp_value, dispersion, std_dev):
-    # Save data to database file
+  def create_image(cls, filename, content):
+    # Save image to database file
     session = DBSession()
-    img = Image(name=filename, hist=histogram, exp_value=exp_value, dispersion=dispersion, std_dev=std_dev)
+    session.expire_on_commit = False
+    img = Image(
+      name=filename
+    )
     session.add(img)
     session.flush()
     transaction.commit()
 
     # Save file contents to filesystem
     session = DBSession()
+    session.expire_on_commit = False
     img = Image.get_by_name(filename)
+    image_id = img.id
     cls.__save_image_to_filesystem(id=img.id, filename=filename, content=content)
+
+    # Calculate image parameters & save to database
+    image_parameters = ImgStatisticCounter(path=cls.__path_to_image(id=img.id, name=img.name))
+
+    img.main_colors = str(image_parameters.main_colors)
+    img.expectation_value = str(image_parameters.expectation_value)
+    img.dispersion = str(image_parameters.dispersion)
+    img.standard_deviation = str(image_parameters.standard_deviation)
+
+    session.add(img)
+    session.flush()
+    transaction.commit()
 
     # Generate preview and save it to filesystem
     generate_preview(
       cls.__path_to_image(id=img.id, name=filename),
       cls.__path_to_image_preview(id=img.id, name=filename)
     )
-    return img
+
+    session = DBSession()
+    return cls.__image_to_dictionary(Image.get_by_id(image_id))
 
 
   @classmethod
   def __image_to_dictionary(cls, image):
-    return {
+    result = {
       'id': image.id,
       'name': image.name,
-      'histogram': image.histogram,
-      'expectation_value': image.expectation_value,
-      'dispersion': image.dispersion,
-      'standard_deviation': image.standard_deviation,
+      'main_colors': ast.literal_eval(image.main_colors) if image.main_colors is not None else None,
+      'expectation_value': ast.literal_eval(image.expectation_value) if image.expectation_value is not None else None,
+      'dispersion': ast.literal_eval(image.dispersion) if image.dispersion is not None else None,
+      'standard_deviation': ast.literal_eval(image.standard_deviation) if image.standard_deviation is not None else None,
       'path': cls.path_to_image(id=image.id, name=image.name),
       'preview': cls.path_to_image_preview(id=image.id, name=image.name)
     }
+    if result['main_colors'] is not None:
+        result['main_colors_in_html_format'] = [ColorValueTransform.rgb_to_hex_string(c) for c in result['main_colors']]
+    return result
 
   @classmethod
   def __image_array_to_dictionary_array(cls, images):
@@ -124,7 +146,7 @@ class DatabaseManager:
   def retrieve_image_by_name(cls, name):
     session = DBSession()
     image = Image.get_by_name(name=name)
-    if image:
+    if image is not None:
       return cls.__image_to_dictionary(image)
 
 
