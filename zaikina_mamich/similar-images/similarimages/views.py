@@ -104,14 +104,15 @@ def result_view(request):
     return HTTPFound(location=route_path('home', request))
 
   def retrieve_similar_images(ref, images):
-    img_distance_pairs = [(img, ImgStatisticCounter.distance_between_two_images(ref, img))
+    img_distance_pairs = [(img, ImgStatisticCounter.distance(ref, img)
+                           , ImgStatisticCounter.deviation_distance(ref, img))
                           for img in images]
-    img_distance_pairs.sort(key=lambda (image, distance): distance)
+    img_distance_pairs.sort(key=lambda (image, distance, deviation): distance)
     result = []
     for pair in img_distance_pairs:
-        if pair[1] > ImgStatisticCounter.ARE_SIMILAR_THRESHOLD:
+        if not ImgStatisticCounter.are_similar(ref, pair[0]):
             break
-        result.append(pair[0])
+        result.append(pair)
     return result
 
   images = retrieve_similar_images(

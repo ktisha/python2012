@@ -1,5 +1,6 @@
 __author__ = 'Anton M Alexeyev'
 
+import blist
 from blist import sortedset
 
 class WordMatrix:
@@ -45,10 +46,12 @@ class WordMatrix:
         length1 = 0.0
         collector = 0.0
         for key in self.token_set:
-            collector += (self.get(key, col0) * self.get(key, col1))
+            k0 = self.get(key, col0)
+            k1 = self.get(key, col1)
+            collector += (k0 * k1)
             collector += (self.get(col0, key) * self.get(col1, key))
-            length0 += 2 * (self.get(key, col0)**2)
-            length1 += 2 * (self.get(key, col1)**2)
+            length0 +=  2 * (k0**2)
+            length1 +=  2 * (k1**2)
         length0 **= 0.5
         length1 **= 0.5
         return collector / (length0 * length1)

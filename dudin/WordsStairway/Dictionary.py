@@ -19,7 +19,7 @@ class Word:
         elif isinstance(text, unicode):
             self.text = text
         else:
-            raise Exception("Input word is not a string (input: " + str(text) + ")")
+            raise MyException("Input word is not a string (input: " + str(text) + ")")
         self.text = self.text.upper()
 
 
@@ -30,10 +30,10 @@ class Dictionary:
         self.start_word = Word(start_word)
         self.end_word = Word(end_word)
         if len(start_word) != len(end_word):
-            raise Exception("Incorrect input: start_word (" + self.start_word.text +
+            raise MyException("Incorrect input: start_word (" + self.start_word.text +
                             ") and end_word (" + self.end_word.text + ") has different lengths")
         if len(start_word) == 0:
-            raise Exception("Incorrect input: words should have non-zero lengths")
+            raise MyException("Incorrect input: words should have non-zero lengths")
         self.word_length = len(start_word)
 
         # Add start_word into dictionary
@@ -174,3 +174,14 @@ class Dictionary:
             print "Key is " + str(key)
             for word in ls:
                 print word.text
+
+
+class MyException(Exception):
+    """
+    Exception, which raises in case of handled exceptions
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return self.value
