@@ -1,7 +1,5 @@
 # coding: utf-8
 
-import math
-
 class field:
 
     def __init__(self, startpos):
@@ -9,8 +7,7 @@ class field:
         self.__w = len(startpos[0])
         self.__startpos = startpos
         self.__currIter = 0
-        self.__cache = {}
-        self.__cache[0] = startpos
+        self.__cache = {0: startpos}
         self.__minIter = 0
 
     def __checkCell(self, list, i, j):
@@ -27,9 +24,7 @@ class field:
         else:
             return 0
 
-    def findPrev(self, num):
-        target = self.__cache[num]
-
+    def __findPrev(self, target):
         def checkLine(lineNum):
             fits = True
             for l in xrange(self.__w):
@@ -47,7 +42,6 @@ class field:
                     temp >>= 1
                 yield line
 
-        oldCands = []
         newCands = []
 
         for i in generateLists(self.__w):
@@ -68,79 +62,48 @@ class field:
                     if checkLine(i - 1):
                         newCands.append(cand)
 
-        res = []
         for cand in newCands:
             if checkLine(self.__h - 1) and checkLine(0):
-                res.append(cand)
+                return cand
 
-        return res
+        return None
 
+    def generate(self, num, findPrev = False):
+        if num < self.__minIter - 1:
+            return "Overflow"
 
-    def __generate(self, num):
-        if num < self.__minIter:
-            raise ValueError
+        elif num == self.__minIter - 1:
+            if findPrev:
+                prev = self.__findPrev(self.__cache[self.__minIter])
+                if prev is None:
+                    return "No prev"
+                else:
+                    self.__cache[num] = prev
+                    self.__minIter = num
+            else:
+                return "Prev warning"
+        else:
+            bestKey = num
+            keys = self.__cache.keys()
+            while not (bestKey in keys):
+                bestKey -= 1
 
-        bestKey = num
-        keys = self.__cache.keys()
-        while not (bestKey in keys):
-            bestKey -= 1
+            curr = self.__cache[bestKey]
+            for step in xrange(bestKey, num):
+                dest = [[]] * self.__h
+                for i in xrange(0, self.__h):
+                    dest [i] = [0] * self.__w
 
-        curr = self.__cache[bestKey]
+                for i in xrange(0, self.__h):
+                    for j in xrange(0, self.__w):
+                        dest[i][j] = self.__checkCell(curr, i, j)
 
-        get = lambda i, j: curr[i % self.__h][j % self.__w]
+                curr = dest
+                self.__cache[step] = curr
+            self.__cache[num] = curr
 
-        def getNum(index):
-            res = 0
-            for i in xrange(0, 16):
-                res += index[int(math.floor(i / 4))][i % 4] << i
-            return res
-
-        for step in xrange(bestKey, num):
-            dest = [[]] * self.__h
-            for i in xrange(0, self.__h):
-                dest [i] = [0] * self.__w
-
-            for i in xrange(0, self.__h):
-                for j in xrange(0, self.__w):
-                    dest[i][j] = self.__checkCell(curr, i, j)
-
-            curr = dest
-            self.__cache[step] = curr
-
-        return curr
-
-
-
-    def move(self, delta):
-        self.__currIter += delta
-        if self.__currIter < 0:
-            self.__currIter = 0
-
-        self.__cache[self.__currIter] = self.__generateUnhashed(self.__currIter)
-       #  self.__fillCache()
-
-    def __fillCache(self):
-        base = int(math.floor(self.__currIter / 10)) * 10 - 10         # Нижняя граница тридцатки, в которой находится текущий индекс
-        indexes = []
-        for i in xrange(10, 20):
-            indexes.append(base + i)
-        for power in xrange(0, 3):
-            step = 30 ** power
-            for i in xrange(-1, -11, -1):
-                indexes.append(base + i * step)
-            for i in xrange(1, 11, 1):
-                indexes.append(base + step + i * step)
-            base -= step
-
-        indexes = filter(lambda i: i > 0, indexes)
-        indexes.append(0)
-
-        for key in self.__cache.keys():
-            if not (key in indexes):
-                self.__cache.pop(key)
-        for index in indexes:
-            if not self.__cache.has_key(index):
-                self.__cache[index] = self.__generate(index)
+        self.__currIter = num
+        return "OK"
 
     def getField(self):
         return self.__cache[self.__currIter]
@@ -149,14 +112,13 @@ class field:
         return self.__currIter
 
 
-def replace(i):
-    if i == 1:
-        return 'O'
-    else:
-        return ' '
 
 def show(field):
-    #print field.getCurrIter()
+    def replace(i):
+        if i == 1:
+            return 'O'
+        else:
+            return ' '
     data = field.getField()
     print '----------'
     for row in data:
@@ -233,22 +195,16 @@ small = [[0, 0, 0, 0],
          [0, 1, 1, 0],
          [0, 0, 0, 0]]
 
-f = field(glider3)
+f = field(glider)
 show(f)
 raw_input()
-prevs = f.findPrev(0)
-if len(prevs) == 0:
-    print "Fail"
-else:
-    for res in prevs:
-        print '----------'
-        for row in res:
-            print ''.join(map(replace, row))
-            pass
-        print '----------'
-        print
+i = 1
+while f.generate(i, True) == "OK":
+    show(f)
+    i += 1
+    raw_input()
+print "Fail"
 raw_input()
-
 #while True:
 #    raw_input()
 #    f.move(100)
