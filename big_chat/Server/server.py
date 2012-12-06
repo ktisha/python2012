@@ -1,23 +1,17 @@
-from xml.etree.ElementPath import _SelectorContext
-
-__author__ = 'mazzachuses'
-#http://www.ibm.com/developerworks/ru/library/l-python_part_10/
 from twisted.internet import reactor
 from twisted.internet.protocol import ServerFactory
-from twisted.protocols.basic import LineOnlyReceiver
 from twisted.web.sux import XMLParser
 import base64
 from stanza import Stanza
 
 HOST = "localhost"
 
-step1 = open("step1.xml").read()
-step2 = open("step2.xml").read()
-step3 = open("step3.xml").read()
+def get_step(number):
+    file = open("Steps/step" + str(number) + ".xml")
+    res = file.read()
+    file.close()
+    return res
 
-step4 = open("step4.xml").read()
-step5 = open("step5.xml").read()
-step6 = open("step6.xml").read()
 
 class XMLChatProtocol(XMLParser):
     def __init__(self):
@@ -29,7 +23,6 @@ class XMLChatProtocol(XMLParser):
         self.success_auth = False
         self.resource = None
 
-
     def get_user_name(self):
         return self.username
 
@@ -39,47 +32,33 @@ class XMLChatProtocol(XMLParser):
         self.stack_stanzas.append(stanza)
         self.__handle_()
 
-
     def __handle_(self):
         stack = self.stack_stanzas
         stanza = stack.pop()
-        length = len(stack)
         if stanza.is_closed():
             if stanza.get_name() == "auth":#todo add nonce
-                self.transport.write(step3)
+                self.transport.write(get_step(3))
             elif stanza.get_name() == "response":
-                if not self.success_auth:
-                    data = stanza.get_text()
-                    data = base64.b64decode(data)
-                    data = data.split(",")
-                    for entry in data:
-                        if entry.startswith("username"):
-                            self.username = entry.split("=")[1].replace("'", "").replace('"', '')
-                        if entry.startswith("realm"):
-                            self.realm = entry.split("=")[1].replace("'", "").replace('"', '')
-                    self.transport.write(step4)
-                    self.success_auth = True
-                else:
-                    self.transport.write(step5)
+                self.handle_response(stanza)
             elif stanza.get_name() == "iq":
                 self.handle_query(stanza)
             elif stanza.get_name() == "message":
                 self.__handle_message_(stanza)
             elif stanza.get_name() == "presence":
                 self.__handle_presence_(stanza)
-            stack[length - 1].add_child(stanza)
+            stack[len(stack) - 1].add_child(stanza)
 
         else:
             if stanza.get_name() == "stream:stream":
                 if not self.success_auth:
                     self.id = self.factory.get_id()
                     host = self.factory.get_host()
-                    response = step1 % (self.id, host)
+                    response = get_step(1) % (self.id, host)
                     self.transport.write(response)
-                    self.transport.write(step2)
+                    self.transport.write(get_step(2))
                 if self.success_auth: #end auth and add user
                     host = self.factory.get_host()
-                    response = step6 % (self.id, host)
+                    response = get_step(6) % (self.id, host)
                     self.transport.write(response)
 
             stack.append(stanza)
@@ -96,7 +75,23 @@ class XMLChatProtocol(XMLParser):
         to = attrs['to'].split("@")[0]
         user = self.factory.get_client(to)
         attrs['to'] = user.login
+        attrs['from'] = self.username + '@' + self.realm
+        attrs['xml:lang'] = 'en'
+        stanza.add_child(Stanza('active', {'xmlns': 'http://jabber.org/protocol/chatstates'}))
         user.transport.write(stanza.to_xml())
+
+    def handle_response(self, stanza):
+        if not self.success_auth:
+            data = base64.b64decode(stanza.get_text()).split(",")
+            for entry in data:
+                if entry.startswith("username"):
+                    self.username = entry.split("=")[1].replace("'", "").replace('"', '')
+                if entry.startswith("realm"):
+                    self.realm = entry.split("=")[1].replace("'", "").replace('"', '')
+            self.transport.write(get_step(4))
+            self.success_auth = True
+        else:
+            self.transport.write(get_step(5))
 
     def handle_query(self, stanza):
         attrs = stanza.get_attrs()
@@ -129,15 +124,16 @@ class XMLChatProtocol(XMLParser):
                         response = Stanza("iq", {"to": self.login, type: "result", "id": id})
                         response.add_child(query)
                         for user in self.factory.get_clients().items():
-                            if user[0] != self.username:
-                                item = Stanza("item",
-                                    {'jid': user[1].login, 'name': user[1].username, 'subscription': 'both'})
-                                query.add_child(item)
+                        # if user[0] != self.username:
+                            item = Stanza("item",
+                                {'jid': user[1].login, 'name': user[1].username, 'subscription': 'both'})
+                            query.add_child(item)
+
                         self.transport.write(response.to_xml())
                         for user in self.factory.get_clients().items():
-                            if user[0] != self.username:
-                                presence = Stanza("presence", {'from': user[1].login, 'to': self.login})
-                                self.transport.write(presence.to_xml())
+                        #  if user[0] != self.username:
+                            presence = Stanza("presence", {'from': user[1].login, 'to': self.login})
+                            self.transport.write(presence.to_xml())
                     else:
                         stanza = Stanza("iq",
                             {'type': 'error', 'from': self.factory.get_host(), 'id': id, 'to': self.login})

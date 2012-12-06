@@ -28,6 +28,7 @@ class Stanza(object):
 
     def get_attrs(self):
         return self.__attr_
+
     def get_children(self):
         return self.__children_
 
@@ -69,12 +70,10 @@ class Stanza(object):
         res.append(">")
         if self.__text_:
             res.append(self.__text_)
-           # res.append("\n")
+            # res.append("\n")
         for child in self.__children_:
             res.append(child.to_xml())
         res.append("</")
         res.append(self.__name_)
         res.append(">")
         return "".join(res)
-
-
