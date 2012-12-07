@@ -57,7 +57,7 @@ rb_cosine.pack()
 rb_freq.pack()
 
 # button construction
-B = Button(root, text ="I'm feeling lucky", command = print_suggestions,
+B = Button(root, text ="Go!", command = print_suggestions,
     font = tkFont.Font(family = "Courier", size = 14))
 B.pack()
 

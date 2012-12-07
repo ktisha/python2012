@@ -6,13 +6,15 @@ from nltk.corpus import stopwords
 from matrix_management import WordMatrix
 import re
 
-# todo: wipe away hardcode
+window_size = 6
 
 input_text = open("testtext", "r")
 text = ""
 
 for line in input_text:
     text += line.lower() + " "
+
+input_text.close()
 
 print "Text loaded"
 print "Learning..."
@@ -31,13 +33,14 @@ for token in tokens:
     else:
         tokens_filtered += [ token ]
 
+tokens_filtered += ['*'] * (window_size - 1)
+
 # stemming
 #normalized_tokens = [stemmer.stem(token) for token in tokens if token not in stopwords.words('english')]
 normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
 
 print "Tokens set filtered and stemmed :", normalized_tokens
 
-window_size = 10
 matrix = WordMatrix()
 
 win_start = 0
@@ -47,8 +50,11 @@ while win_start + window_size <= len(normalized_tokens):
     second = 1
     while first < len(window):
         second = first + 1
+        set = []
         while second < len(window):
-            matrix.add(window[first], window[second], window_size - second + first + 1)
+            if not (window[first], window[second]) in set:
+                matrix.add(window[first], window[second], 1)
+                set += [(window[first], window[second])]
             second += 1
         first += 1
     win_start += 1
@@ -56,9 +62,13 @@ while win_start + window_size <= len(normalized_tokens):
 print "Co-occurence counted"
 print "Keys quantity:", len(matrix.get_tokens())
 
+"""
 for key in matrix.get_tokens():
-    if key <> "*":
-        pass#print key, matrix.kn_cooccurences(key, 6)
+    print key,
+    for succ in matrix.get_tokens():
+        print matrix.get(key, succ),
+    print
+"""
 
 print "Done"
 
@@ -75,7 +85,7 @@ def get_euclidean_vector_by_token(n, token):
 def get_cosine_vector_by_token(n, token):
     print "Incoming token:", token
     if token in matrix.token_set:
-        return matrix.kn_columns(token, n, matrix.dist_cols_cosine)
+        return matrix.kn_columns(token, n, matrix.dist_cols_inverted_cosine)
     raise KeyError
 
 def get_frequential_vector_by_token(n, token):
@@ -83,7 +93,3 @@ def get_frequential_vector_by_token(n, token):
     if token in matrix.token_set:
         return matrix.kn_cooccurences(token, n)
     raise KeyError
-
-for key in matrix.get_tokens():
-    if key <> "*":
-        pass#print key, matrix.kn_columns(key, 6, matrix.dist_cols_euclidean)
