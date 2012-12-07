@@ -66,8 +66,7 @@ def findBigram(input, output, CALIBRE):
 		for key, value in freq:
 			freqDecrypted[keys[key[0]] + keys[key[1]]] =  value
 		freqDecrypted = sorted(freqDecrypted.iteritems(), key = lambda (k,v):(v, k))[-CALIBRE:]
-		print freqDecrypted
-		count = 0
+	        count = 0
 		for key, value in freqDecrypted:
 			if key in bigrams:
 				count += 1
