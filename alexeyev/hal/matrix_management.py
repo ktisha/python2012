@@ -1,5 +1,6 @@
 __author__ = 'Anton M Alexeyev'
 
+import blist
 from blist import sortedset
 
 class WordMatrix:
@@ -35,23 +36,26 @@ class WordMatrix:
         """Measures distance between 2 columns: Euclidean distance"""
         collector = 0
         for key in self.token_set:
-            collector += (self.get(key, col0) - self.get(key, col1))**2
-            collector += (self.get(col0, key) - self.get(col1, key))**2
+            collector += (self.get(key, col0) - self.get(key, col1)) ** 2
+            collector += (self.get(col0, key) - self.get(col1, key)) ** 2
         return collector**0.5
 
-    def dist_cols_cosine(self, col0, col1):
+    def dist_cols_inverted_cosine(self, col0, col1):
         """Measures distance between 2 columns: Cosine similarity"""
         length0 = 0.0
         length1 = 0.0
         collector = 0.0
+
         for key in self.token_set:
-            collector += (self.get(key, col0) * self.get(key, col1))
-            collector += (self.get(col0, key) * self.get(col1, key))
-            length0 += 2 * (self.get(key, col0)**2)
-            length1 += 2 * (self.get(key, col1)**2)
+            k0 = self.get(key, col0)
+            k1 = self.get(key, col1)
+            collector += k0 * k1
+            collector += self.get(col0, key) * self.get(col1, key)
+            length0 +=  2 * (k0**2)
+            length1 +=  2 * (k1**2)
         length0 **= 0.5
         length1 **= 0.5
-        return collector / (length0 * length1)
+        return (0.0 + length0 * length1) / (collector + 0.0)
 
     def kn_columns(self, target_column, k, dist_func):
         """Gets k nearest columns to target_column by distance function provided by dist_func"""
