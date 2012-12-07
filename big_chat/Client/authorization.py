@@ -1,14 +1,11 @@
 from PyQt4 import Qt
 from PyQt4 import QtCore
 
-import sys
 
 class AuthorizationWidget(object):
-
     def __init__(self, validationFunc):
         if __name__ == "authorization":
             self.validationFunc = validationFunc
-            self.app = Qt.QApplication(sys.argv)
             self.window = Qt.QWidget()
             self.window.setWindowTitle("authorization")
 
@@ -22,7 +19,6 @@ class AuthorizationWidget(object):
             self.layout.addWidget(self.label1)
 
             self.editNickname = Qt.QLineEdit()
-#            self.editNickname.setMaxLength(15)
             self.layout.addWidget(self.editNickname)
 
             self.label2 = Qt.QLabel("Enter your password:")
@@ -31,8 +27,18 @@ class AuthorizationWidget(object):
 
             self.editPassword = Qt.QLineEdit()
             self.editPassword.setEchoMode(2)
-#            self.editPassword.setMaxLength(15)
             self.layout.addWidget(self.editPassword)
+
+            self.serverListLayout = Qt.QHBoxLayout()
+            self.serverListLabel = Qt.QLabel("Server:")
+            self.serverListLabel.setFixedWidth(35)
+            self.serverList = Qt.QComboBox()
+            servers = QtCore.QStringList(["gmail.com", "vkmessenger.com", "localhost"])
+            self.serverList.addItems(servers)
+            self.serverListLayout.addWidget(self.serverListLabel)
+            self.serverListLayout.addWidget(self.serverList)
+
+            self.layout.addLayout(self.serverListLayout)
 
             self.bt1 = Qt.QPushButton("Ok")
             self.layout.addWidget(self.bt1)
@@ -47,7 +53,8 @@ class AuthorizationWidget(object):
             Qt.QObject.connect(self.editPassword, Qt.SIGNAL("returnPressed()"), self.okBtListener)
 
     def okBtListener(self):
-        result = self.validationFunc(str(self.editNickname.text()), str(self.editPassword.text()))
+        result = self.validationFunc(str(self.editNickname.text()), str(self.editPassword.text()),
+            str(self.serverList.itemText(self.serverList.currentIndex())))
         if result != True:
             self.labelError.setText('<B><FONT color="red">%s</FONT></B>' % result)
             self.labelError.show()
@@ -60,4 +67,4 @@ class AuthorizationWidget(object):
 
     def show(self):
         self.window.show()
-        self.app.exec_()
+

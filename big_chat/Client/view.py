@@ -1,15 +1,17 @@
 from PyQt4 import Qt
+from PyQt4 import QtGui
 import datetime
 
-class View(object):
-    def __init__(self):
+class View(QtGui.QWidget):
+    def __init__(self, app, parent=None):
         if __name__ == "view":
-            self.window = Qt.QWidget()
-            self.window.setMinimumSize(450, 300)
-            self.window.setWindowTitle("prototype client v0.03")
+            self.app = app
+            QtGui.QWidget.__init__(self, parent)
+            self.setMinimumSize(450, 300)
+            self.setWindowTitle("big_chat client v0.05")
 
             self.rootHBoxLayout = Qt.QHBoxLayout()
-            self.window.setLayout(self.rootHBoxLayout)
+            self.setLayout(self.rootHBoxLayout)
 
             self.chatVBoxLayout = Qt.QVBoxLayout()
             self.usersVBoxLayout = Qt.QVBoxLayout()
@@ -64,22 +66,26 @@ class View(object):
 
     def sendListener(self):
         if self.messageEdit.text() == "":
-            self.textEdit.append("<B><FONT color='#ff0000'> you can't send empty message </FONT></B><BR>")
-        else:
-            dt = datetime.datetime.now()
-            time = dt.strftime("%H:%M:%S")
-            if self.checkSendAll.isChecked():
-                self.textEdit.append("<B><FONT color='#654321'>I'm to all [" + time + '] </FONT></B><BR>' + self.messageEdit.text())
-                self.model.sendAll(self.messageEdit.text())
-            else:
-                if self.userList.currentItem() == None:
-                    self.userList.setCurrentItem(self.userList.item(0))
-                self.model.send(str(self.userList.currentItem().text()), self.messageEdit.text())
-                self.textEdit.append("<B><FONT color='#3caa3c'>To " + self.userList.currentItem().text() + " [" + time + '] </FONT></B><BR>' + self.messageEdit.text())
-            self.messageEdit.clear()
+            self.textEdit.append("<B><FONT color='#ff0000'> You can't send empty message </FONT></B><BR>")
+            return
+        if self.userList.count() == 0:
+            self.textEdit.append("<B><FONT color='#ff0000'> Your friends are not online </FONT></B><BR>")
+            return
+        if self.userList.currentItem() == None:
+            self.textEdit.append("<B><FONT color='#ff0000'> Select interlocutor or 'Send all' </FONT></B><BR>")
+            return
 
-    def show(self):
-        self.window.show()
+        dt = datetime.datetime.now()
+        time = dt.strftime("%H:%M:%S")
+        if self.checkSendAll.isChecked():
+            self.textEdit.append(
+                "<B><FONT color='#654321'>I'm to all [" + time + '] </FONT></B><BR>' + self.messageEdit.text())
+            self.model.sendAll(self.messageEdit.text())
+        else:
+            self.model.send(str(self.userList.currentItem().text()), self.messageEdit.text())
+            self.textEdit.append(
+                "<B><FONT color='#3caa3c'>To " + self.userList.currentItem().text() + " [" + time + '] </FONT></B><BR>' + self.messageEdit.text())
+        self.messageEdit.clear()
 
     def setModel(self, _model):
         self.model = _model
@@ -88,3 +94,11 @@ class View(object):
         dt = datetime.datetime.now()
         time = dt.strftime("%H:%M:%S")
         self.textEdit.append('<B><FONT color="#324862">' + login + ' [' + time + '] </FONT></B><BR>' + message)
+
+    def closeEvent(self, event):
+        reply = QtGui.QMessageBox.question(self, 'Message', "Are you sure?", QtGui.QMessageBox.Yes,
+            QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
