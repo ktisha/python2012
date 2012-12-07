@@ -1,9 +1,9 @@
-class Error(Exception): #todo other name
+class Error(Exception):
     pass
 
 
 class Stanza(object):
-    def __init__(self, name=None, attr=None, text=None, chidren=None):
+    def __init__(self, name=None, attr=None, text=None, children=None):
         super(Stanza, self).__init__()
         self.__is_closed_ = False
         self.__name_ = name
@@ -15,8 +15,8 @@ class Stanza(object):
             self.__text_ = text
         else:
             self.__text_ = ""
-        if chidren:
-            self.__children_ = chidren
+        if children:
+            self.__children_ = children
         else:   self.__children_ = []
 
 

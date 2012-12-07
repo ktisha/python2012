@@ -3,9 +3,8 @@ from twisted.internet.protocol import ServerFactory
 from twisted.web.sux import XMLParser
 import base64
 from stanza import Stanza
-
-HOST = "localhost"
-
+import logging
+#todo decorator
 def get_step(number):
     file = open("Steps/step" + str(number) + ".xml")
     res = file.read()
@@ -17,7 +16,9 @@ class XMLChatProtocol(XMLParser):
     def __init__(self):
         self.username = None
         self.realm = None
+        self.login_res = None
         self.login = None
+
         self.id = None
         self.stack_stanzas = []
         self.success_auth = False
@@ -27,7 +28,7 @@ class XMLChatProtocol(XMLParser):
         return self.username
 
     def gotTagStart(self, name, attributes):
-        XMLParser.gotTagStart(self, name, attributes)
+    # XMLParser.gotTagStart(self, name, attributes)
         stanza = Stanza(name, attributes)
         self.stack_stanzas.append(stanza)
         self.__handle_()
@@ -35,9 +36,10 @@ class XMLChatProtocol(XMLParser):
     def __handle_(self):
         stack = self.stack_stanzas
         stanza = stack.pop()
+        logging.debug("got stanza:" + stanza.to_xml())
         if stanza.is_closed():
-            if stanza.get_name() == "auth":#todo add nonce
-                self.transport.write(get_step(3))
+            if stanza.get_name() == "auth":
+                self.__send_(get_step(3))
             elif stanza.get_name() == "response":
                 self.handle_response(stanza)
             elif stanza.get_name() == "iq":
@@ -48,20 +50,25 @@ class XMLChatProtocol(XMLParser):
                 self.__handle_presence_(stanza)
             stack[len(stack) - 1].add_child(stanza)
 
+
         else:
             if stanza.get_name() == "stream:stream":
                 if not self.success_auth:
                     self.id = self.factory.get_id()
                     host = self.factory.get_host()
                     response = get_step(1) % (self.id, host)
-                    self.transport.write(response)
-                    self.transport.write(get_step(2))
+                    self.__send_(response)
+                    self.__send_(get_step(2))
                 if self.success_auth: #end auth and add user
                     host = self.factory.get_host()
                     response = get_step(6) % (self.id, host)
-                    self.transport.write(response)
+                    self.__send_(response)
 
             stack.append(stanza)
+
+    def __send_(self, data):
+        logging.debug("send:" + data)
+        self.transport.write(data)
 
     def __handle_presence_(self, stanza):
         map = self.factory.get_clients()
@@ -74,11 +81,12 @@ class XMLChatProtocol(XMLParser):
         attrs = stanza.get_attrs()
         to = attrs['to'].split("@")[0]
         user = self.factory.get_client(to)
-        attrs['to'] = user.login
-        attrs['from'] = self.username + '@' + self.realm
-        attrs['xml:lang'] = 'en'
-        stanza.add_child(Stanza('active', {'xmlns': 'http://jabber.org/protocol/chatstates'}))
-        user.transport.write(stanza.to_xml())
+        if user:
+            attrs['to'] = user.login
+            attrs['from'] = self.username + '@' + self.realm
+            attrs['xml:lang'] = 'en'
+            stanza.add_child(Stanza('active', {'xmlns': 'http://jabber.org/protocol/chatstates'}))
+            user.__send_(stanza.to_xml())
 
     def handle_response(self, stanza):
         if not self.success_auth:
@@ -88,10 +96,15 @@ class XMLChatProtocol(XMLParser):
                     self.username = entry.split("=")[1].replace("'", "").replace('"', '')
                 if entry.startswith("realm"):
                     self.realm = entry.split("=")[1].replace("'", "").replace('"', '')
-            self.transport.write(get_step(4))
-            self.success_auth = True
+            if not self.factory.has_user(self.username):
+                self.__send_(get_step(4))
+                self.success_auth = True
+            else:
+                self.__send_(get_step(100))
+                self.transport.loseConnection()
         else:
-            self.transport.write(get_step(5))
+            self.__send_(get_step(5))
+
 
     def handle_query(self, stanza):
         attrs = stanza.get_attrs()
@@ -104,54 +117,65 @@ class XMLChatProtocol(XMLParser):
                 del child1.get_children()[0]
                 self.resource = resource.get_text()
                 response = Stanza("iq", {'id': id, 'type': 'result'})
-                self.login = self.username + "@" + self.realm + "/" + self.resource
-
+                self.login_res = self.username + "@" + self.realm + "/" + self.resource
+                self.login = self.username + "@" + self.realm
                 self.add_user()
-                jid = Stanza("jid", text=self.login)
+                jid = Stanza("jid", text=self.login_res)
                 child1.add_child(jid)
                 response.add_child(child1)
-                self.transport.write(response.to_xml())
+                self.__send_(response.to_xml())
             elif child1.get_name() == "session":
                 response = Stanza("iq", {'from': self.realm, 'type': 'result', "id": id})
-                self.transport.write(response.to_xml())
+                self.__send_(response.to_xml())
             else:
-                stanza = Stanza("iq", {'type': 'error', 'from': self.factory.get_host(), 'id': id, 'to': self.login})
+                stanza = Stanza("iq",
+                    {'type': 'error', 'from': self.factory.get_host(), 'id': id, 'to': self.login_res})
         elif type == "get":
             for child in stanza.get_children():
                 if child.get_name() == "query":
                     query = child
                     if query.get_attr("xmlns") == "jabber:iq:roster":
-                        response = Stanza("iq", {"to": self.login, type: "result", "id": id})
+                        response = Stanza("iq", {"to": self.login_res, type: "result", "id": id})
                         response.add_child(query)
                         for user in self.factory.get_clients().items():
-                        # if user[0] != self.username:
-                            item = Stanza("item",
-                                {'jid': user[1].login, 'name': user[1].username, 'subscription': 'both'})
-                            query.add_child(item)
+                            if user[0] != self.username:
+                                item = Stanza("item",
+                                    {'jid': user[1].login, 'name': user[1].username, 'subscription': 'both'})
+                                query.add_child(item)
 
-                        self.transport.write(response.to_xml())
+                        self.__send_(response.to_xml())
                         for user in self.factory.get_clients().items():
-                        #  if user[0] != self.username:
-                            presence = Stanza("presence", {'from': user[1].login, 'to': self.login})
-                            self.transport.write(presence.to_xml())
+                            if user[0] != self.username:
+                                presence = Stanza("presence", {'from': user[1].login, 'to': self.login_res})
+                                self.__send_(presence.to_xml())
                     else:
                         stanza = Stanza("iq",
-                            {'type': 'error', 'from': self.factory.get_host(), 'id': id, 'to': self.login})
+                            {'type': 'error', 'from': self.factory.get_host(), 'id': id, 'to': self.login_res})
                         stanza.add_child(query)
-                        self.transport.write(stanza.to_xml())
+                        self.__send_(stanza.to_xml())
+
+    def connectionLost(self, reason):
+        self.report_presence_unavailable()
+        self.factory.remove_user(self.username)
+        #  XMLParser.connectionLost(self,reason)
 
 
     def report_presence(self, other_user):
-        stanza = Stanza("presence", {'from': other_user.login, 'to': self.login})
-        self.transport.write(stanza.to_xml())
+        stanza = Stanza("presence", {'from': other_user.login, 'to': self.login_res})
+        self.__send_(stanza.to_xml())
+
+    def report_presence_unavailable(self):
+        for user in self.factory.get_clients().items():
+            stanza = Stanza("presence", {'from': self.login, 'to': user[1].login_res, 'type': 'unavailable'})
+            user[1].__send_(stanza.to_xml())
 
 
     def add_user(self):
-        self.factory.add_client(self)#todo mabe  self.username
+        self.factory.add_client(self)
 
 
     def gotTagEnd(self, name):
-        XMLParser.gotTagEnd(self, name)
+    # XMLParser.gotTagEnd(self, name)
         stack = self.stack_stanzas
         stanza = stack.pop()
         stanza.close()
@@ -160,19 +184,19 @@ class XMLChatProtocol(XMLParser):
 
 
     def gotText(self, data):
-        XMLParser.gotText(self, data)
+    # XMLParser.gotText(self, data)
         length = len(self.stack_stanzas)
         if length > 0:
             self.stack_stanzas[length - 1].add_text(data)
 
 
 class ChatProtocolFactory(ServerFactory):
-    protocol = XMLChatProtocol#ChatProtocol
+    protocol = XMLChatProtocol
 
 
-    def __init__(self):
-        self.__clients_ = {} #login - > XMLChatProtocol todo add support resourses
-        self.__host_ = HOST
+    def __init__(self, host):
+        self.__clients_ = {} #user_name - > XMLChatProtocol todo add support resourses
+        self.__host_ = host
         self.__cur_id_ = -1
 
     def sendMessageToAllClients(self, mesg):
@@ -193,10 +217,15 @@ class ChatProtocolFactory(ServerFactory):
         return self.__clients_
 
     def get_client(self, user_name):
-        return self.__clients_[user_name]
+        if self.__clients_.has_key(user_name):
+            return self.__clients_[user_name]
+        else:
+            return None
+
+    def has_user(self, name):
+        return self.__clients_.has_key(name)
+
+    def remove_user(self, username):
+        del self.__clients_[username]
 
 
-print "Starting Server"
-factory = ChatProtocolFactory()
-reactor.listenTCP(5222, factory)
-reactor.run()
