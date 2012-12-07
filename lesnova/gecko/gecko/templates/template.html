@@ -1,0 +1,53 @@
+{% load staticfiles %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" type="text/css"  media="screen, projection" />
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<div id="wrapper">
+    <div id="header">
+        <strong>{% block hader %}{% endblock %}</strong>
+    </div><!-- #header-->
+    <div id="middle">
+        <div id="container">
+            <div id="content">
+                {% block content %}{% endblock %}
+            </div><!-- #content-->
+        </div><!-- #container-->
+        <div class="sidebar" id="sideLeft">
+            <br><big>Выдача и прием книг:</big></br>
+            <br><a href="/issue_add">Выдача книг</a></br>
+            <br><a href="/issue_list">Прием книг</a></br>
+            <br><big>Книги:</big></br>
+            <br><a href="/book_add">Добавить книгу</a></br>
+            <br><a href="/book_list">Редактировать список</a></br>
+            <br><big>Авторы:</big></br>
+            <br><a href="/author_add">Добавление</a></br>
+            <br><a href="/author_list">Редактировать список</a></br>
+            <br><big>Администрирование:</big></br>
+            <br><strong>Факультеты:</strong></br>
+            <br><a href="/faculty_add">Добавление</a></br>
+            <br><a href="/faculty_list">Редактировать список</a></br>
+            <br><strong>Группы:</strong></br>
+            <br><a href="/group_add">Добавление</a></br>
+            <br><a href="/group_list">Редактировать список</a></br>
+            <br><strong>Кафедры:</strong></br>
+            <br><a href="/department_add">Добавление</a></br>
+            <br><a href="/department_list">Редактировать список</a></br>
+            <br><strong>Преподаватели:</strong></br>
+            <br><a href="/teacher_add">Добавление</a></br>
+            <br><a href="/teacher_list">Редактировать список</a></br>
+            <br><strong>Студенты:</strong></br>
+            <br><a href="/student_add">Добавление</a></br>
+            <br><a href="/student_list">Редактировать список</a></br>
+        </div><!-- .sidebar#sideLeft -->
+    </div><!-- #middle-->
+    <div id="footer">
+        <br><strong>127.0.0.1</strong></br>
+        <strong>2012</strong>
+    </div><!-- #footer -->
+</div><!-- #wrapper -->
+</body>
+</html>

@@ -1,0 +1,3 @@
+bottle==0.11.3
+distribute==0.6.32
+pymongo==2.3

@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:tal="http://xml.zope.org/namespaces/tal"
+    xmlns:metal="http://xml.zope.org/namespaces/metal"
+    metal:use-macro="base">
+
+<tal:block metal:fill-slot="content">
+
+<h3>Results</h3>
+
+<div>
+  <div id="image">
+    <a href="${request.static_path('similarimages:' + image['path'])}" rel="lightbox" title="${image['name']}">
+      <img class="ref-img" src="${request.static_path('similarimages:' + image['preview'])}" height="200" width="400" title="${image['name']}"/>
+    </a>
+    <table class="main-colors">
+        <span tal:repeat="color image['main_colors_in_html_format']">
+            <td style="background-color: ${color}">&nbsp</td>
+        </span>
+    </table>
+  </div>
+</div>
+
+<br />
+<h3>Following are result images</h3>
+
+<div id="images">
+  <span tal:repeat="img images">
+    <div class="image-entry">
+      <a href="${request.static_path('similarimages:' + img[0]['path'])}" rel="lightbox[similar]" title="${img[0]['name']}">
+        <img src="${request.static_path('similarimages:' + img[0]['preview'])}" height="200" width="400" title="${img[0]['name']}" />
+      </a>
+      <table class="main-colors">
+        <span tal:repeat="color img[0]['main_colors_in_html_format']">
+            <td style="background-color: ${color}">&nbsp</td>
+        </span>
+      </table>
+      <p>MainColor distance: ${img[1]}</p>
+      <p>Deviation distance: ${img[2]}</p>
+    </div>
+  </span>
+</div>
+
+</tal:block>
+</html>

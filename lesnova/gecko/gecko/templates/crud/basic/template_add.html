@@ -1,0 +1,12 @@
+{% extends "template.html" %}
+
+{% block title %}Gecko library{% endblock %}
+
+{% block hader %}Добавить {% block header_name %}{% endblock %} {% endblock %}
+
+{% block content %}
+    <form action="" method="post"> {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Добавить {% block content_name %}{% endblock %}">
+    </form>
+{% endblock %}
