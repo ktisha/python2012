@@ -2,7 +2,6 @@
 
 import socket as sck
 import sys
-import base64
 import ssl
 from email.header import decode_header
 import logging
