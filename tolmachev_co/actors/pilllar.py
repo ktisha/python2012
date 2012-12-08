@@ -1,4 +1,4 @@
-from actor import Actor
+from actors.actor import Actor
 
 class Pillar (Actor):
     def accept(self):

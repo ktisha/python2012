@@ -1,4 +1,4 @@
-from actor import Actor
+from actors.actor import Actor
 
 class Alcoholic (Actor):
     def accept(self):
