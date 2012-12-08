@@ -2,6 +2,20 @@ README
 ---------------
 HAL method demo
 ---------------
+The desktop application demonstrates that
+HAL semantic space model does work. Or doesn't.
 
+Choose the distance metric, enter the word of interest
+and find out what other words (stemmed tokens)
+HAL considers to be semantically close to it
+(e.g. if you enter the name, the first k tokens
+should be names or pronouns).
+
+-----------
 How to run:
- ... to be added soon
+
+1. You need to have Python 2.7 installed.
+2. Type into terminal:
+
+$ cd <some directory>/hal
+$ python gui.py
