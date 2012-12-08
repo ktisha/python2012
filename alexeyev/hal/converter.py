@@ -3,10 +3,12 @@ __author__ = 'Anton M Alexeyev'
 
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
-from matrix_management import WordMatrix
+from hashed_matrix_management import HashedWordMatrix
 import re
 
-window_size = 6
+#todo: make learning a single method with file provided
+
+window_size = 15
 
 input_text = open("testtext", "r")
 text = ""
@@ -33,15 +35,27 @@ for token in tokens:
     else:
         tokens_filtered += [ token ]
 
-tokens_filtered += ['*'] * (window_size - 1)
+tokens_filtered = ['*'] * (window_size - 1) + tokens_filtered + ['*'] * (window_size - 1)
 
 # stemming
-#normalized_tokens = [stemmer.stem(token) for token in tokens if token not in stopwords.words('english')]
 normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
+
+# filtering out specific words
+min_freq = 15
+
+dict = {}
+for token in normalized_tokens:
+    if not dict.has_key(token):
+        dict[token] = 0
+    dict[token] += 1
+
+for index in range(len(normalized_tokens)):
+    if dict[normalized_tokens[index]] < min_freq:
+        normalized_tokens[index] = '*'
 
 print "Tokens set filtered and stemmed :", normalized_tokens
 
-matrix = WordMatrix()
+matrix = HashedWordMatrix()
 
 win_start = 0
 while win_start + window_size <= len(normalized_tokens):
@@ -50,16 +64,18 @@ while win_start + window_size <= len(normalized_tokens):
     second = 1
     while first < len(window):
         second = first + 1
-        set = []
         while second < len(window):
-            if not (window[first], window[second]) in set:
-                matrix.add(window[first], window[second], 1)
-                set += [(window[first], window[second])]
-            second += 1
+           matrix.add(window[first], window[second], 1)
+           second += 1
         first += 1
     win_start += 1
 
 print "Co-occurence counted"
+
+matrix.normalize()
+
+print "Vectors normalized"
+
 print "Keys quantity:", len(matrix.get_tokens())
 
 """
@@ -78,18 +94,18 @@ def get_token_by_word(word):
 
 def get_euclidean_vector_by_token(n, token):
     print "Incoming token:", token
-    if token in matrix.token_set:
+    if token in matrix.get_tokens():
         return matrix.kn_columns(token, n, matrix.dist_cols_euclidean)
     raise KeyError
 
 def get_cosine_vector_by_token(n, token):
     print "Incoming token:", token
-    if token in matrix.token_set:
+    if token in matrix.get_tokens():
         return matrix.kn_columns(token, n, matrix.dist_cols_inverted_cosine)
     raise KeyError
 
 def get_frequential_vector_by_token(n, token):
     print "Incoming token:", token
-    if token in matrix.token_set:
+    if token in matrix.get_tokens():
         return matrix.kn_cooccurences(token, n)
     raise KeyError

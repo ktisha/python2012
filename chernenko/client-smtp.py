@@ -1,7 +1,7 @@
 #coding: utf-8
 
 from smtp import *
-from Tkinter import *
+import Tkinter
 import ttk
 import tkMessageBox
 import argparse
