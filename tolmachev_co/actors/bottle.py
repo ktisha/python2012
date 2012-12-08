@@ -1,5 +1,5 @@
 from actors.actor import Actor
 
 class Bottle (Actor):
-    def accept(self):
+    def accept_visitor(self, visitor):
         pass
