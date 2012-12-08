@@ -1,6 +1,7 @@
 __author__ = 'Pavel Moskalevich'
 
 import re
+from ngram import Ngram, NgramStorage
 
 class Normalizer:
     ''' This class normalizes text from file.
@@ -42,8 +43,8 @@ class NgramMaker:
     '''
 
     def __init__(self, max_order):
-        self.ngrams    = {}
         self.max_order = max_order
+        self.storage_  = NgramStorage()
 
     def parse(self, text):
         tokens = re.split('\s+', text)
@@ -51,16 +52,21 @@ class NgramMaker:
             for ng_ord in xrange(1, self.max_order + 1):
                 if wnum + ng_ord < len(tokens):
                     words_tuple = tuple(tokens[wnum : wnum + ng_ord])
-                    if self.ngrams.has_key(words_tuple):
-                        self.ngrams[words_tuple] = self.ngrams[words_tuple] + 1
+                    ngram = self.storage_.get_n_gram(words_tuple)
+                    if  ngram == None:
+                        ngram = Ngram(1)
                     else:
-                        self.ngrams[words_tuple] = 1
+                        ngram.count = ngram.count + 1
+                    self.storage_.set_n_gram(words_tuple, ngram)
 
     def __iter__(self):
-        return self.ngrams.__iter__()
+        return self.storage_.__iter__()
+
+    def storage(self):
+        return self.storage_
 
     def at(self, words_tuple):
-        if self.ngrams.has_key(words_tuple):
-            return self.ngrams[words_tuple]
-        else:
-            0
+        ngram = self.storage_.get_n_gram(words_tuple)
+        if  ngram == None:
+            ngram = Ngram(0)
+        return ngram

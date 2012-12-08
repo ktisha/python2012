@@ -30,5 +30,7 @@ class TestText(unittest.TestCase):
         self.assertIsNone(ng.get_n_gram(words4[0]))
         self.assertIsNone(ng.get_n_gram(words4[0:1]))
 
+        self.assertEqual(4, len(ng.get_n_grams(3)))
+
 if __name__ == '__main__':
     unittest.main()

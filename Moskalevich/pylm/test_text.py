@@ -15,8 +15,12 @@ class TestText(unittest.TestCase):
     def test_ngrams(self):
         maker = NgramMaker(3)
         maker.parse(self.text)
-        for ng in maker:
-            print ng, " :  ", maker.at(ng)
+#        for ng in maker:
+#            print ng, " :  ", maker.at(ng)
+        self.assertEqual(3, maker.at(('in',)).count)
+        self.assertEqual(2, maker.at(('the',)).count)
+        # check that we have exact number of unigrams (don't forget the <s>, </s> and <punc>
+        self.assertEqual(38 + 3, len(maker.storage().get_n_grams(1)))
 
 if __name__ == '__main__':
     unittest.main()

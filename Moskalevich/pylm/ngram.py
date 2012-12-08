@@ -19,6 +19,9 @@ class NgramStorage:
     def __init__(self):
         self.n_grams = {}
 
+    def __iter__(self):
+        return self.n_grams.__iter__()
+
     def set_n_gram(self, words_tuple, ngram):
         if not self.n_grams.has_key(len(words_tuple)):
             self.n_grams[len(words_tuple)] = {}
@@ -28,6 +31,11 @@ class NgramStorage:
         if not self.n_grams.has_key(len(words_tuple)) or not self.n_grams[len(words_tuple)].has_key(words_tuple):
             return None
         return self.n_grams[len(words_tuple)][words_tuple]
+
+    def get_n_grams(self, order):
+        if not self.n_grams.has_key(order):
+            return []
+        return filter(lambda x: len(x) == order, self.n_grams[order].keys())
 
     def total_n_grams(self, order = 0):
         ''' Returns total number of n-grams of order (sum of all counts).
