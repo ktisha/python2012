@@ -1,8 +1,9 @@
 # coding=utf-8
 from indexer import create_normalized_index, create_indexes
-from search_runner import aggregate_tag_for_test, convert_tag_to_word_bag
+from search_runner import aggregate_tag_for_test, convert_tag_to_word_bag, aggregate_tag
 import time
 from searcher.PlainSearcher import PlainSearcher
+from searcher.QuickSearcher import QuickSearcher
 from utils import print_time
 
 def setup():
@@ -68,11 +69,11 @@ def test_tag_aggregation():
 def aggregate_tags_with_timing(searcher, tags, output):
     print "aggregate %d tags" % len(tags)
     for tag in tags:
-        answers = aggregate_tag_for_test(searcher, tag, True)
+        answers = aggregate_tag(searcher, tag, True)
         for answer in answers:
             output.write(answer + "\n")
 
-def test_execution_time():
+def test_execution_time_plain_searcher():
     with open("2.5_tag", "r") as file:
         tags = map(str.strip, file.readlines())
     print("Finish reading")
@@ -88,8 +89,25 @@ def test_execution_time():
                 current = []
         aggregate_tags_with_timing(searcher, current, output)
 
+
+def test_execution_time_quick_searcher():
+    with open("2.5_tag", "r") as file:
+        tags = map(str.strip, file.readlines())
+    print("Finish reading")
+
+    searcher = QuickSearcher()
+
+    with open("test_res", "w") as output:
+        current = []
+        for tag in tags:
+            current.append(tag)
+            if len(current) == 100:
+                aggregate_tags_with_timing(searcher, current, output)
+                current = []
+        aggregate_tags_with_timing(searcher, current, output)
+
 if __name__ == "__main__":
     # setup()
-    test_searcher()
-    test_tag_aggregation()
-    test_execution_time()
+    # test_searcher()
+    # test_tag_aggregation()
+    test_execution_time_quick_searcher()

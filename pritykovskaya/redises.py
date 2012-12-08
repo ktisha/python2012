@@ -19,6 +19,9 @@ def connect_bag_id_to_length():
 def connect_bag_id_to_bag():
     return __redis_connect(4)
 
+def connect_word_to_bag_ids_quick():
+    return __redis_connect(5)
+
 def __redis_connect(redis_id):
     r = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=redis_id)
     return r
