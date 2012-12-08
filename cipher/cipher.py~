@@ -19,7 +19,11 @@ def write_cipher(text_filename, cipher_filename):
 	for i in lines:
 		thisline = i.lower().translate(None,punctuation+'\n').split(" ");
 		text += thisline
+	print "text"
+	print text
 	ciphered_text = make_cipher(text)
+	print "ciphered"
+	print ciphered_text
 	output = open(cipher_filename,'w')
 	for word in ciphered_text:
 		output.write(word+" ");
