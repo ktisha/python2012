@@ -1,10 +1,9 @@
 __author__ = 'Pavel Moskalevich'
 
 class Ngram:
-    def __init__(self, count = 0, prob = 0, bow = 0):
+    def __init__(self, count = 0, prob = 0):
         self.count = count
         self.prob  = prob
-        self.bow   = bow
 
     def set_count(self, count):
         self.count = count
@@ -12,8 +11,6 @@ class Ngram:
     def set_prob(self, prob):
         self.prob = prob
 
-    def set_bow(self, bow):
-        self.bow = bow
 
 class NgramStorage:
     def __init__(self, max_order):

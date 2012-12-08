@@ -41,7 +41,10 @@ def main(args):
         out_file.write('\n\\%d-grams:\n' % ng_ord)
         for ng in sorted(ng_storage.get_n_grams(ng_ord)):
             ngram = ng_storage.get_n_gram(ng)
-            out_file.write("%.8f\t%s\n" % (ngram.prob, ' '.join(ng)))   # add bow
+            if ng_ord < ng_storage.max_order():
+                out_file.write("%.8f\t%s\t0\n" % (ngram.prob, ' '.join(ng)))
+            else:
+                out_file.write("%.8f\t%s\n" % (ngram.prob, ' '.join(ng)))
 
     out_file.write('\n\\end\\\n')
     out_file.close()
