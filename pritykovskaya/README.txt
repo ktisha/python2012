@@ -25,9 +25,10 @@ normalized.py, indexer.py, search_runner.py
 3) наполнить ее при помощи скрипта insert_script.sql и команды
 mysql -u root -p goods_db < /home/pritykovskaya/Desktop/python_project/insert_script.sql
 
-4) установить redis (http://redis.io/) 
+4) установить redis (http://redis.io/)  
 5) установить байдинги для redis'a под python (https://github.com/andymccurdy/redis-py)
  
 6) установить perl библиотеки с помощью команды cpan LWP
 
-7) запустить функцию setup из модуля test.py
+7) поднять redis-server командой ./redis-server
+8) запустить функцию setup из модуля test.py
