@@ -33,11 +33,11 @@ def print_suggestions():
     string  = ""
     try:
         if rb_var.get() == 1:
-            collector = get_euclidean_vector_by_token(7, get_token_by_word(input_text))
+            collector = get_euclidean_vector_by_token(20, get_token_by_word(input_text))
         if rb_var.get() == 2:
-            collector = get_cosine_vector_by_token(7, get_token_by_word(input_text))
+            collector = get_cosine_vector_by_token(20, get_token_by_word(input_text))
         if rb_var.get() == 3:
-            collector = get_frequential_vector_by_token(7, get_token_by_word(input_text))
+            collector = get_frequential_vector_by_token(20, get_token_by_word(input_text))
         collector = [element[1] for element in collector]
     except KeyError:
         string = u"Такого элемента нет!"

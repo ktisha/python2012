@@ -7,48 +7,62 @@ class HashedWordMatrix:
     def __init__(self):
         self.dict = {}
 
+    def get_tokens(self):
+        return self.dict.keys()
+
     def add(self, first, second, value):
-        if dict.has_key(first):
-            if dict[first][1].has_key(second):
-                dict[first][1][second] += value
+        if self.dict.has_key(first):
+            if self.dict[first][1].has_key(second):
+                self.dict[first][1][second] += value
             else:
-                dict[first][1][second]  = value
+                self.dict[first][1][second]  = value
         else:
-            dict[first] = [{}, {second : value}]
+            self.dict[first] = [{}, {second : value}]
 
-        if dict.has_key(second):
-            if dict[second][0].has_key(first):
-                dict[second][0][first] += value
+        if self.dict.has_key(second):
+            if self.dict[second][0].has_key(first):
+                self.dict[second][0][first] += value
             else:
-                dict[second][0][first]  = value
+                self.dict[second][0][first]  = value
         else:
-            dict[second] = [{first : value}, {}]
+            self.dict[second] = [{first : value}, {}]
 
-    def get(self, first, second):
-        if dict.has_key(first):
-            if dict[first][1].has_key(second):
-                return dict[first][1][second]
-            else:
-                return 0
-        return 0
+    def get(self, target, first, second):
+        """Getting the value of the cell in the matrix; target -- row"""
+        if first == target:
+            if self.dict.has_key(first):
+                if self.dict[first][1].has_key(second):
+                    return self.dict[first][1][second]
+                else:
+                    return 0
+            return 0
+        else:
+            if self.dict.has_key(second):
+                if self.dict[second][0].has_key(first):
+                    return self.dict[second][0][first]
+                else:
+                    return 0
+            return 0
 
     def normalize(self):
-        for key in dict.keys():
+        """Normalizing lengths of rows"""
+        for key in self.dict.keys():
             collector = 0.0
-            # todo: make valid
-            for help_key in dict.keys():
-                collector += dict[key][0][help_key]
-                collector += dict[key][1][help_key]
-            for help_key in dict.keys():
-                dict[key][0][help_key] /= (collector)
-                dict[key][1][help_key] /= (collector)
+            for help_key in self.dict.keys():
+                collector += self.get(key, help_key, key) ** 2
+                collector += self.get(key, key, help_key) ** 2
+            for help_key in self.dict.keys():
+                if self.dict.has_key(key) and self.dict[key][0].has_key(help_key):
+                    self.dict[key][0][help_key] /= collector ** 0.5
+                if self.dict.has_key(key) and self.dict[key][1].has_key(help_key):
+                    self.dict[key][1][help_key] /= collector ** 0.5
 
     def dist_cols_euclidean(self, col0, col1):
         """Measures distance between 2 columns: Euclidean distance"""
         collector = 0
-        for key in self.token_set:
-            collector += (self.get(key, col0) - self.get(key, col1)) ** 2
-            collector += (self.get(col0, key) - self.get(col1, key)) ** 2
+        for key in self.get_tokens():
+            collector += (self.get(col0, col0, key) - self.get(col1, col1, key)) ** 2
+            collector += (self.get(col0, key, col0) - self.get(col1, key, col1)) ** 2
         return collector ** 0.5
 
     def dist_cols_inverted_cosine(self, col0, col1):
@@ -57,23 +71,25 @@ class HashedWordMatrix:
         length1 = 0.0
         collector = 0.0
 
-        for key in self.token_set:
-            k0 = self.get(key, col0)
-            k1 = self.get(key, col1)
+        for key in self.get_tokens():
+            k0 = self.get(col0, col0, key)
+            kk0 = self.get(col0, key, col0)
+            k1 = self.get(col1, col1, key)
+            kk1 = self.get(col1, key, col1)
             collector += k0 * k1
-            collector += self.get(col0, key) * self.get(col1, key)
-            length0 +=  2 * (k0**2)
-            length1 +=  2 * (k1**2)
+            collector += kk0 * kk1
+            length0 += k0 ** 2 + kk0 ** 2
+            length1 += k1 ** 2 + kk1 ** 2
         length0 **= 0.5
         length1 **= 0.5
         print length1
-        return (0.0 + length0 * length1) / (collector + 0.0)
+        return (0.0 + length0 * length1) / (collector + 0.0) #if collector > 0 else 0.000000000001
 
     def kn_columns(self, target_column, k, dist_func):
         """Gets k nearest columns to target_column by distance function provided by dist_func"""
-        n = len(self.token_set)
+        n = len(self.get_tokens())
         coolset = sortedset()
-        for word in self.token_set:
+        for word in self.get_tokens():
             if word <> "*":
                 coolset.add((dist_func(target_column, word), word))
         array = list(coolset[1 : k + 1])
@@ -81,11 +97,11 @@ class HashedWordMatrix:
 
     def kn_cooccurences(self, target_column, k):
         """Gets k top columns having max cooccurence with target_column"""
-        n = len(self.token_set)
+        n = len(self.get_tokens())
         coolset = sortedset()
-        for word in self.token_set:
+        for word in self.get_tokens():
             if word <> "*":
-                coolset.add((self.get(target_column, word), word))
+                coolset.add((self.get(target_column, target_column, word), word))
         array = list(coolset[len(coolset) - k : len(coolset)])
         array.reverse()
         return array
