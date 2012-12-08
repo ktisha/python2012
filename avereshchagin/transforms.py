@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from decorators import cached
 
 __author__ = 'Aleksandr Vereshchagin'
 
@@ -20,6 +21,7 @@ class AbstractTransform:
 
 class WalshHadamardTransform(AbstractTransform):
 
+    @cached
     def __getMatrix(self, size):
         # Generating Hadamard matrix of size 'size'
         n = int(math.log(size, 2))
