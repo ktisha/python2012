@@ -1,16 +1,18 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
 __author__ = 'Anton M Alexeyev'
 # I decided to implement HAL, not SAM -- another method for cognitive studies and recommender systems
 
 from nltk.stem import PorterStemmer
-from nltk.corpus import stopwords
 from hashed_matrix_management import HashedWordMatrix
 import re
+from nltk.corpus import stopwords
 
 #todo: make learning a single method with file provided
 
-window_size = 15
+window_size = 11
 
-input_text = open("testtext", "r")
+input_text = open("test.txt", "r")
 text = ""
 
 for line in input_text:
@@ -29,6 +31,7 @@ tokens = re.findall(r"[A-Za-z]+", text)
 print "Tokens set built :", tokens
 
 tokens_filtered = []
+
 for token in tokens:
     if token in stopwords.words('english'):
         tokens_filtered += ["*"]
@@ -41,7 +44,7 @@ tokens_filtered = ['*'] * (window_size - 1) + tokens_filtered + ['*'] * (window_
 normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
 
 # filtering out specific words
-min_freq = 15
+min_freq = 10
 
 dict = {}
 for token in normalized_tokens:
@@ -108,4 +111,10 @@ def get_frequential_vector_by_token(n, token):
     print "Incoming token:", token
     if token in matrix.get_tokens():
         return matrix.kn_cooccurences(token, n)
+    raise KeyError
+
+def get_manhattan_vector_by_token(n, token):
+    print "Incoming token:", token
+    if token in matrix.get_tokens():
+        return matrix.kn_columns(token, n, matrix.dist_cols_manhattan)
     raise KeyError

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
 from _sortedlist import sortedset
 
 __author__ = 'Anton M Alexeyev'
@@ -64,6 +66,14 @@ class HashedWordMatrix:
             collector += (self.get(col0, col0, key) - self.get(col1, col1, key)) ** 2
             collector += (self.get(col0, key, col0) - self.get(col1, key, col1)) ** 2
         return collector ** 0.5
+
+    def dist_cols_manhattan(self, col0, col1):
+        """Measures distance between 2 columns: Manhattan distance"""
+        collector = 0
+        for key in self.get_tokens():
+            collector += abs(self.get(col0, col0, key) - self.get(col1, col1, key))
+            collector += abs(self.get(col0, key, col0) - self.get(col1, key, col1))
+        return collector
 
     def dist_cols_inverted_cosine(self, col0, col1):
         """Measures distance between 2 columns: Cosine similarity"""

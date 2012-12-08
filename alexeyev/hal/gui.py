@@ -6,6 +6,9 @@ from Tkinter import *
 import tkFont
 from converter import *
 
+# global variables i don't want the user to modify
+closest_tokens_number = 8
+
 # main frame construction
 root = Tk()
 
@@ -33,11 +36,13 @@ def print_suggestions():
     string  = ""
     try:
         if rb_var.get() == 1:
-            collector = get_euclidean_vector_by_token(20, get_token_by_word(input_text))
+            collector = get_euclidean_vector_by_token(closest_tokens_number, get_token_by_word(input_text))
         if rb_var.get() == 2:
-            collector = get_cosine_vector_by_token(20, get_token_by_word(input_text))
+            collector = get_cosine_vector_by_token(closest_tokens_number, get_token_by_word(input_text))
         if rb_var.get() == 3:
-            collector = get_frequential_vector_by_token(20, get_token_by_word(input_text))
+            collector = get_frequential_vector_by_token(closest_tokens_number, get_token_by_word(input_text))
+        if rb_var.get() == 4:
+            collector = get_manhattan_vector_by_token(closest_tokens_number, get_token_by_word(input_text))
         collector = [element[1] for element in collector]
     except KeyError:
         string = u"Такого элемента нет!"
@@ -50,11 +55,13 @@ def print_suggestions():
 rb_var = IntVar()
 
 rb_eucl = Radiobutton(root, text = "Euclidean distance", variable = rb_var, value = 1, font = radioFont)
+rb_manh = Radiobutton(root, text = "Manhattan distance", variable = rb_var, value = 4, font = radioFont)
 rb_cosine = Radiobutton(root, text = "Cosine  similarity", variable = rb_var, value = 2, font = radioFont)
 rb_freq = Radiobutton(root, text = "Sorted   by   w[i]", variable = rb_var, value = 3, font = radioFont)
 rb_eucl.select()
 
 rb_eucl.pack()
+rb_manh.pack()
 rb_cosine.pack()
 rb_freq.pack()
 
