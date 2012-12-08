@@ -36,3 +36,31 @@ class Normalizer:
 
 #text = Normalizer.normalize('test\\data\\hobbit.txt')
 #print text
+
+class NgramMaker:
+    ''' This class holds ngrams, made from text.
+    '''
+
+    def __init__(self, max_order):
+        self.ngrams    = {}
+        self.max_order = max_order
+
+    def parse(self, text):
+        tokens = re.split('\s+', text)
+        for wnum in xrange(0, len(tokens)):
+            for ng_ord in xrange(1, self.max_order + 1):
+                if wnum + ng_ord < len(tokens):
+                    words_tuple = tuple(tokens[wnum : wnum + ng_ord])
+                    if self.ngrams.has_key(words_tuple):
+                        self.ngrams[words_tuple] = self.ngrams[words_tuple] + 1
+                    else:
+                        self.ngrams[words_tuple] = 1
+
+    def __iter__(self):
+        return self.ngrams.__iter__()
+
+    def at(self, words_tuple):
+        if self.ngrams.has_key(words_tuple):
+            return self.ngrams[words_tuple]
+        else:
+            0

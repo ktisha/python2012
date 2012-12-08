@@ -9,10 +9,10 @@ class Ngram:
     def set_count(self, count):
         self.count = count
 
-    def set_count(self, prob):
+    def set_prob(self, prob):
         self.prob = prob
 
-    def set_count(self, bow):
+    def set_bow(self, bow):
         self.bow = bow
 
 class NgramStorage:
@@ -34,10 +34,10 @@ class NgramStorage:
         If order is zero, than summarizes across all orders.
         '''
         if order == 0:
-            sum = 0
-            for ord in self.n_grams.keys():
-                sum = sum + reduce(lambda cum, x: cum + self.n_grams[ord][x].count, self.n_grams[ord].keys(), 0)
-            return sum
+            summa = 0
+            for ng_ord in self.n_grams.keys():
+                summa = summa + reduce(lambda cum, x: cum + self.n_grams[ng_ord][x].count, self.n_grams[ng_ord].keys(), 0)
+            return summa
         else:
             if self.n_grams.has_key(order):
                 return reduce(lambda cum, x: cum + self.n_grams[order][x].count, self.n_grams[order].keys(), 0)
