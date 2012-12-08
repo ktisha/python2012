@@ -1,6 +1,9 @@
 __author__ = 'Anton M Alexeyev'
 
+import blist
 from blist import sortedset
+
+# todo: should be made a dict of dicts
 
 class WordMatrix:
     """
@@ -13,9 +16,14 @@ class WordMatrix:
 
     def add(self, first_token, second_token, value):
         """Adds given value to the given cell"""
+        val = self.get(first_token, second_token)
+        self.set(first_token, second_token, val + value)
+
+    def set(self, first_token, second_token, value):
+        """Sets given value for the given cell"""
         if not self.matrix.has_key((first_token, second_token)):
             self.matrix[(first_token, second_token)] = 0
-        self.matrix[(first_token, second_token)] += value
+        self.matrix[(first_token, second_token)] = value
         if not first_token in self.token_set:
             self.token_set += [first_token]
         if not second_token in self.token_set:
@@ -35,23 +43,26 @@ class WordMatrix:
         """Measures distance between 2 columns: Euclidean distance"""
         collector = 0
         for key in self.token_set:
-            collector += (self.get(key, col0) - self.get(key, col1))**2
-            collector += (self.get(col0, key) - self.get(col1, key))**2
+            collector += (self.get(key, col0) - self.get(key, col1)) ** 2
+            collector += (self.get(col0, key) - self.get(col1, key)) ** 2
         return collector**0.5
 
-    def dist_cols_cosine(self, col0, col1):
+    def dist_cols_inverted_cosine(self, col0, col1):
         """Measures distance between 2 columns: Cosine similarity"""
         length0 = 0.0
         length1 = 0.0
         collector = 0.0
+
         for key in self.token_set:
-            collector += (self.get(key, col0) * self.get(key, col1))
-            collector += (self.get(col0, key) * self.get(col1, key))
-            length0 += 2 * (self.get(key, col0)**2)
-            length1 += 2 * (self.get(key, col1)**2)
+            k0 = self.get(key, col0)
+            k1 = self.get(key, col1)
+            collector += k0 * k1
+            collector += self.get(col0, key) * self.get(col1, key)
+            length0 +=  2 * (k0**2)
+            length1 +=  2 * (k1**2)
         length0 **= 0.5
         length1 **= 0.5
-        return collector / (length0 * length1)
+        return (0.0 + length0 * length1) / (collector + 0.0)
 
     def kn_columns(self, target_column, k, dist_func):
         """Gets k nearest columns to target_column by distance function provided by dist_func"""
@@ -73,3 +84,15 @@ class WordMatrix:
         array = list(coolset[len(coolset) - k : len(coolset)])
         array.reverse()
         return array
+
+    def normalize(self):
+        for row in self.token_set:
+            collector = 0
+            for column in self.token_set:
+                collector += self.get(row, column)
+                collector += self.get(column, row)
+            for column in self.token_set:
+                val = self.get(row, column)
+                if val <> 0:
+                    self.set(row, column, val / (collector + 0.0))
+                    # todo: this is incorrect as hell
