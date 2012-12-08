@@ -16,13 +16,17 @@ class Ngram:
         self.bow = bow
 
 class NgramStorage:
-    def __init__(self):
-        self.n_grams = {}
+    def __init__(self, max_order):
+        self.n_grams    = {}
+        self.max_order_ = max_order
 
     def __iter__(self):
         return self.n_grams.__iter__()
 
     def set_n_gram(self, words_tuple, ngram):
+        if len(words_tuple) > self.max_order_:
+            return
+
         if not self.n_grams.has_key(len(words_tuple)):
             self.n_grams[len(words_tuple)] = {}
         self.n_grams[len(words_tuple)][words_tuple] = ngram
@@ -36,6 +40,9 @@ class NgramStorage:
         if not self.n_grams.has_key(order):
             return []
         return filter(lambda x: len(x) == order, self.n_grams[order].keys())
+
+    def max_order(self):
+        return self.max_order_
 
     def total_n_grams(self, order = 0):
         ''' Returns total number of n-grams of order (sum of all counts).

@@ -13,7 +13,7 @@ class TestText(unittest.TestCase):
         words2 = ("hello", "<punc>", "underworld")
         words3 = ("hello", "<punc>", "John")
         words4 = ("goodbye", "<punc>", "John")
-        ng = NgramStorage()
+        ng = NgramStorage(3)
         ng.set_n_gram(words1[0], Ngram(12, 0.1))
         ng.set_n_gram(words1[0:1], Ngram(10, 0.08))
         ng.set_n_gram(words1, Ngram(4, 0.02))
@@ -31,6 +31,8 @@ class TestText(unittest.TestCase):
         self.assertIsNone(ng.get_n_gram(words4[0:1]))
 
         self.assertEqual(4, len(ng.get_n_grams(3)))
+
+        self.assertEqual(3, ng.max_order())
 
 if __name__ == '__main__':
     unittest.main()

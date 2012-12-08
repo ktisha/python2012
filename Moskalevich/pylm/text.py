@@ -18,7 +18,11 @@ class Normalizer:
 
     @staticmethod
     def _replace_punc_(text):
+        text = re.sub('\x92', '\'', text)
+        text = re.sub('\x97', '-', text)
+        text = re.sub('\x85', '...', text)
         text = re.sub('[\,:;\-\(\)\[\]\"\{\}<>=\+\*_\\/]+', ' <punc> ', text)
+        text = re.sub('\s\'|\'\s', ' <punc> ', text)
         text = re.sub('^', '<s> ', text)
         endOfSent = '[\.!?]+'
         text = re.sub(endOfSent + '$', ' </s>', text)
@@ -44,7 +48,7 @@ class NgramMaker:
 
     def __init__(self, max_order):
         self.max_order = max_order
-        self.storage_  = NgramStorage()
+        self.storage_  = NgramStorage(max_order)
 
     def parse(self, text):
         tokens = re.split('\s+', text)
