@@ -3,6 +3,8 @@ __author__ = 'Anton M Alexeyev'
 import blist
 from blist import sortedset
 
+# todo: should be made a dict of dicts
+
 class WordMatrix:
     """
     Sparse matrix presented as a dictionary "(token0, token1)->value".
@@ -14,9 +16,14 @@ class WordMatrix:
 
     def add(self, first_token, second_token, value):
         """Adds given value to the given cell"""
+        val = self.get(first_token, second_token)
+        self.set(first_token, second_token, val + value)
+
+    def set(self, first_token, second_token, value):
+        """Sets given value for the given cell"""
         if not self.matrix.has_key((first_token, second_token)):
             self.matrix[(first_token, second_token)] = 0
-        self.matrix[(first_token, second_token)] += value
+        self.matrix[(first_token, second_token)] = value
         if not first_token in self.token_set:
             self.token_set += [first_token]
         if not second_token in self.token_set:
@@ -77,3 +84,15 @@ class WordMatrix:
         array = list(coolset[len(coolset) - k : len(coolset)])
         array.reverse()
         return array
+
+    def normalize(self):
+        for row in self.token_set:
+            collector = 0
+            for column in self.token_set:
+                collector += self.get(row, column)
+                collector += self.get(column, row)
+            for column in self.token_set:
+                val = self.get(row, column)
+                if val <> 0:
+                    self.set(row, column, val / (collector + 0.0))
+                    # todo: this is incorrect as hell

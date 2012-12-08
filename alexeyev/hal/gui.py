@@ -1,5 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
+__author__ = 'Anton M Alexeyev'
+
 from Tkinter import *
 import tkFont
 from converter import *
@@ -57,7 +59,7 @@ rb_cosine.pack()
 rb_freq.pack()
 
 # button construction
-B = Button(root, text ="Go!", command = print_suggestions,
+B = Button(root, text = "Go!", command = print_suggestions,
     font = tkFont.Font(family = "Courier", size = 14))
 B.pack()
 

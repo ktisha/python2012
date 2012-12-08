@@ -6,6 +6,8 @@ from nltk.corpus import stopwords
 from matrix_management import WordMatrix
 import re
 
+#todo: make learning a single method with file provided
+
 window_size = 6
 
 input_text = open("testtext", "r")
@@ -33,9 +35,10 @@ for token in tokens:
     else:
         tokens_filtered += [ token ]
 
-tokens_filtered += ['*'] * (window_size - 1)
+tokens_filtered = ['*'] * (window_size - 1) + tokens_filtered + ['*'] * (window_size - 1)
 
 # stemming
+#todo: add extra filter: frequency must be reasonably high
 #normalized_tokens = [stemmer.stem(token) for token in tokens if token not in stopwords.words('english')]
 normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
 
@@ -50,25 +53,22 @@ while win_start + window_size <= len(normalized_tokens):
     second = 1
     while first < len(window):
         second = first + 1
-        set = []
         while second < len(window):
-            if not (window[first], window[second]) in set:
-                matrix.add(window[first], window[second], 1)
-                set += [(window[first], window[second])]
-            second += 1
+           matrix.add(window[first], window[second], 1)
+           second += 1
         first += 1
     win_start += 1
 
 print "Co-occurence counted"
 print "Keys quantity:", len(matrix.get_tokens())
 
-"""
+
 for key in matrix.get_tokens():
     print key,
     for succ in matrix.get_tokens():
         print matrix.get(key, succ),
     print
-"""
+
 
 print "Done"
 
