@@ -18,7 +18,7 @@ class SMTP:
 		logging.debug('before connect')
 		logging.debug(server_name + ' ' + str(port))
 		self.socket.connect((server_name, port))		
-		logging.info('reply: ' + self.socket.recv(200))
+		logging.info('reply: ' + self.socket.recv(256))
 		logging.debug('connected')
 
 	def getProperSocket(self):
@@ -46,7 +46,7 @@ class SMTP:
 
 		socket.send(cmd + body + '\r\n')
 		logging.debug(cmd + body + ' cmd sent')
-		reply = socket.recv(200)
+		reply = socket.recv(256)
 		logging.info('reply: ' + reply)
 		return reply
 
@@ -68,14 +68,14 @@ class SMTP:
 			raise Exception('AUTH LOGIN unsupported syntax.')
 
 		socket.send(base64.b64encode(username) + '\r\n')
-		username_reply = socket.recv(200)				
+		username_reply = socket.recv(256)				
 		if username_reply[:3] != '334':
 			raise Exception('AUTH LOGIN server response is unrecognizable.')
 		if base64.b64decode(username_reply[4:]) != 'Password:':
 			raise Exception('AUTH LOGIN unsupported syntax.')
 						
 		socket.send(base64.b64encode(password) + '\r\n')
-		password_reply = socket.recv(200)
+		password_reply = socket.recv(256)
 		logging.debug(password_reply)
 		if password_reply[:3] != '235':					
 			raise Exception('Wrong username or password')
