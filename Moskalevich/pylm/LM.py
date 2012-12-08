@@ -18,7 +18,7 @@ def main(args):
         elif args[i] == '-lm':
             outFile   = args[i + 1]
         elif args[i] == '-o':
-            max_order = args[i + 1]
+            max_order = int(args[i + 1])
         elif args[i] == '-gt':
             nums = args[i + 1].split(',')
             gtNmin = map(lambda n: int(n), nums)
@@ -26,6 +26,16 @@ def main(args):
     if max_order <= 0:
         print "Max order must be non-negative"
         exit(1)
+
+    if len(gtNmin) != max_order:
+        print 'Using default gtNmin parameter, cause it does not fit the provided max_order'
+        gtNmin = [1 for i in xrange(0, max_order)]
+
+    print 'Parameters:'
+    print 'corpus:', corpus
+    print 'outFile:', outFile
+    print 'max_order:', max_order
+    print 'gtNmin:', gtNmin
 
     reader   = Reader(corpus)
     ng_maker = NgramMaker(max_order)
