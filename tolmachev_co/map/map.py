@@ -8,7 +8,7 @@ class Map:
     def __init__(self, width, height):
         self.__width = width
         self.__height = height
-        self.__actors_dict = {}
+        self.__actors_dictionary = {}
 
     def draw(self):
         pass
