@@ -10,6 +10,7 @@ def main(args):
     corpus    = '.'
     outFile   = 'lm.txt'
     max_order = 3
+    gtNmin    = [1,1,1]
 
     for i in xrange(0, len(args)):
         if args[i] == '-c':
@@ -18,6 +19,9 @@ def main(args):
             outFile   = args[i + 1]
         elif args[i] == '-o':
             max_order = args[i + 1]
+        elif args[i] == '-gt':
+            nums = args[i + 1].split(',')
+            gtNmin = map(lambda n: int(n), nums)
 
     if max_order <= 0:
         print "Max order must be non-negative"
@@ -29,7 +33,7 @@ def main(args):
     for file in reader:
         ng_maker.parse(Normalizer.normalize(file))
 
-    gt = GoodTuring(ng_maker.storage())
+    gt = GoodTuring(ng_maker.storage(), gtNmin)
     ng_storage = gt.storage()
 
     out_file = open(outFile, 'w')
