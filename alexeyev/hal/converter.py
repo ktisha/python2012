@@ -5,8 +5,9 @@ __author__ = 'Anton M Alexeyev'
 
 from nltk.stem import PorterStemmer
 from hashed_matrix_management import HashedWordMatrix
-import re
 from nltk.corpus import stopwords
+from nltk import pos_tag
+import re
 
 
 window_size = 11
@@ -21,6 +22,10 @@ def train_model(file):
     global stemmer
     global window_size
     global min_freq
+    matrix = HashedWordMatrix()
+
+    print "Loading text..."
+
     input_text = open(file, "r")
     text = ""
 
@@ -29,37 +34,46 @@ def train_model(file):
 
     input_text.close()
 
-    print "Text loaded"
-    print "Learning..."
+    print "Tokenization..."
 
-    # dumb tokenization
     tokens = re.findall(r"[A-Za-z]+", text)
-    print "Tokens set built"#, tokens
+
+    print "POS-tagging..."
+
+    tagged_tokens = pos_tag(tokens)
+
+    print "Stop-words filtering..."
 
     tokens_filtered = []
-    for token in tokens:
-        if token in stopwords.words('english'):
-            tokens_filtered += ["*"]
+    for pair in tagged_tokens:
+        if pair[0] in stopwords.words('english'):
+            tokens_filtered += [("*", pair[1])]
         else:
-            tokens_filtered += [ token ]
+            tokens_filtered += [ pair ]
 
-    tokens_filtered = ['*'] * (window_size - 1) + tokens_filtered + ['*'] * (window_size - 1)
+    tokens_filtered = [('*', "-NONE-")] * (window_size - 1) + tokens_filtered + [('*', "-NONE-")] * (window_size - 1)
 
-    # stemming
-    normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
+    print "Stemming..."
 
-    # filtering out specific words
+    normalized_pairs = [(stemmer.stem(pair[0]), pair[1]) for pair in tokens_filtered]
+
+    print "Frequential filtering..."
+
     dict = {}
-    for token in normalized_tokens:
-        if not dict.has_key(token):
-            dict[token] = 0
-        dict[token] += 1
+    for pair in normalized_pairs:
+        if not dict.has_key(pair[0]):
+            dict[pair[0]] = 0
+        dict[pair[0]] += 1
 
-    for index in range(len(normalized_tokens)):
-        if dict[normalized_tokens[index]] < min_freq:
-            normalized_tokens[index] = '*'
+    normalized_tokens = []
 
-    print "Tokens set filtered and stemmed"#, normalized_tokens
+    for pair in normalized_pairs:
+        if dict[pair[0]] < min_freq or pair[0] == "*":
+            normalized_tokens += ['*' + pair[1]]
+        else:
+            normalized_tokens += [pair[0]]
+
+    print "Learning..."
 
     win_start = 0
     while win_start + window_size <= len(normalized_tokens):
@@ -74,13 +88,12 @@ def train_model(file):
             first += 1
         win_start += 1
 
-    print "Co-occurence counted"
+    print "Normalization..."
 
     matrix.normalize()
 
-    print "Vectors normalized"
-    print "Keys quantity:", len(matrix.get_tokens())
-    print "Done"
+    print "Number of terms:", str(len(matrix.get_tokens())) + "."
+    print "Done."
 
 def get_token_by_word(word):
     global stemmer
