@@ -10,9 +10,6 @@ class Tavern(Actor):
     def accept_visitor(self, visitor):
         visitor.visit_tavern(self)
 
-    def draw(self):
-        pass
-
     def is_time_to_generate_alcoholic(self):
         return self.__steps_number_after_alcoholic_generation == 0
 

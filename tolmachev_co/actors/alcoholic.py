@@ -32,6 +32,3 @@ class Alcoholic (Actor):
     def drop_a_bottle(self):
         self.__has_bottle = False
         return Bottle()
-
-    def draw(self):
-        print 'A',

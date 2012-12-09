@@ -20,6 +20,3 @@ class Beggar (Actor):
 
     def is_in_tavern(self):
         return self.__current_state == BeggarState.AT_THE_TAVERN
-
-    def draw(self):
-        print 'B',
