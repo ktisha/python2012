@@ -5,7 +5,6 @@ from actors.visitors.actor_visitor import ActorVisitor
 import random
 from map.coordinate import Coordinate
 
-
 class ActorMovingVisitor(ActorVisitor):
     class MovingDirection:
         UP = 0
@@ -40,8 +39,9 @@ class ActorMovingVisitor(ActorVisitor):
                 if not self.__map.has_actor_at(new_coord):
                     self.__map.remove(coordinate)
                     self.__map.put(new_coord, alcoholic)
-                    if should_drop_a_bottle():
-                        self.__map.put(coordinate, Bottle())
+                    if should_drop_a_bottle() and alcoholic.has_bottle():
+                        bottle = alcoholic.drop_a_bottle()
+                        self.__map.put(coordinate, bottle)
                 else:
                     actor = self.__map.get(new_coord)
                     if isinstance(actor, Bottle) or isinstance(actor, Pillar) or\

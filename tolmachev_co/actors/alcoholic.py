@@ -1,4 +1,5 @@
 from actors.actor import Actor
+from actors.bottle import Bottle
 
 class AlcoholicState:
     AWAKE = 1
@@ -28,5 +29,6 @@ class Alcoholic (Actor):
     def make_asleep(self):
         self.__current_state = AlcoholicState.SLEEPING
 
-    def draw(self):
-        print 'A',
+    def drop_a_bottle(self):
+        self.__has_bottle = False
+        return Bottle()
