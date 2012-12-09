@@ -2,7 +2,10 @@ from actors.visitors.actor_visitor import ActorVisitor
 
 class ActorDrawingVisitor(ActorVisitor):
     def visit_alcoholic(self, alcoholic):
-        print 'A',
+        if alcoholic.is_sleeping() :
+            print 'S',
+        else:
+            print 'A',
 
     def visit_beggar(self, beggar):
         print 'B',

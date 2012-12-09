@@ -20,3 +20,6 @@ class Policeman (Actor):
 
     def is_walking_with_alcoholic(self):
         return self.__current_state == PolicemanState.WALKING_WITH_ALCOHOLIC
+
+    def start_walking_to_alcoholic(self):
+        self.__current_state = PolicemanState.WALKING_TO_ALCOHOLIC

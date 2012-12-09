@@ -68,7 +68,14 @@ class ActorMovingVisitor(ActorVisitor):
 
 
     def visit_policeman(self, policeman):
-        pass
+        if policeman.is_at_the_station():
+            dict = self.__map.get_lightened_sleeping_alcos()
+            if len(dict) > 0 :
+                policeman.start_walking_to_alcoholic()
+        elif policeman.is_walking_to_alcoholic() :
+
+        elif policeman.is_walking_with_alcoholic():
+            pass
 
 
     def visit_tavern(self, tavern):
@@ -78,6 +85,8 @@ class ActorMovingVisitor(ActorVisitor):
                 alcoholic = tavern.generate_alcoholic()
                 self.__map.put(coordinate, alcoholic)
         tavern.increase_steps_number_after_alcoholic_generation()
+
+
 
 
 
