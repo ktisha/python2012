@@ -3,6 +3,7 @@ from actors.lamp import Lamp
 from actors.pilllar import Pillar
 from actors.policeman import Policeman
 from actors.tavern import Tavern
+from actors.visitors.actor_drawing_visitor import ActorDrawingVisitor
 from actors.visitors.actor_moving_visitor import ActorMovingVisitor
 from coordinate import Coordinate
 
@@ -31,14 +32,15 @@ class Map:
         del self.__actors_dictionary[coordinate]
 
     def draw(self):
+        drawing_visitor = ActorDrawingVisitor()
         for y in xrange(0, self.__height):
             for x in xrange(0, self.__width):
                 coordinate = Coordinate(x, y)
                 if coordinate in self.__actors_dictionary:
                     actor = self.__actors_dictionary[coordinate]
-                    actor.draw()
+                    actor.accept_visitor(drawing_visitor)
                 else:
-                    print ' ',
+                    print '_',
             print
 
     def next_move(self):
