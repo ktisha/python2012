@@ -53,7 +53,7 @@ else:
     visitedWords = [firstWord]
     currentNumber = 0
     currentWord = firstWord
-    while(not searchNewWords(currentWord)):
+    while not searchNewWords(currentWord):
         if len(quequeToVisit) is 0:
             itIsImpossible()
         currentWord = quequeToVisit[0]
