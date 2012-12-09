@@ -88,12 +88,12 @@ class HashedWordMatrix:
             kk1 = self.get(col1, key, col1)
             collector += k0 * k1
             collector += kk0 * kk1
-            length0 += k0 ** 2 + kk0 ** 2
-            length1 += k1 ** 2 + kk1 ** 2
-        length0 **= 0.5
-        length1 **= 0.5
-        print length1
-        return (0.0 + length0 * length1) / (collector + 0.0) #if collector > 0 else 0.000000000001
+            #length0 += k0 ** 2 + kk0 ** 2
+            #length1 += k1 ** 2 + kk1 ** 2
+        #length0 **= 0.5
+        #length1 **= 0.5
+#        return length0 * length1 / collector  #if collector > 0 else 0.000000000001
+        return 1 / collector
 
     def kn_columns(self, target_column, k, dist_func):
         """Gets k nearest columns to target_column by distance function provided by dist_func"""
