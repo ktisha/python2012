@@ -13,10 +13,11 @@ class ActorMovingVisitor(ActorVisitor):
         DOWN = 2
         LEFT = 3
 
-    def __init__(self, map):
+    def __init__(self, map, actor_coordinate):
         self.__map = map
+        self.__actor_coordinate = actor_coordinate
 
-    def visit_alcoholic(self, alcoholic, coordinate):
+    def visit_alcoholic(self, alcoholic):
         def try_make_step(coordinate):
             direction = random.randint(0, 3)
             if direction == ActorMovingVisitor.MovingDirection.LEFT:
@@ -28,31 +29,32 @@ class ActorMovingVisitor(ActorVisitor):
             else:
                 return Coordinate(coordinate.get_x(), coordinate.get_y() + 1)
 
+        coordinate = self.__actor_coordinate
         if alcoholic.is_awake():
             new_coord = try_make_step(coordinate)
             if self.__map.is_in_bounds(new_coord):
-                actor = self.__map[new_coord]
+                actor = self.__map.get(new_coord)
                 if not actor:
-                    del self.__map[coordinate]
-                    self.__map[new_coord] = alcoholic
+                    self.__map.remove(coordinate)
+                    self.__map.put(new_coord, alcoholic)
                 elif isinstance(actor, Bottle) or isinstance(actor, Pillar) or\
                      (isinstance(actor, Alcoholic) and actor.is_sleeping()):
                     alcoholic.make_asleep()
                 else:
                     pass
 
-    def visit_beggar(self, beggar, coordinate):
+    def visit_beggar(self, beggar):
         pass
 
-    def visit_pillar(self, pillar, coordinate):
+    def visit_pillar(self, pillar):
         pass
 
-    def visit_lamp(self, lamp, coordinate):
+    def visit_lamp(self, lamp):
         pass
 
-    def visit_bottle(self, bottle, coordinate):
+    def visit_bottle(self, bottle):
         pass
 
-    def visit_policeman(self, policeman, coordinate):
+    def visit_policeman(self, policeman):
         pass
 
