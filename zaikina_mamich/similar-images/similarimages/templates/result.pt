@@ -14,7 +14,7 @@
     </a>
     <table class="main-colors">
         <span tal:repeat="color image['main_colors_in_html_format']">
-            <td style="background-color: ${color}">&nbsp</td>
+            <td style="background-color: ${color}">&nbsp;</td>
         </span>
     </table>
   </div>
@@ -31,7 +31,7 @@
       </a>
       <table class="main-colors">
         <span tal:repeat="color img[0]['main_colors_in_html_format']">
-            <td style="background-color: ${color}">&nbsp</td>
+            <td style="background-color: ${color}">&nbsp;</td>
         </span>
       </table>
       <p>MainColor distance: ${img[1]}</p>

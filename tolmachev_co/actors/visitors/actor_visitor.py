@@ -16,3 +16,6 @@ class ActorVisitor:
 
     def visit_policeman(self, policeman):
         raise NotImplementedError("Abstract method is called")
+
+    def visit_tavern(self, tavern):
+        raise NotImplementedError("Abstract method is called")
