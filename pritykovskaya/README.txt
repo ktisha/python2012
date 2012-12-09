@@ -30,4 +30,5 @@ normalized.py, indexer.py, search_runner.py
    pip install -r requirements.txt
 4) установить perl библиотеки с помощью команды cpan LWP
 5) поднять redis-server командой ./redis-server
-6) запустить функцию setup из модуля test.py
+6) запустить модуль indexer.py 
+   python indexer.py
