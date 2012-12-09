@@ -107,7 +107,6 @@ class HashedWordMatrix:
 
     def kn_cooccurences(self, target_column, k):
         """Gets k top columns having max cooccurence with target_column"""
-        n = len(self.get_tokens())
         coolset = sortedset()
         for word in self.get_tokens():
             if word <> "*":

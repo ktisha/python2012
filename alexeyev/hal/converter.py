@@ -8,113 +8,117 @@ from hashed_matrix_management import HashedWordMatrix
 import re
 from nltk.corpus import stopwords
 
-#todo: make learning a single method with file provided
 
 window_size = 11
-
-input_text = open("test.txt", "r")
-text = ""
-
-for line in input_text:
-    text += line.lower() + " "
-
-input_text.close()
-
-print "Text loaded"
-print "Learning..."
+min_freq = 11
+matrix = HashedWordMatrix()
 
 # i chose the one everybody knows
 stemmer = PorterStemmer()
 
-# dumb tokenization
-tokens = re.findall(r"[A-Za-z]+", text)
-print "Tokens set built :", tokens
+def train_model(file):
+    global matrix
+    global stemmer
+    global window_size
+    global min_freq
+    input_text = open(file, "r")
+    text = ""
 
-tokens_filtered = []
+    for line in input_text:
+        text += line.lower() + " "
 
-for token in tokens:
-    if token in stopwords.words('english'):
-        tokens_filtered += ["*"]
-    else:
-        tokens_filtered += [ token ]
+    input_text.close()
 
-tokens_filtered = ['*'] * (window_size - 1) + tokens_filtered + ['*'] * (window_size - 1)
+    print "Text loaded"
+    print "Learning..."
 
-# stemming
-normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
+    # dumb tokenization
+    tokens = re.findall(r"[A-Za-z]+", text)
+    print "Tokens set built"#, tokens
 
-# filtering out specific words
-min_freq = 10
+    tokens_filtered = []
+    for token in tokens:
+        if token in stopwords.words('english'):
+            tokens_filtered += ["*"]
+        else:
+            tokens_filtered += [ token ]
 
-dict = {}
-for token in normalized_tokens:
-    if not dict.has_key(token):
-        dict[token] = 0
-    dict[token] += 1
+    tokens_filtered = ['*'] * (window_size - 1) + tokens_filtered + ['*'] * (window_size - 1)
 
-for index in range(len(normalized_tokens)):
-    if dict[normalized_tokens[index]] < min_freq:
-        normalized_tokens[index] = '*'
+    # stemming
+    normalized_tokens = [stemmer.stem(token) for token in tokens_filtered]
 
-print "Tokens set filtered and stemmed :", normalized_tokens
+    # filtering out specific words
+    dict = {}
+    for token in normalized_tokens:
+        if not dict.has_key(token):
+            dict[token] = 0
+        dict[token] += 1
 
-matrix = HashedWordMatrix()
+    for index in range(len(normalized_tokens)):
+        if dict[normalized_tokens[index]] < min_freq:
+            normalized_tokens[index] = '*'
 
-win_start = 0
-while win_start + window_size <= len(normalized_tokens):
-    window = normalized_tokens[win_start:win_start + window_size]
-    first = 0
-    second = 1
-    while first < len(window):
-        second = first + 1
-        while second < len(window):
-           matrix.add(window[first], window[second], 1)
-           second += 1
-        first += 1
-    win_start += 1
+    print "Tokens set filtered and stemmed"#, normalized_tokens
 
-print "Co-occurence counted"
+    win_start = 0
+    while win_start + window_size <= len(normalized_tokens):
+        window = normalized_tokens[win_start:win_start + window_size]
+        first = 0
+        second = 1
+        while first < len(window):
+            second = first + 1
+            while second < len(window):
+               matrix.add(window[first], window[second], 1)
+               second += 1
+            first += 1
+        win_start += 1
 
-matrix.normalize()
+    print "Co-occurence counted"
 
-print "Vectors normalized"
+    matrix.normalize()
 
-print "Keys quantity:", len(matrix.get_tokens())
-
-"""
-for key in matrix.get_tokens():
-    print key,
-    for succ in matrix.get_tokens():
-        print matrix.get(key, succ),
-    print
-"""
-
-print "Done"
+    print "Vectors normalized"
+    print "Keys quantity:", len(matrix.get_tokens())
+    print "Done"
 
 def get_token_by_word(word):
+    global stemmer
     word = re.findall(r"[A-Za-z]+", word)[0]
     return stemmer.stem(word.lower())
 
 def get_euclidean_vector_by_token(n, token):
-    print "Incoming token:", token
+    global matrix
+    print "New token:", token
     if token in matrix.get_tokens():
         return matrix.kn_columns(token, n, matrix.dist_cols_euclidean)
     raise KeyError
 
-def get_cosine_vector_by_token(n, token):
-    print "Incoming token:", token
+def get_cosine_vector_by_token( n, token):
+    global matrix
+    print "New token:", token
     if token in matrix.get_tokens():
         return matrix.kn_columns(token, n, matrix.dist_cols_inverted_cosine)
     raise KeyError
 
 def get_frequential_vector_by_token(n, token):
-    print "Incoming token:", token
+    global matrix
+    print "New token:", token
     if token in matrix.get_tokens():
         return matrix.kn_cooccurences(token, n)
     raise KeyError
 
 def get_manhattan_vector_by_token(n, token):
-    print "Incoming token:", token
+    global matrix
+    print "New token:", token
     if token in matrix.get_tokens():
         return matrix.kn_columns(token, n, matrix.dist_cols_manhattan)
     raise KeyError
+
+def test_print():
+    global matrix
+    for key in matrix.get_tokens():
+        print key,
+        for succ in matrix.get_tokens():
+            print matrix.get(key, succ),
+        print
