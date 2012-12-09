@@ -4,7 +4,7 @@ import threading
 class Model:
     def __init__(self):
         self.presence = dict()
-        self.mess = "a"
+        self.mess = ""
 
     def connect(self, user, password, server):
         self.user = user
