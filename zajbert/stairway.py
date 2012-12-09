@@ -34,7 +34,7 @@ def searchNewWords (word):
     return False
 
 def itIsImpossible():
-    flagImpossible = True
+    global flagImpossible = True
     with codecs.open('answer.txt', 'w', 'utf-8') as answerFile:
         answerFile.write('''it's imposible!!''')
 
