@@ -6,17 +6,12 @@ class AlcoholicState:
     CAUGHT_BY_POLICEMAN = 3
 
 class Alcoholic (Actor):
-    NAME = "Alcoholic"
-
     def __init__(self):
         self.__current_state = AlcoholicState.AWAKE
         self.__has_bottle = True
 
     def accept_visitor(self, visitor):
         visitor.visit_alcoholic(self)
-
-    def get_name(self):
-        return NAME
 
     def is_awake(self):
         return self.__current_state == AlcoholicState.AWAKE
@@ -29,3 +24,6 @@ class Alcoholic (Actor):
 
     def has_bottle(self):
         return self.__has_bottle
+
+    def make_asleep(self):
+        self.__current_state = AlcoholicState.SLEEPING
