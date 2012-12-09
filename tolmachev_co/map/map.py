@@ -26,4 +26,11 @@ class Map:
     def next_move(self):
         pass
 
+    def is_in_bounds(self, coordinate):
+        if coordinate.get_x() >= 0 and coordinate.get_x() < self.__width and\
+           coordinate.get_y() >= 0 and coordinate.get_y() < self.__height:
+            return True
+        else:
+            return False
+
 

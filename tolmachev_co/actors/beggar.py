@@ -6,11 +6,16 @@ class BeggarState:
     AT_THE_TAVERN = 3
 
 class Beggar (Actor):
+    NAME = "Beggar"
+
     def __init__(self):
         self.__current_state = BeggarState.SEARCHING_A_BOTTLE
 
     def accept_visitor(self, visitor):
         visitor.visit_beggar(self)
+
+    def get_name(self):
+        return NAME
 
     def is_searching_a_bottle(self):
         return self.__current_state == BeggarState.SEARCHING_A_BOTTLE

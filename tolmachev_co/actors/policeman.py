@@ -6,11 +6,16 @@ class PolicemanState:
     WALKING_WITH_ALCOHOLIC = 3
 
 class Policeman (Actor):
+    NAME = "Policeman"
+
     def __init__(self):
         self.__current_state = PolicemanState.AT_THE_STATION
 
     def accept_visitor(self, visitor):
         visitor.visit_policeman(self)
+
+    def get_name(self):
+        return NAME
 
     def is_at_the_station(self):
         return self.__current_state == PolicemanState.AT_THE_STATION
