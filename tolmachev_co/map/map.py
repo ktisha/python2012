@@ -3,20 +3,12 @@ from actors.lamp import Lamp
 from actors.pilllar import Pillar
 from actors.policeman import Policeman
 from actors.visitors.actor_moving_visitor import ActorMovingVisitor
-from map.coordinate import Coordinate
+from coordinate import Coordinate
 
 class Map:
-    DEFAULT_WIDTH = 15
-    DEFAULT_HEIGHT = 15
-
     __actors_dictionary = {}
-    __width = 0
-    __height = 0
 
-    def __init__(self):
-        self.__init__(self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT)
-
-    def __init__(self, width, height):
+    def __init__(self, width = 15, height = 15):
         self.__width = width
         self.__height = height
         self.__actors_dictionary[Coordinate(7, 7)] = Pillar()
@@ -45,7 +37,9 @@ class Map:
             print
 
     def next_move(self):
-        for coordinate, actor in self.__actors_dictionary.keys(), self.__actors_dictionary.values():
+        coordinates = self.__actors_dictionary.keys()
+        actors = self.__actors_dictionary.values()
+        for coordinate, actor in zip(coordinates, actors):
             moving_visitor = ActorMovingVisitor(self, coordinate)
             actor.accept_visitor(moving_visitor)
 

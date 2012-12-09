@@ -12,3 +12,5 @@ class Coordinate:
     def __hash__(self):
         return (self.__x, self.__y).__hash__()
 
+    
+
