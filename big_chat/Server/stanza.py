@@ -1,9 +1,9 @@
-class Error(Exception): #todo other name
+class Error(Exception):
     pass
 
 
 class Stanza(object):
-    def __init__(self, name=None, attr=None, text=None, chidren=None):
+    def __init__(self, name=None, attr=None, text=None, children=None):
         super(Stanza, self).__init__()
         self.__is_closed_ = False
         self.__name_ = name
@@ -15,8 +15,8 @@ class Stanza(object):
             self.__text_ = text
         else:
             self.__text_ = ""
-        if chidren:
-            self.__children_ = chidren
+        if children:
+            self.__children_ = children
         else:   self.__children_ = []
 
 
@@ -28,6 +28,7 @@ class Stanza(object):
 
     def get_attrs(self):
         return self.__attr_
+
     def get_children(self):
         return self.__children_
 
@@ -69,12 +70,10 @@ class Stanza(object):
         res.append(">")
         if self.__text_:
             res.append(self.__text_)
-           # res.append("\n")
+            # res.append("\n")
         for child in self.__children_:
             res.append(child.to_xml())
         res.append("</")
         res.append(self.__name_)
         res.append(">")
         return "".join(res)
-
-

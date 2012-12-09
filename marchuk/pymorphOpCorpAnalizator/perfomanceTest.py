@@ -1,24 +1,23 @@
 __author__ = 'amarch'
 # -*- coding: utf-8 -*-
-from openCorporaInitiation import *
+
 from opcorpTextProcessing import *
 from pymorphyWrapper import *
 import time
 
+# Метод, меряющий точность реализованных анализаторов.
+# Используются тексты (формат XML) со снятой омонимией, доступные на сайте Открытого корпуса.
+# На 10 декабря 2012 года тексты содержали примерно предложений: 2724, токенов: 14005, слов: 7520.
+# Итоговая оценка рассчитывается как для вероятностного алгоритма: если метод угадывает форму слова и его характеристики,
+# то к оценке добавляется 1/len(vlist), где vlist - список возможных вариантов, выданных анализатором. По сути это
+# вероятность угадать правильный ответ.
+
 def perfomanceTest(sentnum):
-
     print 'Perfomance test start.'
-
     start_time = time.time()
-
-    sentences =  getSentences_fromXML("/home/amarch/Documents/CSCenter/Python/corpus/annot.opcorpora.no_ambig.xml",sentnum)
+    sentences =  getSentencesFromXML("/home/amarch/Documents/CSCenter/Python/corpus/annot.opcorpora.no_ambig.xml", sentnum)
     morph = POCMorph('/home/amarch/Downloads/ru.sqlite-json','/home/amarch/Documents/CSCenter/Python')
-
     finish_sent_time = time.time()
-
-    #for s in sentences:
-    #    print s
-
     pymorphy_points = 0
     pocmorph_points = 0
     opc_points = 0
@@ -26,7 +25,6 @@ def perfomanceTest(sentnum):
     poctime = 0
     opctime = 0
     toknumber = 0
-
 
     for sent in sentences:
         for tokens in sent[1:]:
@@ -75,7 +73,6 @@ def perfomanceTest(sentnum):
                                 opc_points += 1.0/len(opc_list)
                 opctime += time.time()
 
-
     print 'Pymorphy score:  ', pymorphy_points, ' time ',  pytime
     print 'POCMorph score:  ', pocmorph_points, ' time ', poctime
     print 'OpCorp score:  ', opc_points, ' time ', opctime
@@ -85,5 +82,7 @@ def perfomanceTest(sentnum):
     print 'Total time: ', time.time() - start_time
 
 
+# Пример использования:
 if __name__ == "__main__":
-    perfomanceTest(50)
+    # Померить точность работы и время на первых 10 предложениях
+    perfomanceTest(10)
