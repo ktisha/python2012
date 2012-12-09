@@ -26,8 +26,8 @@ class Map:
         del self.__actors_dictionary[coordinate]
 
     def draw(self):
-        for x in xrange(0, self.__width):
-            for y in xrange(0, self.__height):
+        for y in xrange(0, self.__height):
+            for x in xrange(0, self.__width):
                 coordinate = Coordinate(x, y)
                 if coordinate in self.__actors_dictionary:
                     actor = self.__actors_dictionary[coordinate]

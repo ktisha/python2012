@@ -58,3 +58,14 @@ class ActorMovingVisitor(ActorVisitor):
     def visit_policeman(self, policeman):
         pass
 
+    def visit_tavern(self, tavern):
+        if tavern.is_time_to_generate_alcoholic():
+            coordinate = Coordinate(0, 9)
+            if not self.__map.get(coordinate):
+                alcoholic = tavern.generate_alcoholic()
+                self.__map.put(coordinate, alcoholic)
+        else:
+            tavern.increase_steps_number_after_alcoholic_generation()
+
+
+
