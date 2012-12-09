@@ -13,8 +13,14 @@ class Alcoholic (Actor):
     def accept_visitor(self, visitor):
         visitor.visit_alcoholic(self)
 
-    def get_current_state(self):
-        return self.__current_state
+    def is_awake(self):
+        return self.__current_state == AlcoholicState.IS_AWAKE
+
+    def is_sleeping(self):
+        return self.__current_state == AlcoholicState.IS_SLEEPING
+
+    def is_caught_by_policeman(self):
+        return self.__current_state == AlcoholicState.IS_CAUGHT_BY_POLICEMAN
 
     def has_bottle(self):
         return self.__has_bottle
