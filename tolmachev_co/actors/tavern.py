@@ -14,11 +14,13 @@ class Tavern(Actor):
         pass
 
     def is_time_to_generate_alcoholic(self):
-        return self.__steps_number_after_alcoholic_generation == Tavern.ALCOHOLIC_GENERATION_FREQUENCY
+        return self.__steps_number_after_alcoholic_generation == 0
 
     def increase_steps_number_after_alcoholic_generation(self):
-        self.__steps_number_after_alcoholic_generation += 1
+        if self.__steps_number_after_alcoholic_generation < Tavern.ALCOHOLIC_GENERATION_FREQUENCY:
+            self.__steps_number_after_alcoholic_generation += 1
+        else:
+            self.__steps_number_after_alcoholic_generation = 0
 
     def generate_alcoholic(self):
-        self.__steps_number_after_alcoholic_generation = 0
         return Alcoholic()

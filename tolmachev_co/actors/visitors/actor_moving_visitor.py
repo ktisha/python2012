@@ -64,8 +64,7 @@ class ActorMovingVisitor(ActorVisitor):
             if not self.__map.get(coordinate):
                 alcoholic = tavern.generate_alcoholic()
                 self.__map.put(coordinate, alcoholic)
-        else:
-            tavern.increase_steps_number_after_alcoholic_generation()
+        tavern.increase_steps_number_after_alcoholic_generation()
 
 
 
