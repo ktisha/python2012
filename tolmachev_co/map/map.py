@@ -1,3 +1,9 @@
+from actors.beggar import Beggar
+from actors.lamp import Lamp
+from actors.pilllar import Pillar
+from actors.policeman import Policeman
+from map.coordinate import Coordinate
+
 class Map:
     DEFAULT_WIDTH = 15
     DEFAULT_HEIGHT = 15
@@ -9,6 +15,10 @@ class Map:
         self.__width = width
         self.__height = height
         self.__actors_dictionary = {}
+        self.__actors_dictionary[Coordinate(7, 7)] = Pillar()
+        self.__actors_dictionary[Coordinate(3, 10)] = Lamp()
+        self.__actors_dictionary[Coordinate(3, 15)] = Policeman()
+        self.__actors_dictionary[Coordinate(15, 4)] = Beggar()
 
     def draw(self):
         pass
