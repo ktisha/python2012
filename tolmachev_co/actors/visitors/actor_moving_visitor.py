@@ -29,39 +29,52 @@ class ActorMovingVisitor(ActorVisitor):
             else:
                 return Coordinate(coordinate.get_x(), coordinate.get_y() + 1)
 
+        def should_drop_a_bottle():
+            random_number = direction = random.randint(1, 30)
+            return random_number == 30
+
         coordinate = self.__actor_coordinate
         if alcoholic.is_awake():
             new_coord = try_make_step(coordinate)
             if self.__map.is_in_bounds(new_coord):
-                actor = self.__map.get(new_coord)
-                if not actor:
+                if not self.__map.has_actor_at(new_coord):
                     self.__map.remove(coordinate)
                     self.__map.put(new_coord, alcoholic)
-                elif isinstance(actor, Bottle) or isinstance(actor, Pillar) or\
-                     (isinstance(actor, Alcoholic) and actor.is_sleeping()):
-                    alcoholic.make_asleep()
+                    if should_drop_a_bottle():
+                        self.__map.put(coordinate, Bottle())
                 else:
-                    pass
+                    actor = self.__map.get(new_coord)
+                    if isinstance(actor, Bottle) or isinstance(actor, Pillar) or\
+                       (isinstance(actor, Alcoholic) and actor.is_sleeping()):
+                        alcoholic.make_asleep()
+                    else:
+                        pass
+
 
     def visit_beggar(self, beggar):
         pass
 
+
     def visit_pillar(self, pillar):
         pass
+
 
     def visit_lamp(self, lamp):
         pass
 
+
     def visit_bottle(self, bottle):
         pass
+
 
     def visit_policeman(self, policeman):
         pass
 
+
     def visit_tavern(self, tavern):
         if tavern.is_time_to_generate_alcoholic():
             coordinate = Coordinate(0, 9)
-            if not self.__map.get(coordinate):
+            if not self.__map.has_actor_at(coordinate):
                 alcoholic = tavern.generate_alcoholic()
                 self.__map.put(coordinate, alcoholic)
         tavern.increase_steps_number_after_alcoholic_generation()

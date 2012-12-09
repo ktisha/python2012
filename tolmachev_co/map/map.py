@@ -2,6 +2,7 @@ from actors.beggar import Beggar
 from actors.lamp import Lamp
 from actors.pilllar import Pillar
 from actors.policeman import Policeman
+from actors.tavern import Tavern
 from actors.visitors.actor_moving_visitor import ActorMovingVisitor
 from coordinate import Coordinate
 
@@ -15,6 +16,10 @@ class Map:
         self.__actors_dictionary[Coordinate(3, 10)] = Lamp()
         self.__actors_dictionary[Coordinate(3, 15)] = Policeman()
         self.__actors_dictionary[Coordinate(15, 4)] = Beggar()
+        self.__actors_dictionary[Coordinate(-1, 9)] = Tavern()
+
+    def has_actor_at(self, coordinate):
+        return coordinate in self.__actors_dictionary
 
     def get(self, coordinate):
         return self.__actors_dictionary[coordinate]
