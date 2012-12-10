@@ -34,14 +34,17 @@ def searchNewWords (word):
 
 def itIsImpossible():
     with codecs.open('answer.txt', 'w', 'utf-8') as answerFile:
-        answerFile.write('''it's imposible!!''')
+        answerFile.write('''it's impossible!!''')
 
 with codecs.open('input.txt', 'r', 'utf-8') as f:
    firstWord = f.readline().replace('\n', '')
    lastWord = f.readline().replace('\n', '')
 
+if firstWord == lastWord:
+    with codecs.open('answer.txt', 'w', 'utf-8') as answerFile:
+        answerFile.write(firstWord)
 
-if len(firstWord) != len(lastWord):
+elif len(firstWord) != len(lastWord):
     itIsImpossible()
 else:
     flagImpossible = False
