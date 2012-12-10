@@ -1,3 +1,5 @@
+#!/usr/bin/python3mu
+
 __author__ = 'sergio'
 
 import sys
