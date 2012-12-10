@@ -110,7 +110,7 @@ def result_view(request):
         img_distance_pairs.sort(key=lambda (image, distance, deviation): distance)
         result = []
         for pair in img_distance_pairs:
-            if not ImgStatisticCounter.are_similar(ref, pair[0]):
+            if not ImgStatisticCounter.are_similar(ref, pair[0], pair[1]):
                 break
             result.append(pair)
         return result

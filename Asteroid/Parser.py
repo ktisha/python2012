@@ -27,14 +27,11 @@ class Parser:
 
             if name_prefix:
                 name = line[name_prefix.end(): line.find(info_postfix, name_prefix.end())]
-#                print info_id + "::" + name
                 self.info[info_id] = name
 
                 return
 
     def printParser(self):
-#        for k, v in self.info.iteritems():
-#            print k + " " * (20 - len(k)) + "\"" + v + "\""
         print(self.info)
 
     def fillDict(self):
@@ -43,8 +40,10 @@ class Parser:
         self.parse("CCD temperature =", "CCD_TEMP", "K")
         self.parse("filter \"", "FILTER", "\"")
         self.parse("Observation target:", "OBJECT", "\n")
+
         if self.info.get("OBJECT") is None:
             return
+
         self.info["DESIGNATED"] = re.sub(r'\W', '', self.info.get("OBJECT"))
         self.parse("Mid-exposure time:", "EXPTIME", "UTC")
         self.parse("Latitude:", "LAT", "\n")
@@ -56,32 +55,28 @@ class Parser:
 
     def process(self):
         self.fillDict()
-#        self.printParser()
         if self.info.get("OBJECT") is not None:
             self.add_to_database()
 
     def add_to_database(self):
-        conn = psycopg2.connect("dbname='asteroidb' user='postgres' host='localhost' password='vault13'")
+        conn = psycopg2.connect("dbname='asteroidb' user='postgres' host='localhost' password='superpass'")
         cur = conn.cursor()
 
         d = self.info
 
-        #add new asteroid to DB
+        # adding new asteroid to DB
         ast_name = d.get("OBJECT")
         cur.execute("SELECT id  FROM proclogs_asteroidobs WHERE object_name = '" + ast_name +"';")
         k = cur.fetchone()
         if k is None:
             cur.execute("INSERT INTO proclogs_asteroidobs (object_name, designated_name) VALUES (%s, %s)",
                 (ast_name, re.sub(r'\W', '', ast_name)))
-#            print "DATABASE:: " + ast_name + " has been added to asteroiDB!"
+
             cur.execute("SELECT id  FROM proclogs_asteroidobs WHERE object_name = '" + ast_name +"';")
             k = cur.fetchone()
             conn.commit()
-        else:
-            pass
-#            print "DATABASE:: Asteroid "+ ast_name + " at asteroiDB exists."
 
-        #add new proclog to DB
+        # adding new proclog to DB
         image_name = d.get("IMG_NAME")
         cur.execute("SELECT id  FROM proclogs_proclog WHERE pclg_image_name = '" + image_name +"';")
         l = cur.fetchone()
@@ -94,27 +89,22 @@ class Parser:
                   d.get("FILTER"), d.get("EXPTIME"), d.get("LAT"),
                   d.get("LONG"), d.get("ALT"), d.get("CAT_ASTR"),
                   d.get("IMG_CENTER_RA"), d.get("IMG_CENTER_DEC")))
-#            print("DATABASE:: Proclog with name \"" + image_name + "\" has been added.")
-        else:
-            pass
-#            print("DATABASE:: Proclog with name \"" + image_name + "\" exists.")
 
         conn.commit()
 
-        #close connections
+        # closing connections
         cur.close()
         conn.close()
 
 
-def isProclog(str):
-    if str.endswith(".proclog"):
+def isProclog(line):
+    if line.endswith(".proclog"):
         return True
     else:
         return False
 
 
 def main():
-
     for root, dirs, files in os.walk("."):
         for name in files:
             if isProclog(name):

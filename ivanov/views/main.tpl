@@ -5,8 +5,24 @@
 			<table class="block" width=600px>
 				<tr>
 					<td>						
-						<h2>Challanges</h2>
-						
+						<h2>Challenges</h2>
+
+						%for challenge in challenges_requests_from_friends:
+                            <table>
+                            <tr height=40px class="cell">
+                                <td width=400px>
+                                    <span class="cell_header">{{challenge['achievement']['name']}}</span><br/>
+                                    <span class="cell_caption">{{challenge['achievement']['description']}}</span>
+                                    <span class="cell_caption">(<a href="/friends?friend={{challenge['from']}}">{{challenge['from']}}</a>)</span>
+                                </td>
+                                <td width=130px align=center>
+                                    <a href="/add_challenge_from_friend?challenge={{challenge['achievement']['_id']}}"><div class="green_button">Accept</div></a>
+                                </td>
+                                <td width=50px align=center><a href="/reject_challenge_request?challenge={{challenge['achievement']['_id']}}"><img src="/static/cancel.png"/></td>
+                            </tr>
+                            </table>
+                        %end
+
 						%for challenge in challenges:
 							<table>
 							<tr height=40px class="cell">
@@ -39,7 +55,23 @@
 				<tr>
 					<td>						
 						<h2>Achievements</h2>
-						
+
+						%for achievement in achievements_requests_from_friends:
+                            <table>
+                            <tr height=40px class="cell">
+                                <td width=400px>
+                                    <span class="cell_header">{{achievement['achievement']['name']}}</span><br/>
+                                    <span class="cell_caption">{{achievement['achievement']['description']}}</span>
+                                    <span class="cell_caption">(<a href="/friends?friend={{achievement['from']}}">{{achievement['from']}}</a>)</span>
+                                </td>
+                                <td width=130px align=center>
+                                    <a href="/unlock_achievement_from_friend?achievement={{achievement['achievement']['_id']}}"><div class="green_button">Unlock!</div></a>
+                                </td>
+                                <td width=50px align=center><a href="/reject_achievement_request?achievement={{achievement['achievement']['_id']}}"><img src="/static/cancel.png"/></td>
+                            </tr>
+                            </table>
+                        %end
+
 						%for achievement in achievements:
 							<table>
 							<tr height=40px class="cell">

@@ -1,4 +1,5 @@
 from bottle import run, static_file, view, template, post, request, get, redirect, response, debug
+import bson
 import pymongo
 import cgi
 
@@ -16,17 +17,37 @@ def site_index():
 @get('/signup')
 def present_signup():
     return template("signup",
-                    dict(username="", password="",
-                         password_error="",
-                         username_value="",
-                         username_error=""))
+        dict(username="", password="",
+            password_error="",
+            username_value="",
+            username_error=""))
 
 
 @get('/login')
 def present_login():
     return template("login",
-                    dict(username="", username_value="", password="",
-                         login_error=""))
+        dict(username="", username_value="", password="",
+            login_error=""))
+
+
+@get("/achievement_unlocked_badge")
+def achievement_unlocked_badge():
+    # check for a cookie, if present, then extract value
+    username = login_check()
+    if username is None:
+        print "main: can't identify user...redirecting to signup"
+        redirect("/signup")
+    connection = pymongo.Connection(connection_string, safe=True)
+
+    try:
+        achievement_id = bson.objectid.ObjectId(request.query['achievement'])
+        achievement_value = achievement.find_achievement_by_id(connection, achievement_id)
+        return template("achievement_unlocked_badge",
+            dict(username=username, achievement=achievement_value))
+    except TypeError, bson.errors.InvalidId:
+        redirect("/main")
+
+
 
 
 @get('/new_achievement')
@@ -36,9 +57,13 @@ def new_achievement():
     if username is None:
         print "main: can't identify user...redirecting to signup"
         redirect("/signup")
+    try:
+        friend = request.query['friend']
+    except KeyError:
+        friend = ""
     return template("new_achievement",
-                    dict(name="", description="", tags="", username=username,
-                         name_error=""))
+        dict(name="", description="", tags="", username=username,
+            name_error="", friend=friend))
 
 
 @get('/add_friend')
@@ -49,7 +74,7 @@ def add_friend():
         print "main: can't identify user...redirecting to signup"
         redirect("/signup")
     return template("add_friend",
-                    dict(username=username, name_error=""))
+        dict(username=username, username_error=""))
 
 
 @post('/login')
@@ -74,8 +99,8 @@ def process_login():
     else:
         # not a valid login
         return template("login",
-                        dict(username_value=cgi.escape(username), password="", username="",
-                             login_error="Invalid Login"))
+            dict(username_value=cgi.escape(username), password="", username="",
+                login_error="Invalid Login"))
 
 
 @get('/internal_error')
@@ -171,18 +196,73 @@ def main():
     for challenge_id in challenges_ids:
         challenges.append(achievement.find_achievement_by_id(connection, challenge_id))
 
+    challenges_requests_ids = me['challenges_requests_from_friends']
+    challenges_requests = []
+    for challenge_id in challenges_requests_ids:
+        challenge = {"achievement": achievement.find_achievement_by_id(connection, challenge_id['achievement']),
+                     "from": challenge_id['from']}
+        challenges_requests.append(challenge)
+
     achievements_ids = me['achievements']
+    achievements = []
+    for achievement_id in achievements_ids:
+        achievements.append(achievement.find_achievement_by_id(connection, achievement_id))
+
+    achievements_requests_ids = me['achievements_requests_from_friends']
+    achievements_requests = []
+    for achievement_id in achievements_requests_ids:
+        achievement_id = {"achievement": achievement.find_achievement_by_id(connection, achievement_id['achievement']),
+                          "from": achievement_id['from']}
+        achievements_requests.append(achievement_id)
+
+    return template("main",
+        {'username': username,
+         'friends': friends,
+         'friends_requests': friends_requests,
+         'challenges': challenges,
+         'challenges_requests_from_friends': challenges_requests,
+         'achievements': achievements,
+         'achievements_requests_from_friends': achievements_requests
+        })
+
+
+@get("/friends")
+def main():
+    # check for a cookie, if present, then extract value
+    username = login_check()
+    if username is None:
+        print "main: can't identify user...redirecting to signup"
+        redirect("/login")
+
+    connection = pymongo.Connection(connection_string, safe=True)
+    friend_name = None
+    try:
+        friend_name = request.query['friend']
+    except KeyError:
+        redirect("/main")
+
+    friend = user.get_user(connection, friend_name)
+    friends = friend['friends']
+    challenges_ids = friend['challenges']
+    challenges = []
+    for challenge_id in challenges_ids:
+        challenges.append(achievement.find_achievement_by_id(connection, challenge_id))
+
+    achievements_ids = friend['achievements']
     achievements = []
     for achievement_id in achievements_ids:
         challenges.append(achievement.find_achievement_by_id(connection, achievement_id))
 
-    return template("main",
-                    {'username': username,
-                     'friends': friends,
-                     'friends_requests': friends_requests,
-                     'challenges': challenges,
-                     'achievements': achievements,
-                    })
+    me = user.get_user(connection, username)
+
+    return template("friend",
+        {'username': username,
+         'friend': friend_name,
+         'isFriend': friend_name in me['friends'],
+         'friends': friends,
+         'challenges': challenges,
+         'achievements': achievements,
+        })
 
 
 @post('/new_achievement')
@@ -192,23 +272,16 @@ def new_achievement():
     name = request.forms.get("name")
     description = request.forms.get("description")
     tags = request.forms.get("tags")
-
+    username = request.forms.get("friend")
     my_username = login_check()
-    try:
-        username = request.query['to_user']
-    except KeyError:
-        username = my_username
 
     # set these up in case we have an error case
     errors = {'name': cgi.escape(name)}
     if achievement.validate_new_achievement(name, errors):
         id = achievement.new_achievement(connection, name, description, tags)
-        if username is my_username:
-            print "to me"
-            print id
+        if len(username) is 0:
             achievement.add_challenge_to_me(connection, my_username, id)
         else:
-            print "to friend"
             achievement.add_challenge_to_friend(connection, username, my_username, id)
         redirect("/main")
     else:
@@ -228,10 +301,16 @@ def search():
         query = request.query['q']
     except KeyError:
         query = ""
+
+    try:
+        friend = request.query['friend']
+    except KeyError:
+        friend = ""
+
     connection = pymongo.Connection(connection_string, safe=True)
     achievements = achievement.find_achievements(connection, query)
 
-    return template("search_results", q=query, username=username, achievements=achievements)
+    return template("search_results", friend=friend, q=query, username=username, achievements=achievements)
 
 
 @get("/accept_friend_request")
@@ -258,8 +337,19 @@ def reject_friend_request():
 
 @post('/add_friend')
 def add_friend():
-    my_username = login_check()
     friend_username = request.forms.get("username")
+    redirect("/add_friend_request?friend=" + friend_username)
+
+
+@get('/add_friend_request')
+def add_friend():
+    my_username = login_check()
+
+    friend_username = None
+    try:
+        friend_username = request.query['friend']
+    except KeyError:
+        redirect("/main")
     errors = {'username': cgi.escape(friend_username)}
 
     connection = pymongo.Connection(connection_string, safe=True)
@@ -271,7 +361,11 @@ def add_friend():
 
 @get("/delete_friend")
 def delete_friend():
-    new_friend = request.query['friend']
+    new_friend = None
+    try:
+        new_friend = request.query['friend']
+    except KeyError:
+        redirect("/main")
     my_username = login_check()
 
     connection = pymongo.Connection(connection_string, safe=True)
@@ -295,11 +389,75 @@ def reject_challenge():
 def accept_challenge():
     challenge = request.query['challenge']
     my_username = login_check()
+    connection = pymongo.Connection(connection_string, safe=True)
+
+    try:
+        friend_username = request.query['friend']
+    except KeyError:
+        friend_username = None
+
+    if len(friend_username) is 0:
+        achievement.add_challenge_to_me(connection, my_username, challenge)
+    else:
+        achievement.add_challenge_to_friend(connection, friend_username, my_username, challenge)
+    redirect("/main")
+
+
+@get("/add_challenge_from_friend")
+def accept_challenge():
+    challenge = request.query['challenge']
+    my_username = login_check()
+    connection = pymongo.Connection(connection_string, safe=True)
+    achievement.add_challenge_from_friend(connection, my_username, challenge)
+    redirect("/main")
+
+
+@get("/reject_challenge_request")
+def add_challenge_request():
+    challenge = request.query['challenge']
+    my_username = login_check()
 
     connection = pymongo.Connection(connection_string, safe=True)
-    achievement.add_challenge_to_me(connection, my_username, challenge)
-
+    achievement.reject_challenge_from_friend(connection, my_username, challenge)
     redirect("/main")
+
+
+@get("/achievement_unlocked")
+def achievement_unlocked():
+    achievement_id = request.query['achievement']
+    my_username = login_check()
+    connection = pymongo.Connection(connection_string, safe=True)
+
+    try:
+        friend_username = request.query['friend']
+        achievement.unlock_achievement_to_friend(connection, friend_username, my_username, achievement_id)
+        redirect("/friends?friend=" + friend_username)
+    except KeyError:
+        if achievement.unlock_achievement(connection, my_username, achievement_id):
+            redirect("/achievement_unlocked_badge?achievement=" + achievement_id)
+        else:
+            redirect("/main")
+
+
+@get("/unlock_achievement_from_friend")
+def unlock_achievement_from_friend():
+    achievement_id = request.query['achievement']
+    my_username = login_check()
+    connection = pymongo.Connection(connection_string, safe=True)
+    if achievement.accept_achievement_unlock_from_friend(connection, my_username, achievement_id):
+        redirect("/achievement_unlocked_badge?achievement=" + achievement_id)
+    else:
+        redirect("/main")
+
+
+@get("/reject_achievement_request")
+def reject_achievement_request():
+    achievement_id = request.query['achievement']
+    my_username = login_check()
+    connection = pymongo.Connection(connection_string, safe=True)
+    achievement.reject_achievement_unlock_from_friend(connection, my_username, achievement_id)
+    redirect("/main")
+
 
 # Static Routes
 #http://stackoverflow.com/questions/10486224/static-files

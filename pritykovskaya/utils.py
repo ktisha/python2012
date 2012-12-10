@@ -2,14 +2,19 @@
 import re
 from nltk.tokenize import wordpunct_tokenize
 import time
+import sys
 
 def read_stop_list(stop_list_file):
-    input_file = open(stop_list_file, "r")
     stop_list = set()
+    try:
+        input_file = open(stop_list_file, "r")
+    except IOError:
+        print "No stop list, so stop words will not be filtered."
+    else:
 
-    for line in input_file:
-        stop_list.add(line.lower().rstrip())
-    input_file.close()
+        for line in input_file:
+            stop_list.add(line.lower().rstrip())
+        input_file.close()
 
     return stop_list
 

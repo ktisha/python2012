@@ -1,4 +1,6 @@
 # coding=utf-8
+import redis
+import sys
 from indexer import create_normalized_index, create_indexes
 from search_runner import aggregate_tag_for_test, convert_tag_to_word_bag, aggregate_tag
 import time
@@ -6,9 +8,6 @@ from searcher.PlainSearcher import PlainSearcher
 from searcher.QuickSearcher import QuickSearcher
 from utils import print_time
 
-def setup():
-    create_normalized_index()
-    create_indexes()
 
 def test_searcher():
     searcher = PlainSearcher()
@@ -91,11 +90,13 @@ def test_execution_time_plain_searcher():
 
 
 def test_execution_time_quick_searcher():
+
+    searcher = QuickSearcher()
+
     with open("2.5_tag", "r") as file:
         tags = map(str.strip, file.readlines())
     print("Finish reading")
 
-    searcher = QuickSearcher()
 
     with open("test_res", "w") as output:
         current = []

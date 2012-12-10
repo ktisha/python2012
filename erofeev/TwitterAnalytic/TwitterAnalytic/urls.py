@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     # url(r'^TwitterAnalytic/', include('TwitterAnalytic.foo.urls')),
 
     url(r'^recipient', 'Analytic.views.recipient'),
-    #url(r'^$', 'Analytic.views.search'),
+    url(r'^$', 'Analytic.views.search'),
     url(r'^search', 'Analytic.views.search'),
     url(r'^result', 'Analytic.views.result'),
 

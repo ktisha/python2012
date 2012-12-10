@@ -76,7 +76,7 @@ def add_challenge_to_me(connection, username, challenge):
 
     if db.users.find(
         {'_id': username, '$or': [{'challenges': challenge_id}, {'achievements': challenge_id}]}).count() > 0:
-        print "challange already accepted"
+        print "challenge already accepted"
         return False
 
     db.users.update({'_id': username}, {'$push': {'challenges': challenge_id}})
@@ -91,5 +91,80 @@ def add_challenge_to_friend(connection, username, my_username, challenge):
         print "bad sessionid passed in"
         return False
     achievement_link = {'achievement': challenge_id, 'from': my_username}
-    db.users.update({'_id': username}, {'$push': {'challanges_requests_from_friends': achievement_link}})
+    db.users.update({'_id': username}, {'$push': {'challenges_requests_from_friends': achievement_link}})
+    return True
+
+
+def add_challenge_from_friend(connection, username, challenge):
+    db = connection.achievements_of_life
+    try:
+        challenge_id = bson.objectid.ObjectId(challenge)
+    except TypeError, bson.errors.InvalidId:
+        print "bad sessionid passed in"
+        return False
+    db.users.update({'_id': username}, {'$pull': {'challenges_requests_from_friends': {"achievement": challenge_id}}})
+    db.users.update({'_id': username}, {'$push': {'challenges': challenge_id}})
+    return True
+
+
+def reject_challenge_from_friend(connection, username, challenge):
+    db = connection.achievements_of_life
+    try:
+        challenge_id = bson.objectid.ObjectId(challenge)
+    except TypeError, bson.errors.InvalidId:
+        print "bad sessionid passed in"
+        return False
+
+    db.users.update({'_id': username}, {'$pull': {'challenges_requests_from_friends': {"achievement": challenge_id}}})
+    return True
+
+
+def unlock_achievement(connection, username, challenge):
+    db = connection.achievements_of_life
+    try:
+        challenge_id = bson.objectid.ObjectId(challenge)
+    except TypeError, bson.errors.InvalidId:
+        print "bad sessionid passed in"
+        return False
+    db.users.update({'_id': username}, {'$pull': {'achievements_requests_from_friends': {"achievement": challenge_id}}})
+    db.users.update({'_id': username}, {'$pull': {'challenges': challenge_id}})
+    db.users.update({'_id': username}, {'$push': {'achievements': challenge_id}})
+    return True
+
+
+def unlock_achievement_to_friend(connection, username, my_username, challenge):
+    db = connection.achievements_of_life
+    try:
+        challenge_id = bson.objectid.ObjectId(challenge)
+    except TypeError, bson.errors.InvalidId:
+        print "bad sessionid passed in"
+        return False
+    achievement_link = {'achievement': challenge_id, 'from': my_username}
+    db.users.update({'_id': username}, {'$push': {'achievements_requests_from_friends': achievement_link}})
+    return True
+
+
+def accept_achievement_unlock_from_friend(connection, username, challenge):
+    db = connection.achievements_of_life
+    try:
+        challenge_id = bson.objectid.ObjectId(challenge)
+    except TypeError, bson.errors.InvalidId:
+        print "bad sessionid passed in"
+        return False
+
+    db.users.update({'_id': username}, {'$pull': {'achievements_requests_from_friends': {"achievement": challenge_id}}})
+    db.users.update({'_id': username}, {'$pull': {'challenges': challenge_id}})
+    db.users.update({'_id': username}, {'$push': {'achievements': challenge_id}})
+    return True
+
+
+def reject_achievement_unlock_from_friend(connection, username, challenge):
+    db = connection.achievements_of_life
+    try:
+        challenge_id = bson.objectid.ObjectId(challenge)
+    except TypeError, bson.errors.InvalidId:
+        print "bad sessionid passed in"
+        return False
+
+    db.users.update({'_id': username}, {'$pull': {'achievements_requests_from_friends': {"achievement": challenge_id}}})
     return True

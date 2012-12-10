@@ -7,7 +7,8 @@
 					<td>						
 						<h2>Search</h2>
 						<form method="get">						  
-							<input type="text" name="q" value="{{q}}">							  
+							<input type="text" name="q" value="{{q}}">
+							<input type="hidden" name="friend" value="{{friend}}">
 							<input type="submit" value="Search">
 						</form>
 					
@@ -22,7 +23,7 @@
 											<span class="cell_caption">{{achievement['description']}}</span>											
 										</td>								
 										<td width=130px align=center> 
-											<a href="/accept_challenge?challenge={{achievement['_id']}}"><div class="green_button">Accept!</div></a>
+											<a href="/accept_challenge?challenge={{achievement['_id']}}&friend={{friend}}"><div class="green_button">Accept!</div></a>
 										</td>											
 									</tr>  
 								</table>
