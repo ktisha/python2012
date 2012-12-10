@@ -90,7 +90,6 @@ def intersected_only_with_cat(triplet):
 # return set of text results in my specific form
 def aggregate_tag(searcher, tag, tag_is_normalized):
     bag_of_words_ids = run_searcher(searcher, tag, tag_is_normalized)
-    print bag_of_words_ids
     best_original_ids, best_bags, competitors_info = return_back_to_original_ids_filter_categories(bag_of_words_ids)
 
     answers = set()

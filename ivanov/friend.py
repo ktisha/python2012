@@ -2,6 +2,10 @@ import pymongo
 import pymongo.errors
 
 def new_friend_request(connection, from_user, to_user, errors):
+    if from_user == to_user:
+        errors['username_error'] = "No no no, if you are not crazy :)"
+        return False
+
     db = connection.achievements_of_life
     users = db.users
 
