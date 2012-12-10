@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import codecs
-flagImpossible = False
+
 
 
 def createDict (sizeOfWord):
@@ -19,22 +19,20 @@ def searchNewWords (word):
     global currentNumber
     global lastWord
     letters = u"абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
-    with open ('answer.txt', 'w') as answerFile:
-        for i in xrange(len(word)):
-            for ch in letters:
-                newWord = word[0 : i] + ch + word[i + 1 : 100]
-                if newWord == lastWord:
-                    openWords[newWord] = currentNumber
-                    return True
-                if word == newWord or newWord in openWords:
-                    continue
-                if newWord in setOfUsefulWords:
-                    quequeToVisit.append(newWord)
-                    openWords[newWord] = currentNumber
+    for i in xrange(len(word)):
+        for ch in letters:
+            newWord = word[0 : i] + ch + word[i + 1 : 100]
+            if newWord == lastWord:
+                openWords[newWord] = currentNumber
+                return True
+            if word == newWord or newWord in openWords:
+                continue
+            if newWord in setOfUsefulWords:
+                quequeToVisit.append(newWord)
+                openWords[newWord] = currentNumber
     return False
 
 def itIsImpossible():
-    flagImpossible = True
     with codecs.open('answer.txt', 'w', 'utf-8') as answerFile:
         answerFile.write('''it's imposible!!''')
 
@@ -42,9 +40,11 @@ with codecs.open('input.txt', 'r', 'utf-8') as f:
    firstWord = f.readline().replace('\n', '')
    lastWord = f.readline().replace('\n', '')
 
+
 if len(firstWord) != len(lastWord):
     itIsImpossible()
 else:
+    flagImpossible = False
     setOfUsefulWords = createDict(len(firstWord))
     quequeToVisit = []
     quequeToVisit.append(firstWord)
@@ -53,9 +53,11 @@ else:
     visitedWords = [firstWord]
     currentNumber = 0
     currentWord = firstWord
-    while not searchNewWords(currentWord):
-        if len(quequeToVisit) is 0:
+    while (not searchNewWords(currentWord)) and (not flagImpossible):
+        if len(quequeToVisit) is  0:
             itIsImpossible()
+            flagImpossible = True
+            continue
         currentWord = quequeToVisit[0]
         del quequeToVisit[0]
 
