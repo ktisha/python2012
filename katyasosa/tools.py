@@ -22,15 +22,15 @@ def common_gc_content(sequences):
     GC_count, length = 0, 0
     for seq_record in sequences:
         sequence = seq_record.seq
-        GC_count += sequence.count("G") + sequence.count("C")
-        length += len(sequence) - sequence.count("N")
+        GC_count += sequence.count('G') + sequence.count('C')
+        length += len(sequence) - sequence.count('N')
     return round((1.0 * GC_count)/length * 100, 2)
 
 class GeneFinder(object):
     __metaclass__ = ABCMeta
 
-    executable = "gene_finder"
-    name = "gene_finder"
+    executable = 'gene_finder'
+    name = 'gene_finder'
 
     def __init__(self, data_dir, lib_dir):
         self.lib_dir = lib_dir
@@ -38,7 +38,7 @@ class GeneFinder(object):
         self.install()
 
     def execute(self, genome_name):
-        genome_path = os.path.join(self.data_dir, genome_name + ".fasta")
+        genome_path = os.path.join(self.data_dir, genome_name + '.fasta')
         args = self.get_args(genome_path)
         devnull = open(os.devnull, "w")
 
@@ -46,9 +46,9 @@ class GeneFinder(object):
             [os.path.join(self.lib_dir, self.executable)] + args,
             stdout=devnull, stderr=devnull)
         parsed_result_path = os.path.join(self.data_dir,
-            "{0}_{1}_genes.fasta".format(genome_name, self.name))
+            '{0}_{1}_genes.fasta'.format(genome_name, self.name))
 
-        SeqIO.write(self.parse_result(genome_path), parsed_result_path, "fasta")
+        SeqIO.write(self.parse_result(genome_path), parsed_result_path, 'fasta')
         return parsed_result_path
 
     __call__ = execute
@@ -70,27 +70,27 @@ class GeneMarkCommonGC(GeneFinder):
     """
     ./gm -rn -m heuristic_path genome_path
     """
-    executable = "gm"
-    name = "gm_commonGC"
+    executable = 'gm'
+    name = 'gm_commonGC'
 
     def install(self):
-        gm_key_path = os.path.join(self.lib_dir, "gm_key")
-        if not os.path.isfile(os.path.expanduser("~/.gm_key")):
-            shutil.copyfile(gm_key_path, os.path.expanduser("~/.gm_key"))
+        gm_key_path = os.path.join(self.lib_dir, 'gm_key')
+        if not os.path.isfile(os.path.expanduser('~/.gm_key')):
+            shutil.copyfile(gm_key_path, os.path.expanduser('~/.gm_key'))
 
     def get_args(self, genome_path):
-        gc = common_gc_content(SeqIO.parse(genome_path, "fasta"))
+        gc = common_gc_content(SeqIO.parse(genome_path, 'fasta'))
         gc = min(70, max(30, int(gc)))
-        heuristic_dir = os.path.join(self.lib_dir, "heuristic_mat")
-        heuristic_filename = os.path.join(heuristic_dir, "heu_11_{0}.mat".format(gc))
+        heuristic_dir = os.path.join(self.lib_dir, 'heuristic_mat')
+        heuristic_filename = os.path.join(heuristic_dir, 'heu_11_{0}.mat'.format(gc))
         return ["-rn", "-m", heuristic_filename, genome_path]
 
     def parse_result(self, genome_path):
-        result_path = genome_path + ".fasta.rgn"
+        result_path = genome_path + '.fasta.rgn'
         if not os.path.isfile(os.path.expanduser(result_path)):
             return
 
-        gm_result = SeqIO.parse(result_path, "fasta")
+        gm_result = SeqIO.parse(result_path, 'fasta')
 
         for seq_record in gm_result:
             seq_record.description = ""
@@ -101,49 +101,49 @@ class GeneMarkEveryGC(GeneMarkCommonGC):
    For every GC:
    ./gm -rn -m heuristic_for_the_gc_path contigs_with_the_gc_path
    """
-    executable = "gm"
-    name = "gm_everyGC"
+    executable = 'gm'
+    name = 'gm_everyGC'
 
     def execute(self, genome_name):
-        genome_path = os.path.join(self.data_dir, genome_name + ".fasta")
+        genome_path = os.path.join(self.data_dir, genome_name + '.fasta')
 
         counter = [0]
         def rename(gene):
-            gene.id = gene.description = gene.name = self.name + "_" + str(counter[0])
+            gene.id = gene.description = gene.name = self.name + '_' + str(counter[0])
             counter[0] += 1
             return gene
 
         genes = []
         execute = super(GeneMarkEveryGC, self).execute
-        for seq_record in SeqIO.parse(genome_path, "fasta"):
+        for seq_record in SeqIO.parse(genome_path, 'fasta'):
             if len(seq_record.seq) > 200:
                 with NamedTemporaryFile(prefix=seq_record.id,
-                    suffix=".fasta") as f:
-                    SeqIO.write(seq_record, f, "fasta")
+                    suffix='.fasta') as f:
+                    SeqIO.write(seq_record, f, 'fasta')
                     f.flush()
-                    current_genes = SeqIO.parse(execute(f.name.replace(".fasta", "")),
-                        "fasta")
+                    current_genes = SeqIO.parse(execute(f.name.replace('.fasta', '')),
+                        'fasta')
                     genes.append(itertools.imap(rename, current_genes))
 
         parsed_result_path = os.path.join(self.data_dir,
-            "{0}_{1}_genes.fasta".format(genome_name, self.name))
-        SeqIO.write(itertools.chain(*genes), parsed_result_path, "fasta")
+            '{0}_{1}_genes.fasta'.format(genome_name, self.name))
+        SeqIO.write(itertools.chain(*genes), parsed_result_path, 'fasta')
         return parsed_result_path
 
 class GeneMarkHmmCommomGC(GeneFinder):
-    executable = "gmhmmp"
-    name = "gmhmmp_commonGC"
+    executable = 'gmhmmp'
+    name = 'gmhmmp_commonGC'
 
     def install(self):
-        gm_key_path = os.path.join(self.lib_dir, "gm_key")
-        if not os.path.isfile(os.path.expanduser("~/.gm_key")):
-            shutil.copyfile(gm_key_path, os.path.expanduser("~/.gm_key"))
+        gm_key_path = os.path.join(self.lib_dir, 'gm_key')
+        if not os.path.isfile(os.path.expanduser('~/.gm_key')):
+            shutil.copyfile(gm_key_path, os.path.expanduser('~/.gm_key'))
 
     def get_args(self, genome_path):
-        gc = common_gc_content(SeqIO.parse(genome_path, "fasta"))
+        gc = common_gc_content(SeqIO.parse(genome_path, 'fasta'))
         gc = min(70, max(30, int(gc)))
-        heuristic_dir = os.path.join(self.lib_dir, "heuristic_mod")
-        heuristic_filename = os.path.join(heuristic_dir, "heu_11_{0}.mod".format(gc))
+        heuristic_dir = os.path.join(self.lib_dir, 'heuristic_mod')
+        heuristic_filename = os.path.join(heuristic_dir, 'heu_11_{0}.mod'.format(gc))
         result_path = genome_path + '.gmhmm'
         return ['-d', '-p', '0','-m', heuristic_filename, '-o', result_path, genome_path]
 
@@ -171,29 +171,29 @@ class GeneMarkHmmEveryGC(GeneMarkHmmCommomGC):
     name = 'gmhmmp_everyGC'
 
     def execute(self, genome_name):
-        genome_path = os.path.join(self.data_dir, genome_name + ".fasta")
+        genome_path = os.path.join(self.data_dir, genome_name + '.fasta')
 
         counter = [0]
         def rename(gene):
-            gene.id = gene.description = gene.name = self.name + "_" + str(counter[0])
+            gene.id = gene.description = gene.name = self.name + '_' + str(counter[0])
             counter[0] += 1
             return gene
 
         genes = []
         execute = super(GeneMarkHmmCommomGC, self).execute
-        for seq_record in SeqIO.parse(genome_path, "fasta"):
+        for seq_record in SeqIO.parse(genome_path, 'fasta'):
             if len(seq_record.seq) > 200:
                 with NamedTemporaryFile(prefix=seq_record.id,
-                    suffix=".fasta") as f:
-                    SeqIO.write(seq_record, f, "fasta")
+                    suffix='.fasta') as f:
+                    SeqIO.write(seq_record, f, 'fasta')
                     f.flush()
-                    current_genes = SeqIO.parse(execute(f.name.replace(".fasta", "")),
-                        "fasta")
+                    current_genes = SeqIO.parse(execute(f.name.replace('.fasta', '')),
+                        'fasta')
                     genes.append(itertools.imap(rename, current_genes))
 
         parsed_result_path = os.path.join(self.data_dir,
-            "{0}_{1}_genes.fasta".format(genome_name, self.name))
-        SeqIO.write(itertools.chain(*genes), parsed_result_path, "fasta")
+            '{0}_{1}_genes.fasta'.format(genome_name, self.name))
+        SeqIO.write(itertools.chain(*genes), parsed_result_path, 'fasta')
         return parsed_result_path
 
 class GeneMarkS(GeneFinder):
@@ -201,15 +201,15 @@ class GeneMarkS(GeneFinder):
     name = 'gms'
 
     def install(self):
-        gm_key_path = os.path.join(self.lib_dir, "gm_key")
-        if not os.path.isfile(os.path.expanduser("~/.gm_key")):
-            shutil.copyfile(gm_key_path, os.path.expanduser("~/.gm_key"))
+        gm_key_path = os.path.join(self.lib_dir, 'gm_key')
+        if not os.path.isfile(os.path.expanduser('~/.gm_key')):
+            shutil.copyfile(gm_key_path, os.path.expanduser('~/.gm_key'))
 
     def get_args(self, genome_path):
         return ['--clean', genome_path]
 
     def parse_result(self, genome_path):
-        result_path = genome_path + ".fasta.lst"
+        result_path = genome_path + '.fasta.lst'
         if not os.path.isfile(os.path.expanduser(result_path)):
             return
         contigs = dict([(s.id, s.seq) for s in SeqIO.parse(open(genome_path),
