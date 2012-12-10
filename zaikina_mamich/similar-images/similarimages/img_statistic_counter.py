@@ -179,6 +179,9 @@ class ImgStatisticCounter:
         if counted_distance < cls.LOWER_THRESHOLD:
             return True
 
+        if counted_distance > cls.UPPER_THRESHOLD:
+            return False
+
         image = image.__dict__ if not isinstance(image, dict) else image
         ref = ref.__dict__ if not isinstance(ref, dict) else ref
 
