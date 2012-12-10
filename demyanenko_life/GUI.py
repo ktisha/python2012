@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import ConfigParser
 import time
 import sys
 import PIL.ImageTk as ImgTk
@@ -9,7 +10,7 @@ import life
 
 
 class lifeGUI:
-    def __init__(self, root, w, h, size, initialState):
+    def __init__(self, root, w, h, size, frames, initialState):
 
         self.canvasLocked = False
         self.globalLock = False
@@ -19,6 +20,7 @@ class lifeGUI:
         self.h = h
         self.size = size
         self.rawField = initialState
+        self.frames = frames
         self.field = life.field(self.rawField)
         
         self.root = root
@@ -154,26 +156,63 @@ class lifeGUI:
         self.canvas.delete("all")
         for i in xrange(w):
             for j in xrange(h):
-                self.canvas.create_rectangle(i * self.size + 2, j * self.size + 2, (i + 1) * self.size + 2, (j + 1) * self.size + 2, tags="all")
-                if self.rawField[j][i] == 1:
-                    self.canvas.create_rectangle(i * self.size + 2 + 2, j * self.size + 2 + 2, (i + 1) * self.size - 2 + 2, (j + 1) * self.size - 2 + 2, fill="black", tags="all")
+                if self.frames:
+                    self.canvas.create_rectangle(i * self.size + 2, j * self.size + 2, (i + 1) * self.size + 2, (j + 1) * self.size + 2, tags="all")
+                    if self.rawField[j][i] == 1:
+                        self.canvas.create_rectangle(i * self.size + 2 + 2, j * self.size + 2 + 2, (i + 1) * self.size - 2 + 2, (j + 1) * self.size - 2 + 2, fill="black", tags="all")
+                else:
+                    if self.rawField[j][i] == 1:
+                        self.canvas.create_rectangle(i * self.size + 2, j * self.size + 2, (i + 1) * self.size + 2, (j + 1) * self.size + 2, fill="black", tags="all")
 
-w, h, size = 6, 6, 42
-initialState = []
-if len(sys.argv) == 3:
-    with open(sys.argv[1], "r") as fieldFile:
+def readField(filename):
+    strState = []
+    with open(filename) as fieldFile:
         strState = [s.replace('\n', '') for s in fieldFile]
     h = len(strState)
     w = len(strState[0])
     initialState = [list(x) for x in [[0]*w]*h]
     for i in xrange(h):
         initialState[i] = [int(x) for x in strState[i]]
-    size = int(sys.argv[2])
+    return initialState
 
-if len(sys.argv) == 4:
-    [w, h, size] = [int(i) for i in sys.argv[1:4]]
+w, h, size, frames = 6, 6, 42, True
+initialState = [list(x) for x in [[0]*w]*h]
+
+if len(sys.argv) == 2:
+    config = ConfigParser.ConfigParser()
+    config.read(sys.argv[1])
+
+    def getInt(str):
+        if config.has_option("Config", str):
+            return config.getint("Config", str)
+        else:
+            return eval(str)
+
+    def getBool(str):
+        if config.has_option("Config", str):
+            return bool(config.getint("Config", str))
+        else:
+            return eval(str)
+
+    def getStr(str):
+        if config.has_option("Config", str):
+            return config.get("Config", str)
+        else:
+            return eval(str)
+
+    w = getInt("w")
+    h = getInt("h")
     initialState = [list(x) for x in [[0]*w]*h]
+    size = getInt("size")
+    frames = getBool("frames")
+
+    init = None
+    init = getStr("init")
+    if not (init is None):
+        initialState = readField(init)
+        h = len(initialState)
+        w = len(initialState[0])
 
 root = Tk()
-lifeGUI(root, w, h, size, initialState)
+lifeGUI(root, w, h, size, frames, initialState)
 root.mainloop()
