@@ -7,7 +7,7 @@ from tools import GeneMarkCommonGC, GeneMarkEveryGC, GeneMarkHmmCommomGC, GeneMa
 
 
 def make_sam_out(predict_path, genes_path, genome_name, data_dir, method_name):
-    devnull = open(os.devnull, "w")
+    devnull = open(os.devnull, 'w')
     subprocess.call(['bwa', 'index', '-a', 'bwtsw', predict_path],
         stdout=devnull, stderr=devnull)
     subprocess.call(['bwa', 'index', '-a', 'bwtsw', genes_path],
@@ -39,13 +39,21 @@ def get_sam_map(sam_path):
 def count_metrics(genes_sam_path, predict_sam_path):
     predict_on_genes, predict_count = get_sam_map(predict_sam_path)
     genes_on_predict, genes_count = get_sam_map(genes_sam_path)
-    H = namedtuple('H', ['name', 'TP', 'FP', 'FN'])
+    H = namedtuple('H', ['name', 'TP', 'FP', 'FN', 'P', 'R', 'F'])
     TP = len(predict_on_genes)
-    H_predict_is_gene = H('predict is gene', TP, predict_count - TP,
-        genes_count - len(set(predict_on_genes.values())))
+    FP = predict_count - TP
+    FN = genes_count - len(set(predict_on_genes.values()))
+    P = TP * 1. / (TP + FP)
+    R = TP * 1. / (TP + FN)
+    F = 2 * P * R / (P + R)
+    H_predict_is_gene = H('predict is gene', TP, FP, FN, P, R, F)
     TP = len(genes_on_predict)
-    H_gene_was_predicted = H('gene was predicted', TP, genes_count - TP,
-        predict_count - len(set(genes_on_predict.values())))
+    FP = genes_count - TP
+    FN = predict_count - len(set(genes_on_predict.values()))
+    P = TP * 1. / (TP + FP)
+    R = TP * 1. / (TP + FN)
+    F = 2 * (P * R)/(P + R)
+    H_gene_was_predicted = H('gene was predicted', TP, FP, FN, P, R, F)
     return H_predict_is_gene, H_gene_was_predicted
 
 def compare_data(tools, genomes, data_dir):
@@ -57,11 +65,12 @@ def compare_data(tools, genomes, data_dir):
             hypothesises = count_metrics(path_prefix + tool.name + '_on.sam',
                 path_prefix + 'on_' + tool.name + '.sam')
             for hypothesis in hypothesises:
-                yield hypothesis.name, genome_name, tool.name, hypothesis.TP, \
-                      hypothesis.FP, hypothesis.FN
+                yield hypothesis.name, genome_name, tool.name, hypothesis.TP,\
+                      hypothesis.FP, hypothesis.FN, hypothesis.P, hypothesis.R,\
+                      hypothesis.F
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     data_dir = 'Data'
     lib_dir = '/home/katya/CSC/python2012/katyasosa/gmsuite'
     genomes = {'ECO2_seq': 'Data/eco_genes.fasta'}
@@ -78,4 +87,5 @@ if __name__ == "__main__":
     tools = [gm_common_gc, gm_every_gc, gm_hmm_common_gc, gm_hmm_every_gc, gm_s]
     with open('compare_out', 'w') as out:
         for data in compare_data(tools, genomes, data_dir):
+            out.write('hypothesis_name,genome_name,tool_name,TP,FP,FN,P,R,F\n')
             out.write(','.join([str(x) for x in data]) + '\n')
