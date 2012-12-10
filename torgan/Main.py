@@ -1,36 +1,46 @@
 from Crossword import Crossword
+import sys
 
-file = open("grid.txt")
 input_grid = []
-for line in file.readlines():
-    input_grid.append(line.split())
-file.close()
-
-file = open("dict.txt")
 input_dict = []
-for line in file.readlines():
-    input_dict.extend(line.split())
-file.close()
 
-# TODO: add exception handling for: working with files, validate input - grid's format
+try:
 
-crossword = Crossword()
-crossword.parse_matrix(input_grid)
-is_right = crossword.fill_with_words(input_dict)
+    file = open("grid.txt")
+    for line in file.readlines():
+        input_grid.append(line.split())
+    file.close()
 
-if is_right:
-    for word in crossword.horizontal_words:
-        if word.value is not None:
-            input_grid[word.item][word.start : word.end + 1] = word.value
-    for word in crossword.vertical_words:
-        if word.value is not None:
-            for line in input_grid:
-                if word.start <= input_grid.index(line) <= word.end:
-                    line[word.item] = word.value[input_grid.index(line) - word.start]
-    for line in input_grid:
-        print line
-else:
-    print "Error! Can not fill crossword with that dictionary!"
+    file = open("dict.txt")
+    for line in file.readlines():
+        input_dict.extend(line.split())
+    file.close()
+
+    crossword = Crossword()
+    crossword.parse_matrix(input_grid)
+    is_right = crossword.fill_with_words(input_dict)
+
+    if is_right:
+        for word in crossword.horizontal_words:
+            if word.value is not None:
+                input_grid[word.item][word.start : word.end + 1] = word.value
+        for word in crossword.vertical_words:
+            if word.value is not None:
+                for line in input_grid:
+                    if word.start <= input_grid.index(line) <= word.end:
+                        line[word.item] = word.value[input_grid.index(line) - word.start]
+        for line in input_grid:
+            print line
+    else:
+        print "Can not fill crossword with that dictionary!"
+
+except IOError as e:
+    print "Error: ", e.strerror, e.filename
+except TypeError:
+    print "Error: wrong format of the input crossword grid - empty or contains wrong chars!"
+except:
+    print "Unexpected error:", sys.exc_info()[0]
+    raise
 
 
 

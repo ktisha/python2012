@@ -23,6 +23,7 @@ class AbstractGrid:
         return words_coordinates
 
     def parse_matrix(self, matrix):
+        self.__check_format(matrix)
         for i in xrange(len(matrix)):
             words_coordinates = self.__extract_words_coordinates(matrix[i])
             for (x1, x2) in words_coordinates:
@@ -42,3 +43,12 @@ class AbstractGrid:
                 parent.children.append(self.__build_tree(cross, not is_vertical))
         return parent
 
+    def __check_format(self, list):
+        if len(list) == 0:
+            raise TypeError
+        for line in list:
+            isRight = True
+            for i in line:
+                isRight &= i == '*' or i == '_'
+            if not isRight:
+                raise TypeError
