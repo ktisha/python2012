@@ -83,8 +83,6 @@ class ActorMovingVisitor(ActorVisitor):
                 self.__map.remove(coordinate)
                 self.__map.put(new_coord, beggar)
 
-
-
     def visit_pillar(self, pillar):
         pass
 
