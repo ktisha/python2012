@@ -1,27 +1,17 @@
 #include "prev.h"
 
-#include <iostream>
 #include <functional>
 #include <memory>
 #include <math.h>
 
-using std::cout;
-using std::endl;
 typedef std::vector<std::vector<bool>*> dvec;
-
-void printVec(const std::vector<bool>& v)
-{
-    for (bool i : v)
-        cout << i;
-    cout << endl;
-}
 
 std::vector<std::vector<bool> > findPrev(std::vector<std::vector<bool> > t)
 {
     std::function<int(std::vector<bool>)> vec2num = [&](std::vector<bool> v)
     {
         int res = 0;
-        for (int i = v.size() - 1; i >= 0; i--)
+        for (int i = 0; i < v.size(); i++)
         {
             res |= (v[i] << i);
         }
@@ -41,7 +31,7 @@ std::vector<std::vector<bool> > findPrev(std::vector<std::vector<bool> > t)
     std::function<std::vector<bool>(int)> num2vec = [&](int num)
     {
         std::vector<bool> res = std::vector<bool>(w);
-        for (int i = 0; i < w; i++)
+        for (int i = w - 1; i >= 0; i--)
         {
             res[i] = num % 2;
             num >>= 1;
@@ -85,7 +75,6 @@ std::vector<std::vector<bool> > findPrev(std::vector<std::vector<bool> > t)
                 transitions[i * count * count + j * count + k] = res;
             }
         }
-        cout << "precalc i: " << i << endl;
     }
 
     std::vector<std::vector<int>> newCands;
@@ -106,10 +95,7 @@ std::vector<std::vector<bool> > findPrev(std::vector<std::vector<bool> > t)
                 }
             }
         }
-        cout << "i: " << i << endl;
     }
-
-    cout << "Checkpoint 1" << endl;
 
     for (int i = 3; i < h; i++)
     {
@@ -126,59 +112,48 @@ std::vector<std::vector<bool> > findPrev(std::vector<std::vector<bool> > t)
                     newCands.push_back(cand);
             }
         }
-
-        cout << "Checkpoint " << i << endl;
     }
 
-    cout << newCands.size() << endl;
+    std::vector<int> minCand;
+    int minSum = w * h + 1;
+
+    std::function<int(const std::vector<int>&)> onesCount = [](const std::vector<int>& v)
+    {
+        int res = 0;
+        for (int num : v)
+        {
+            int i;
+            for (i = 0; num; i++)
+            {
+                num &= num - 1;
+            }
+            res += i;
+        }
+        return res;
+    };
+
     for (std::vector<int> cand : newCands)
     {
         if (transitions[cand[h-2] * count * count + cand[h-1] * count + cand[0]] == target[h-1] && 
             transitions[cand[h-1] * count * count + cand[0]   * count + cand[1]] == target[0])
         {
-            std::vector<std::vector<bool>> res(h);
-            for (int i = 0; i < h; i++)
+            int sum = onesCount(cand);
+            if (sum < minSum)
             {
-                res[i] = num2vec(cand[i]);
-                printVec(res[i]);
+                minCand = cand;
+                minSum = sum;
             }
-            cout << "test";
-            cout << endl;
-            return res;
         }
+    }
+
+    if (minSum <= w * h)
+    {
+        std::vector<std::vector<bool>> res(h);
+        for (int i = 0; i < h; i++)
+        {
+            res[i] = num2vec(minCand[i]);
+        }
+        return res;
     }
     return std::vector<std::vector<bool>>(0);
-}
-
-void main()
-{
-    int size = 7;
-    bool arr[] = {0, 0, 0, 0, 0, 0, 0,
-                  0, 0, 1, 0, 0, 0, 0,
-                  0, 0, 0, 1, 0, 0, 0,
-                  0, 1, 1, 1, 0, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0};
-
-    std::vector<std::vector<bool> > field(size);
-    for (int i = 0; i < size; i++)
-    {
-        field[i] = std::vector<bool>(size);
-        for (int j = 0; j < size; j++)
-        {
-            field[i][j] = arr[i * size + j];
-        }
-    }
-
-    std::vector<std::vector<bool> > prev = findPrev(field);
-    cout << "Ya rodilsya!" << endl;
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-        {
-            cout << prev[i][j];
-        }
-        cout << endl;
-    }
 }

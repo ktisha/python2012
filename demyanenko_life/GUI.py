@@ -1,6 +1,7 @@
 # coding: utf-8
 
-import PIL.Image as Img
+import time
+import sys
 import PIL.ImageTk as ImgTk
 from Tkinter import *
 import tkMessageBox
@@ -8,57 +9,61 @@ import life
 
 
 class lifeGUI:
-    def __init__(self, root):
+    def __init__(self, root, w, h, size, initialState):
 
         self.canvasLocked = False
-        self.rawField = [[0, 0, 0, 0, 0, 0],
-                         [0, 0, 1, 0, 0, 0],
-                         [0, 0, 0, 1, 0, 0],
-                         [0, 1, 1, 1, 0, 0],
-                         [0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0]]
+        self.globalLock = False
+        self.stahp = False
 
+        self.w = w
+        self.h = h
+        self.size = size
+        self.rawField = initialState
         self.field = life.field(self.rawField)
-
-        root.title = "Life"
-        root.geometry("401x261")
+        
+        self.root = root
+        self.root.title = "Life"
+        self.root.geometry(str(149 + w * size) + "x" + str(9 + h * size))
 
         self.clear = IntVar()
         self.currIter = StringVar()
         self.step = StringVar()
 
-        self.backImg = ImgTk.PhotoImage(file="prev.png")
-        oneBackBtn = Button(root, command=self.moveOneBack, image=self.backImg)
-        oneBackBtn.place(cnf={"width": 32, "height": 32, "x": 3, "y": 3})
+        self.backImg = ImgTk.PhotoImage(file = "prev.png")
+        oneBackBtn = Button(self.root, command = self.moveOneBack, image = self.backImg)
+        oneBackBtn.place(cnf = {"width": 32, "height": 32, "x": 3, "y": 3})
 
-        currIterLbl = Label(root, textvariable=self.currIter)
-        currIterLbl.place(cnf={"width": 67, "height": 32, "x": 38, "y": 3})
+        currIterLbl = Label(self.root, textvariable = self.currIter)
+        currIterLbl.place(cnf = {"width": 67, "height": 32, "x": 38, "y": 3})
         self.currIter.set("0")
 
-        self.fwdImg = ImgTk.PhotoImage(file="next.png")
-        oneForwardBtn = Button(root, command=self.moveOneForward, image=self.fwdImg)
-        oneForwardBtn.place(cnf={"width": 32, "height": 32, "x": 108, "y": 3})
+        self.fwdImg = ImgTk.PhotoImage(file = "next.png")
+        oneForwardBtn = Button(self.root, command = self.moveOneForward, image = self.fwdImg)
+        oneForwardBtn.place(cnf = {"width": 32, "height": 32, "x": 108, "y": 3})
 
-        self.manyBackImg = ImgTk.PhotoImage(file="manyprev.png")
-        manyBackBtn = Button(root, command=self.moveManyBack, image=self.manyBackImg)
-        manyBackBtn.place(cnf={"width": 32, "height": 32, "x": 3, "y": 38})
+        self.manyBackImg = ImgTk.PhotoImage(file = "manyprev.png")
+        manyBackBtn = Button(self.root, command = self.moveManyBack, image = self.manyBackImg)
+        manyBackBtn.place(cnf = {"width": 32, "height": 32, "x": 3, "y": 38})
 
-        stepEnt = Entry(root, textvariable=self.step)
-        stepEnt.place(cnf={"width": 67, "height": 30, "x": 38, "y": 39})
+        stepEnt = Entry(self.root, textvariable = self.step)
+        stepEnt.place(cnf = {"width": 67, "height": 30, "x": 38, "y": 39})
         stepEnt.focus()
         self.step.set("2")
 
-        self.manyFwdImg = ImgTk.PhotoImage(file="manynext.png")
-        manyForwardBtn = Button(root, command = self.moveManyForward, image=self.manyFwdImg)
-        manyForwardBtn.place(cnf={"width": 32, "height": 32, "x": 108, "y": 38})
+        self.manyFwdImg = ImgTk.PhotoImage(file = "manynext.png")
+        manyForwardBtn = Button(self.root, command = self.moveManyForward, image = self.manyFwdImg)
+        manyForwardBtn.place(cnf = {"width": 32, "height": 32, "x": 108, "y": 38})
 
-        resetBtn = Button(root, text="Reset", command = self.reset)
-        resetBtn.place(cnf={"width": 137, "height": 32, "x": 3, "y": 73})
+        stopBtn = Button(self.root, text = "Stahp", command = self.stop)
+        stopBtn.place(cnf = {"width": 137, "height": 32, "x": 3, "y": 73})
 
-        clearChk = Checkbutton(root, text="Clear", variable=self.clear)
-        clearChk.place(cnf={"width": 128, "height": 32, "x": 3, "y": 113})
+        resetBtn = Button(self.root, text = "Reset", command = self.reset)
+        resetBtn.place(cnf = {"width": 137, "height": 32, "x": 3, "y": 108})
 
-        self.canvas = Canvas(root, height=252, width=252, bg="white")
+        clearChk = Checkbutton(self.root, text = "Clear", variable = self.clear)
+        clearChk.place(cnf = {"width": 128, "height": 32, "x": 3, "y": 143})
+
+        self.canvas = Canvas(self.root, height = size * h + 1, width = size * w + 1, bg = "white")
         self.canvas.place(cnf={"x": 143, "y": 3})
         self.canvas.bind("<Button-1>", self.canvasClick)
         self.canvasDraw()
@@ -78,49 +83,97 @@ class lifeGUI:
             self.currIter.set(str(self.field.getCurrIter()))
 
     def moveOneBack(self):
+        if self.globalLock:
+            return
         self.move(-1)
 
     def moveOneForward(self):
+        if self.globalLock:
+            return
         self.move(1)
 
     def moveManyBack(self):
+        if self.globalLock:
+            return
         if not self.step.get().isdigit():
             return
         else:
-            self.move(-int(self.step.get()))
+            self.globalLock = True
+            for i in xrange(0, -int(self.step.get()), -1):
+                self.move(-1)
+                self.root.update()
+                time.sleep(0.1)
+                if self.stahp:
+                    self.stahp = False
+                    break
+            self.globalLock = False
 
     def moveManyForward(self):
+        if self.globalLock:
+            return
         if not self.step.get().isdigit():
             return
         else:
-            self.move(int(self.step.get()))
+            self.globalLock = True
+            for i in xrange(int(self.step.get())):
+                self.move(1)
+                self.root.update()
+                time.sleep(0.1)
+                if self.stahp:
+                    self.stahp = False
+                    break
+            self.globalLock = False
+
+    def stop(self):
+        if self.globalLock:
+            self.stahp = True
 
     def reset(self):
+        if self.globalLock:
+            return
         self.canvasLocked = False
         if self.clear.get() == 1:
-            self.rawField =[list(x) for x in [[0]*6]*6]
+            self.rawField = [list(x) for x in [[0]*self.w]*self.h]
         else:
             self.rawField = self.field.getField()
         self.currIter.set("0")
         self.canvasDraw()
 
     def canvasClick(self, event):
+        if self.globalLock:
+            return
         if self.canvasLocked:
             return
         else:
-            x = int(event.x / 42)
-            y = int(event.y / 42)
+            x = int((event.x - 1) / self.size)
+            y = int((event.y - 1) / self.size)
             self.rawField[y][x] = 1 - self.rawField[y][x]
             self.canvasDraw()
 
     def canvasDraw(self):
         self.canvas.delete("all")
-        for i in xrange(6):
-            for j in xrange(6):
-                self.canvas.create_rectangle(i * 42, j * 42, i * 42 + 42, j * 42 + 42, tags="all")
+        for i in xrange(w):
+            for j in xrange(h):
+                self.canvas.create_rectangle(i * self.size + 2, j * self.size + 2, (i + 1) * self.size + 2, (j + 1) * self.size + 2, tags="all")
                 if self.rawField[j][i] == 1:
-                    self.canvas.create_rectangle(i * 42 + 2, j * 42 + 2, i * 42 + 40, j * 42 + 40, fill="black", tags="all")
+                    self.canvas.create_rectangle(i * self.size + 2 + 2, j * self.size + 2 + 2, (i + 1) * self.size - 2 + 2, (j + 1) * self.size - 2 + 2, fill="black", tags="all")
+
+w, h, size = 6, 6, 42
+initialState = []
+if len(sys.argv) == 3:
+    with open(sys.argv[1], "r") as fieldFile:
+        strState = [s.replace('\n', '') for s in fieldFile]
+    h = len(strState)
+    w = len(strState[0])
+    initialState = [list(x) for x in [[0]*w]*h]
+    for i in xrange(h):
+        initialState[i] = [int(x) for x in strState[i]]
+    size = int(sys.argv[2])
+
+if len(sys.argv) == 4:
+    [w, h, size] = [int(i) for i in sys.argv[1:4]]
+    initialState = [list(x) for x in [[0]*w]*h]
 
 root = Tk()
-lifeGUI(root)
+lifeGUI(root, w, h, size, initialState)
 root.mainloop()
