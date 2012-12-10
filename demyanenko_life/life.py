@@ -1,5 +1,8 @@
 # coding: utf-8
 
+import itertools
+import prev
+
 class field:
 
     def __init__(self, startpos):
@@ -25,63 +28,26 @@ class field:
             return 0
 
     def __findPrev(self, target):
-        def checkLine(lineNum):
-            fits = True
-            for l in xrange(self.__w):
-                if self.__checkCell(cand, lineNum, l) != target[lineNum][l]:
-                    fits = False
-                    break
-            return fits
+        t = prev.dvec(target)
+        res = prev.findPrev(t)
+        if len(res) == 0:
+            return None
+        else:
+            return [list(row) for row in res]
 
-        def generateLists(len):
-            for num in xrange(2 ** len):
-                line = []
-                temp = num
-                for i in xrange(len):
-                    line.append(temp & 1)
-                    temp >>= 1
-                yield line
-
-        newCands = []
-
-        for i in generateLists(self.__w):
-            for j in generateLists(self.__w):
-                for k in generateLists(self.__w):
-                    cand = [list(i), list(j), list(k)]
-                    if checkLine(1):
-                        newCands.append(cand)
-
-        for i in xrange(3, self.__h):
-            oldCands = newCands
-            newCands = []
-
-            for j in oldCands:
-                for k in generateLists(self.__w):
-                    cand = list(j)
-                    cand.append(list(k))
-                    if checkLine(i - 1):
-                        newCands.append(cand)
-
-        for cand in newCands:
-            if checkLine(self.__h - 1) and checkLine(0):
-                return cand
-
-        return None
-
-    def generate(self, num, findPrev = False):
+    def generate(self, num):
         if num < self.__minIter - 1:
             return "Overflow"
 
         elif num == self.__minIter - 1:
-            if findPrev:
-                prev = self.__findPrev(self.__cache[self.__minIter])
-                if prev is None:
-                    return "No prev"
-                else:
-                    self.__cache[num] = prev
-                    self.__minIter = num
+            if self.__h > 7:
+                return "Field too big"
+            prev = self.__findPrev(self.__cache[self.__minIter])
+            if prev is None:
+                return "No prev"
             else:
-                return "Prev warning"
+                self.__cache[num] = prev
+                self.__minIter = num
         else:
             bestKey = num
             keys = self.__cache.keys()
@@ -99,7 +65,7 @@ class field:
                         dest[i][j] = self.__checkCell(curr, i, j)
 
                 curr = dest
-                self.__cache[step] = curr
+                self.__cache[step + 1] = list(curr)
             self.__cache[num] = curr
 
         self.__currIter = num
@@ -110,6 +76,9 @@ class field:
 
     def getCurrIter(self):
         return self.__currIter
+
+    def getMinIter(self):
+        return self.__minIter
 
 
 
@@ -195,17 +164,21 @@ small = [[0, 0, 0, 0],
          [0, 1, 1, 0],
          [0, 0, 0, 0]]
 
-f = field(glider)
-show(f)
-raw_input()
-i = 1
-while f.generate(i, True) == "OK":
-    show(f)
-    i += 1
-    raw_input()
-print "Fail"
-raw_input()
-#while True:
-#    raw_input()
-#    f.move(100)
-#    show(f)
+gliders = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+           [0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+           [0, 1, 1, 1, 0, 0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+           [0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+           [0, 1, 1, 1, 0, 0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+#f = field(small)
+#show(f)
+#raw_input()
+#i = -1
+#print f.generate(i)
+#show(f)
+#raw_input()
