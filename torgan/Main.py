@@ -5,13 +5,16 @@ input_grid = []
 input_dict = []
 
 try:
+    if len(sys.argv) != 3:
+        print "Error: Wrong count of parameters!"
+        exit(1)
 
-    file = open("grid.txt")
+    file = open(sys.argv[1])
     for line in file.readlines():
         input_grid.append(line.split())
     file.close()
 
-    file = open("dict.txt")
+    file = open(sys.argv[2])
     for line in file.readlines():
         input_dict.extend(line.split())
     file.close()
