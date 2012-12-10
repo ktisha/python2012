@@ -1,4 +1,3 @@
-import os
 from map.map import Map
 
 def main():

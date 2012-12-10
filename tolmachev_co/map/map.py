@@ -16,7 +16,7 @@ class Map:
         self.__height = height
         self.__actors_dictionary[Coordinate(7, 7)] = Pillar()
         self.__actors_dictionary[Coordinate(3, 10)] = Lamp()
-        self.__actors_dictionary[Coordinate(3, 15)] = Policeman()
+        self.__actors_dictionary[Coordinate(3, 15)] = Policeman(Coordinate(3, 15))
         self.__actors_dictionary[Coordinate(15, 4)] = Beggar()
         self.__actors_dictionary[Coordinate(-1, 9)] = Tavern()
 
@@ -88,22 +88,6 @@ class Map:
         for coordinate, actor in zip(coordinates, actors):
             if isinstance(actor, Policeman) :
                return coordinate
-
-    def is_empty_field(self, coordinate):
-        if coordinate in self.__actors_dictionary:
-            return False
-        else :
-            return True
-
-    def is_empty_field_except_sleeping_alcoholic(self, coordinate):
-        if coordinate in self.__actors_dictionary:
-            actor = self.__actors_dictionary[coordinate]
-            if(isinstance(actor, Alcoholic)) :
-                if actor.is_sleeping() :
-                    return True
-            return False
-        else :
-            return True
 
 
 
