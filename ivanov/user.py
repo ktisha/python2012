@@ -129,8 +129,13 @@ def new_user(connection, username, password):
     # the hashed password is what we insert
     password_hash = make_pw_hash(password)
 
-    user = {'_id': username, 'password': password_hash, 'friends': [], 'friends_requests': [], 'challenges': [],
-            'achievements': []}
+    user = {'_id': username, 'password': password_hash,
+            'friends': [], 'friends_requests': [],
+            'challenges': [],
+            'challenges_requests_from_friends': [],
+            'achievements': [],
+            'achievements_requests_from_friends': [],
+    }
 
     db = connection.achievements_of_life
     users = db.users
