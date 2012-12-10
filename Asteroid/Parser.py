@@ -61,7 +61,7 @@ class Parser:
             self.add_to_database()
 
     def add_to_database(self):
-        conn = psycopg2.connect("dbname='asteroidb' user='postgres' host='localhost' password='vault13'")
+        conn = psycopg2.connect("dbname='asteroidb' user='postgres' host='localhost' password='superpass'")
         cur = conn.cursor()
 
         d = self.info
