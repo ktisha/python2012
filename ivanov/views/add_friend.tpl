@@ -16,7 +16,7 @@
 								<input type="text" name="username" value="{{username}}">
 							  </td>
 							  <td class="error">
-							{{name_error}}            
+							{{username_error}}
 							  </td>
 							</tr>
 						  </table>

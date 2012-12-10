@@ -31,21 +31,20 @@ class QuickSearcher(BaseSearcher):
             # если слово однословное, то должны проверить,
             # входит ли оно в данного кандидата
             word_ids = self.word_to_bag_ids_redis.smembers(word)
-            for id in candidates:
-                if id[0] in id_wordsInfo:
-                    id_wordsInfo[id[0]][1] += check_link_between_word_and_item(id, word_ids)
+            for candidate_id in candidates:
+                if candidate_id[0] in id_wordsInfo:
+                    id_wordsInfo[candidate_id[0]][1] += check_link_between_word_and_item(candidate_id, word_ids)
                 else:
-                    id_wordsInfo[id[0]] = [id[1], check_link_between_word_and_item(id, word_ids)]
+                    id_wordsInfo[candidate_id[0]] = [candidate_id[1], check_link_between_word_and_item(candidate_id, word_ids)]
         return id_wordsInfo
     def find_bag_of_words_for_tag(self, bag_of_words):
-        bag_ids_passed_threshold = set()
+        bag_ids_passed_threshold = {}
         if len(bag_of_words) != 0:
 
             number_of_one_symbol_words = count_one_symbol_words(bag_of_words)
             original_len = len(bag_of_words) - number_of_one_symbol_words
             #original_len = len(bag_of_words)
             self.word_to_bag_ids_redis_quick.zunionstore("union", bag_of_words)
-
 
             if number_of_one_symbol_words == 0:
                 cur_ids = []
@@ -64,29 +63,6 @@ class QuickSearcher(BaseSearcher):
 
 
 
-'''
-    def find_bag_of_words_for_tag(self, bag_of_words):
-        number_of_one_symbol_words = count_one_symbol_words(bag_of_words)
-        original_len = len(bag_of_words) - number_of_one_symbol_words
-        # print number_of_one_symbol_words
-        bag_ids_passed_threshold = set()
-
-        if number_of_one_symbol_words == 0:
-            cur_ids = []
-            #find all bag ids, where words were mentioned
-            for word in bag_of_words:
-                cur_ids += self.word_to_bag_ids_redis.smembers(word)
-
-            #for each bag id count how many words from tag it has
-            if len(cur_ids) != 0:
-                id_freq = Counter(cur_ids)
-                bag_ids_passed_threshold = self.choose_keys_passed_threshold(id_freq, original_len)
-        else:
-            id_wordsInfo = self.create_wordInfo_one_symbol_words(bag_of_words)
-            bag_ids_passed_threshold = self.choose_keys_passed_threshold_with_one_symbol_words(id_wordsInfo, original_len)
-
-        return bag_ids_passed_threshold
-'''
 # todo
 # если tag пересекается только с категорией (mod key 3 == 2)
 # то это не зачет

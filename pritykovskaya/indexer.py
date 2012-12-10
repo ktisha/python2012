@@ -52,3 +52,7 @@ def create_indexes():
                 word_ids_redis_quick.zadd(word, 1, (item_id - 1)*3 + i - 1)
 
     disconnect_db(db)
+
+if __name__ == "__main__":
+    create_normalized_index()
+    create_indexes()

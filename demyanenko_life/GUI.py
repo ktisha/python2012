@@ -31,7 +31,7 @@ class lifeGUI:
         self.currIter = StringVar()
         self.step = StringVar()
 
-        self.backImg = ImgTk.PhotoImage(file = "prev.png")
+        self.backImg = ImgTk.PhotoImage(file = "res\\prev.png")
         oneBackBtn = Button(self.root, command = self.moveOneBack, image = self.backImg)
         oneBackBtn.place(cnf = {"width": 32, "height": 32, "x": 3, "y": 3})
 
@@ -39,11 +39,11 @@ class lifeGUI:
         currIterLbl.place(cnf = {"width": 67, "height": 32, "x": 38, "y": 3})
         self.currIter.set("0")
 
-        self.fwdImg = ImgTk.PhotoImage(file = "next.png")
+        self.fwdImg = ImgTk.PhotoImage(file = "res\\next.png")
         oneForwardBtn = Button(self.root, command = self.moveOneForward, image = self.fwdImg)
         oneForwardBtn.place(cnf = {"width": 32, "height": 32, "x": 108, "y": 3})
 
-        self.manyBackImg = ImgTk.PhotoImage(file = "manyprev.png")
+        self.manyBackImg = ImgTk.PhotoImage(file = "res\\manyprev.png")
         manyBackBtn = Button(self.root, command = self.moveManyBack, image = self.manyBackImg)
         manyBackBtn.place(cnf = {"width": 32, "height": 32, "x": 3, "y": 38})
 
@@ -52,7 +52,7 @@ class lifeGUI:
         stepEnt.focus()
         self.step.set("2")
 
-        self.manyFwdImg = ImgTk.PhotoImage(file = "manynext.png")
+        self.manyFwdImg = ImgTk.PhotoImage(file = "res\\manynext.png")
         manyForwardBtn = Button(self.root, command = self.moveManyForward, image = self.manyFwdImg)
         manyForwardBtn.place(cnf = {"width": 32, "height": 32, "x": 108, "y": 38})
 

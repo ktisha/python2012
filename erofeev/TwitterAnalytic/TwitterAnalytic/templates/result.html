@@ -41,6 +41,42 @@
     </script>
 </head>
 <body>
+
+Статистика:<br>
+<table border="1px">
+    <tr>
+        <td></td>
+        <td>Вручную</td>
+        <td>Автоматически</td>
+        <td>%</td>
+    </tr>
+    <tr>
+        <td class="happy">Положительный</td>
+        <td>{{ stat.manual_happy }}</td>
+        <td>{{ stat.auto_happy }}</td>
+        <td>{{ stat.happy }}</td>
+    </tr>
+    <tr>
+        <td class="neutral">Нейтральный</td>
+        <td>{{ stat.manual_neutral }}</td>
+        <td>{{ stat.auto_neutral }}</td>
+        <td>{{ stat.neutral }}</td>
+    </tr>
+    <tr>
+        <td class="negative">Отрицательный</td>
+        <td>{{ stat.manual_negative }}</td>
+        <td>{{ stat.auto_negative }}</td>
+        <td>{{ stat.negative }}</td>
+    </tr>
+    <tr>
+        <td class="spam">Спам</td>
+        <td>{{ stat.manual_spam }}</td>
+        <td>{{ stat.auto_spam }}</td>
+        <td>{{ stat.spam }}</td>
+    </tr>
+</table>
+<br>
+
 <form action="recipient" method="post" id="tweets">
     <table cellspacing="0" border="1px">
         <thead>

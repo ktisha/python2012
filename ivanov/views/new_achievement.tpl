@@ -41,6 +41,7 @@
 							  </td>
 							</tr>
 						  </table>
+						  <input type="hidden" name="friend" value="{{friend}}">
 						  <input type="submit" value="Create">
 						</form>
 					</td>
