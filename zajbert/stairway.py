@@ -34,7 +34,7 @@ def searchNewWords (word):
     return False
 
 def itIsImpossible():
-    flagImpossible = True
+    global flagImpossible = True
     with codecs.open('answer.txt', 'w', 'utf-8') as answerFile:
         answerFile.write('''it's imposible!!''')
 
@@ -53,7 +53,7 @@ else:
     visitedWords = [firstWord]
     currentNumber = 0
     currentWord = firstWord
-    while(not searchNewWords(currentWord)):
+    while not searchNewWords(currentWord):
         if len(quequeToVisit) is 0:
             itIsImpossible()
         currentWord = quequeToVisit[0]
