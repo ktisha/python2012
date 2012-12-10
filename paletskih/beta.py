@@ -5,7 +5,6 @@ import os
 from PyQt4 import QtGui, QtCore
 
 
-""" We do believe input is correct"""
 n = 0
 m = 0
 wall =  list()
@@ -38,7 +37,7 @@ class MyView(QtGui.QGraphicsView):
                 self.walls = self.walls + [QtGui.QGraphicsLineItem(w[1]*20, w[2]*20 - 20, w[1]*20, w[2]*20)]
             else:
                 self.walls = self.walls + [QtGui.QGraphicsLineItem(w[1]*20 - 20, w[2]*20, w[1]*20, w[2]*20)]
-        self.walker = QtGui.QGraphicsPixmapItem(QtGui.QPixmap("cross.bmp"))
+        self.walker = QtGui.QGraphicsPixmapItem(QtGui.QPixmap('cross.bmp'))
         self.scene.addItem(self.walker)
 
         for w in self.frame:
@@ -65,7 +64,7 @@ class MyView(QtGui.QGraphicsView):
         self.a.setTimeLine(self.tl)
 
         for i in range(l):
-            self.a.setPosAt(i/l,  QtCore.QPointF(-15 + path[i][1]*20, -15 + path[i][2]*20))
+            self.a.setPosAt(i/l,  QtCore.QPointF(-20 + path[i][1]*20, -20 + path[i][2]*20))
             if i < l - 1:
                 if path[i+1][0] > path[i][0]:
                     w = findwall(path[i][1], path[i][2], path[i+1][1], path[i+1][2])
@@ -77,47 +76,24 @@ class MyView(QtGui.QGraphicsView):
                     self.wallsAnim[j].setPosAt((i+1)/l, QtCore.QPointF(20*(n - w[1]),20*(m - w[2])))
         self.tl.start()
 
+
 class Example(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, par):
         super(Example, self).__init__()
-        
+        self.parent = par
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(300, 300, 315, 315)
+        self.setGeometry(300, 300, min(500, n*20 + 80), min(500, m*20 + 80))
         self.setWindowTitle('Aperture Laboratories')
         self.MV = MyView()
-        self.bt = QtGui.QPushButton("Choose New Labyrinth")
-        self.bt.clicked.connect(self.chooseFile)
+        self.bt = QtGui.QPushButton('Choose New Labyrinth')
+        self.bt.clicked.connect(self.parent.startOver)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.MV)
         vbox.addWidget(self.bt)
         self.setLayout(vbox)
-        self.show()
-        
-    def chooseFile(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', 
-                '')
-        if prework(fname) != '':
-            start(self)
-            
-        
-def start(e):
-    e.hide()
-    e = Example()
-    e.show()
-        
-def start(q):
-    q.close()
-    ex = Example()
-    ex.show()
-        
-def restart(e):
-    e.close()
-    q = Question()
-    
-
-        
+                  
 
 def findwall(x0, y0, x1, y1):
         if abs(x0 - x1) + abs(y0 - y1) != 1:
@@ -250,13 +226,30 @@ def prework(fname):
         path = [prev[cur]] + path
         cur = prev[cur]
 
+       
+
+class App(QtGui.QApplication):
+    def __init__(self, *args):
+        QtGui.QApplication.__init__(self, *args)
+        self.connect(self, QtCore.SIGNAL('lastWindowClosed()'), self.exit)
+        self.main = None
+        self.startOver()
+        
+    def startOver(self):
+        fname = QtGui.QFileDialog.getOpenFileName(None, 'Choose labyrinth file')
+        if prework(fname) == '':
+            return
+        if not self.main == None:
+            self.main.close()
+        self.main = Example(self)
+        self.main.show()
+        
+
 
 def main():
-    prework('input1.txt')
-    app = QtGui.QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
-    ex = Example()
-    sys.exit(app.exec_())
+    global app
+    app = App(sys.argv)
+    app.exec_()
 
 
 if __name__ == '__main__':
