@@ -1,4 +1,3 @@
-from actors.bottle import Bottle
 from way_finder import WayFinder
 
 class BeggarWayFinderWithBottle(WayFinder):

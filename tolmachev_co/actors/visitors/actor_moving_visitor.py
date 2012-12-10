@@ -4,8 +4,11 @@ from actors.pilllar import Pillar
 from actors.visitors.actor_visitor import ActorVisitor
 import random
 from map.coordinate import Coordinate
+from map.way_finder.beggar_way_finder import BeggarWayFinder
+from map.way_finder.beggar_way_finder_with_bottle import BeggarWayFinderWithBottle
 from map.way_finder.policeman_way_finder import PolicemanWayFinder
 from map.way_finder.policeman_way_finder_with_alcoholic import PolicemanWayFinderWithAlcoholic
+
 
 class ActorMovingVisitor(ActorVisitor):
     class MovingDirection:
@@ -54,7 +57,32 @@ class ActorMovingVisitor(ActorVisitor):
 
 
     def visit_beggar(self, beggar):
-        pass
+        if beggar.is_in_tavern() :
+            beggar.spend_time_in_tavern()
+            if beggar.is_ready_to_search_a_bottle() :
+                beggar.start_searching_a_bottle()
+
+        if beggar.is_searching_a_bottle() :
+            coordinate = self.__map.get_beggar_coord()
+            dict = self.__map.get_bottles()
+            wayFinder = BeggarWayFinder(self.__map, coordinate, dict.keys())
+            new_coord = wayFinder.get_next_coordinate_to_go()
+            if new_coord:
+                if  self.__map.has_actor_at(new_coord):
+                    beggar.start_walking_with_bottle()
+                self.__map.remove(coordinate)
+                self.__map.put(new_coord, beggar)
+        elif beggar.is_walking_with_a_bottle() :
+            coordinate = self.__map.get_beggar_coord()
+            end_coords = [beggar.get_tavern_coordinate()]
+            wayFinder = BeggarWayFinderWithBottle(self.__map, coordinate, end_coords)
+            new_coord = wayFinder.get_next_coordinate_to_go()
+            if new_coord:
+                if  new_coord in end_coords:
+                    beggar.start_to_be_in_tavern()
+                self.__map.remove(coordinate)
+                self.__map.put(new_coord, beggar)
+
 
 
     def visit_pillar(self, pillar):
@@ -85,8 +113,7 @@ class ActorMovingVisitor(ActorVisitor):
                     policeman.start_walking_with_alcoholic()
                 self.__map.remove(coordinate)
                 self.__map.put(new_coord, policeman)
-
-        if policeman.is_walking_with_alcoholic():
+        elif policeman.is_walking_with_alcoholic():
             coordinate = self.__map.get_policeman_coord()
             end_coords = [policeman.get_station_coordinate()]
             wayFinder = PolicemanWayFinderWithAlcoholic(self.__map, coordinate, end_coords)

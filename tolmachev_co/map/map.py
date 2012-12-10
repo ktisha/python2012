@@ -1,5 +1,6 @@
 from actors.alcoholic import Alcoholic
 from actors.beggar import Beggar
+from actors.bottle import Bottle
 from actors.lamp import Lamp
 from actors.pilllar import Pillar
 from actors.policeman import Policeman
@@ -17,7 +18,7 @@ class Map:
         self.__actors_dictionary[Coordinate(7, 7)] = Pillar()
         self.__actors_dictionary[Coordinate(3, 10)] = Lamp()
         self.__actors_dictionary[Coordinate(3, 15)] = Policeman(Coordinate(3, 15))
-        self.__actors_dictionary[Coordinate(15, 4)] = Beggar()
+        self.__actors_dictionary[Coordinate(15, 4)] = Beggar(Coordinate(15, 4))
         self.__actors_dictionary[Coordinate(-1, 9)] = Tavern()
 
     def has_actor_at(self, coordinate):
@@ -80,7 +81,18 @@ class Map:
                         if isinstance(lightened_actor, Alcoholic):
                             if lightened_actor.is_sleeping() :
                                 sleeping_alcoholics[lightened_coordinate] = lightened_actor
-            return sleeping_alcoholics
+        return sleeping_alcoholics
+
+    def get_bottles(self):
+        bottles = {}
+        for y in xrange(0, self.__height):
+            for x in xrange(0, self.__width):
+                coordinate = Coordinate(x, y)
+                if coordinate in self.__actors_dictionary:
+                    actor = self.__actors_dictionary[coordinate]
+                    if isinstance(actor, Bottle):
+                        bottles[coordinate] = actor
+        return bottles
 
     def get_policeman_coord(self):
         coordinates = self.__actors_dictionary.keys()
@@ -88,6 +100,13 @@ class Map:
         for coordinate, actor in zip(coordinates, actors):
             if isinstance(actor, Policeman) :
                return coordinate
+
+    def get_beggar_coord(self):
+        coordinates = self.__actors_dictionary.keys()
+        actors = self.__actors_dictionary.values()
+        for coordinate, actor in zip(coordinates, actors):
+            if isinstance(actor, Beggar) :
+                return coordinate
 
 
 
