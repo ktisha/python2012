@@ -51,7 +51,6 @@ def count_metrics(genes_sam_path, predict_sam_path):
 def compare_data(tools, genomes, data_dir):
     for genome_name, genes_path in genomes.iteritems():
         for tool in tools:
-            print tool.executable
             path_result = tool.execute(genome_name)
             path_prefix = make_sam_out(path_result, genes_path, genome_name,
                 data_dir, tool.name)
