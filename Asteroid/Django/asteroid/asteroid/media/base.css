@@ -1,0 +1,13 @@
+body {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+a {
+    color: #7799FF;
+    font: bold 10pt verdana;
+}
+
+.info_item {
+    font: 11pt verdana;
+}

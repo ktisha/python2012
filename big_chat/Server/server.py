@@ -1,10 +1,9 @@
-from twisted.internet import reactor
 from twisted.internet.protocol import ServerFactory
 from twisted.web.sux import XMLParser
 import base64
 from stanza import Stanza
 import logging
-#todo decorator
+
 def get_step(number):
     file = open("Steps/step" + str(number) + ".xml")
     res = file.read()
@@ -18,7 +17,6 @@ class XMLChatProtocol(XMLParser):
         self.realm = None
         self.login_res = None
         self.login = None
-
         self.id = None
         self.stack_stanzas = []
         self.success_auth = False
@@ -28,7 +26,6 @@ class XMLChatProtocol(XMLParser):
         return self.username
 
     def gotTagStart(self, name, attributes):
-    # XMLParser.gotTagStart(self, name, attributes)
         stanza = Stanza(name, attributes)
         self.stack_stanzas.append(stanza)
         self.__handle_()
@@ -76,7 +73,6 @@ class XMLChatProtocol(XMLParser):
             if client[0] != self.username:
                 client[1].report_presence(self)
 
-
     def __handle_message_(self, stanza):
         attrs = stanza.get_attrs()
         to = attrs['to'].split("@")[0]
@@ -104,7 +100,6 @@ class XMLChatProtocol(XMLParser):
                 self.transport.loseConnection()
         else:
             self.__send_(get_step(5))
-
 
     def handle_query(self, stanza):
         attrs = stanza.get_attrs()
@@ -157,8 +152,6 @@ class XMLChatProtocol(XMLParser):
     def connectionLost(self, reason):
         self.report_presence_unavailable()
         self.factory.remove_user(self.username)
-        #  XMLParser.connectionLost(self,reason)
-
 
     def report_presence(self, other_user):
         stanza = Stanza("presence", {'from': other_user.login, 'to': self.login_res})
@@ -169,22 +162,17 @@ class XMLChatProtocol(XMLParser):
             stanza = Stanza("presence", {'from': self.login, 'to': user[1].login_res, 'type': 'unavailable'})
             user[1].__send_(stanza.to_xml())
 
-
     def add_user(self):
         self.factory.add_client(self)
 
-
     def gotTagEnd(self, name):
-    # XMLParser.gotTagEnd(self, name)
         stack = self.stack_stanzas
         stanza = stack.pop()
         stanza.close()
         stack.append(stanza)
         self.__handle_()
 
-
     def gotText(self, data):
-    # XMLParser.gotText(self, data)
         length = len(self.stack_stanzas)
         if length > 0:
             self.stack_stanzas[length - 1].add_text(data)
@@ -192,7 +180,6 @@ class XMLChatProtocol(XMLParser):
 
 class ChatProtocolFactory(ServerFactory):
     protocol = XMLChatProtocol
-
 
     def __init__(self, host):
         self.__clients_ = {} #user_name - > XMLChatProtocol todo add support resourses

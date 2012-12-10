@@ -3,7 +3,13 @@ __author__ = "amarch"
 
 from lxml import etree
 
-def getSentences_fromXML(filepath, sentencesno=0):
+# Метод, извлекающий из текстов со снятой омонимией в формате XML (например [http://opencorpora.org/?page=downloads])
+# прдложения и характеристики слов с помощью XPath. В качестве аргументов используется путь до файла с тестами и количество
+# извлекаемых предложений (если указано больше чем возможно - извлекается сколько возможно, по умолчанию извлекаются все).
+# Итоговый список имеет формат списка для всех предложений, где каждое предложение хранится как
+# ['предложение', [{'norm','info','class'}, 'token']], т.е. текст предложения и информация для всех токенов.
+
+def getSentencesFromXML(filepath, sentencesno = 0):
     tree = etree.parse(filepath)
     sentences = []
     if sentencesno < 0:
@@ -13,7 +19,6 @@ def getSentences_fromXML(filepath, sentencesno=0):
         if sentencesno > 0:
             q = min(len(id_sentences), sentencesno)
             id_sentences = id_sentences[0:q]
-
         for id in id_sentences:
             tmp = []
             quer = ''.join(["//text/paragraphs/paragraph/sentence[@id = ",id,"]/source/text()"])
@@ -39,8 +44,11 @@ def getSentences_fromXML(filepath, sentencesno=0):
             sentences.append(tmp)
         return sentences
 
+# Примеры использования
 if __name__ == "__main__":
-    sentences =  getSentences_fromXML("/home/amarch/Documents/CSCenter/Python/corpus/files/export/annot/small.xml", 1)
 
+    # Извлечение первого предложения и информации о содержащихся токенах в список.
+    sentences =  getSentencesFromXML("/home/amarch/Documents/CSCenter/Python/corpus/files/export/annot/small.xml", 1)
+    print sentences[1]
 
 
