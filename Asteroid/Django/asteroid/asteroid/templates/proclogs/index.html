@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Asteroids list{% endblock %}
+
+{% block content %}
+    <h1>Observed objects list:</h1>
+    {% if asteroids %}
+        <ul>
+        {% for aster in asteroids %}
+            <li><a href="{% url proclogs.views.asteroid_info aster.designated_name %}">{{ aster.object_name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no asteroids in the database.</p>
+    {% endif %}
+{% endblock %}

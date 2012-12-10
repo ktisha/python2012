@@ -1,25 +1,29 @@
 __author__ = 'Pavel Moskalevich'
 
 class Ngram:
-    def __init__(self, count = 0, prob = 0, bow = 0):
+    def __init__(self, count = 0, prob = 0):
         self.count = count
         self.prob  = prob
-        self.bow   = bow
 
     def set_count(self, count):
         self.count = count
 
-    def set_count(self, prob):
+    def set_prob(self, prob):
         self.prob = prob
 
-    def set_count(self, bow):
-        self.bow = bow
 
 class NgramStorage:
-    def __init__(self):
-        self.n_grams = {}
+    def __init__(self, max_order):
+        self.n_grams    = {}
+        self.max_order_ = max_order
+
+    def __iter__(self):
+        return self.n_grams.__iter__()
 
     def set_n_gram(self, words_tuple, ngram):
+        if len(words_tuple) > self.max_order_:
+            return
+
         if not self.n_grams.has_key(len(words_tuple)):
             self.n_grams[len(words_tuple)] = {}
         self.n_grams[len(words_tuple)][words_tuple] = ngram
@@ -29,15 +33,23 @@ class NgramStorage:
             return None
         return self.n_grams[len(words_tuple)][words_tuple]
 
+    def get_n_grams(self, order):
+        if not self.n_grams.has_key(order):
+            return []
+        return filter(lambda x: len(x) == order, self.n_grams[order].keys())
+
+    def max_order(self):
+        return self.max_order_
+
     def total_n_grams(self, order = 0):
         ''' Returns total number of n-grams of order (sum of all counts).
         If order is zero, than summarizes across all orders.
         '''
         if order == 0:
-            sum = 0
-            for ord in self.n_grams.keys():
-                sum = sum + reduce(lambda cum, x: cum + self.n_grams[ord][x].count, self.n_grams[ord].keys(), 0)
-            return sum
+            summa = 0
+            for ng_ord in self.n_grams.keys():
+                summa = summa + reduce(lambda cum, x: cum + self.n_grams[ng_ord][x].count, self.n_grams[ng_ord].keys(), 0)
+            return summa
         else:
             if self.n_grams.has_key(order):
                 return reduce(lambda cum, x: cum + self.n_grams[order][x].count, self.n_grams[order].keys(), 0)

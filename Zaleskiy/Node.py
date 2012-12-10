@@ -3,8 +3,6 @@ import Coordinates
 
 class Node:
 
-    map
-
     def __init__(self, coordinates, bombs, distance_from_start, parent, action):
         self.coordinates = coordinates
         self.bombs = bombs

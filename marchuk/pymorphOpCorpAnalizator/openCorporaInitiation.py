@@ -1,12 +1,20 @@
 __author__ = 'amarch'
-#-*- coding: utf-8 -*-
-import sys
+# -*- coding: utf-8 -*-
+
 import os
 
-tagsDictionary = {'S':'NOUN', 'V':'VERB', 'A':'ADV' }
+
+# Класс, релализующий работу со словарем Открытого корпуса русского языка [opencorpora.org]
 
 class OpCorpDict():
+
     path = ''
+
+# Метод инициализации словаря, аргументами служат путь до словаря и флаг принудительного разбиения.
+# Для ускорения работы со словарем, имеющем не менее 5 миллионов вхождений, словарь разбивается на отдельные части
+# вида Xpart.dict.opcorpora.txt, где X - числовой код первой буквы слова.
+# Разбиение происходит один раз, все части сохраняются в папку '/divideOpCorp', возможно принудительное разбиение
+# при установленном флаге 'divide=True'.
 
     def __init__(self, path, divide=False):
         self.path = path
@@ -15,20 +23,23 @@ class OpCorpDict():
                 os.removedirs(''.join([path, '/dividedOpCorp']))
                 os.makedirs(''.join([path, '/dividedOpCorp']))
                 self.divideDictionary()
-            except Exception:
-                print 'Good news everyone!'
+            except IOError,OSError:
+                print 'OpCorpDict can\'t divide dictionary. Please check your rights in destination. '
         else:
             if not os.path.exists(''.join([path, '/dividedOpCorp'])):
                 os.makedirs(''.join([path, '/dividedOpCorp']))
                 self.divideDictionary()
         self.path = ''.join([path, '/dividedOpCorp'])
 
+# Метод разбиения словаря
+# Разбиение происходит по первой букве слова, если у слова есть формы на разные буквы (ЕХАТЬ и ПОЕХАТЬ) - все формы
+# записываются во все подходящие файлы
 
     def divideDictionary(self):
         print 'Start divide whole dictionary into small parts. Please wait.'
         try:
             wholeDictionary = open(''.join([self.path,'/dict.opcorpora.txt']),'r')
-            hash = []
+            letterHashes = []
             newWord = True
             wordSet = []
             for line in wholeDictionary.readlines():
@@ -37,18 +48,18 @@ class OpCorpDict():
                     newWord = True
                     for line in wordSet:
                         if ord(line[0]) in range(1024,1106):
-                            hash.append(ord(line[0]))
-                    hash = list(set(hash))
-                    for h in hash:
+                            letterHashes.append(ord(line[0]))
+                    letterHashes = list(set(letterHashes))
+                    for h in letterHashes:
                         dictPart = open(''.join([self.path,'/dividedOpCorp/',str(h),'part.dict.opcorpora.txt']),'aw+')
                         dictPart.write("\n")
                         for word in wordSet:
                             try:
                                 dictPart.write(word.encode('utf-8'))
                             except IOError:
-                                print 'Can`t open file', ''.join([self.path,'/dividedOpCorp/',str(hash),'part.dict.opcorpora.txt'])
+                                print 'Can`t open file', ''.join([self.path,'/dividedOpCorp/',str(letterHashes),'part.dict.opcorpora.txt'])
                         dictPart.close()
-                    hash = []
+                    letterHashes = []
                     wordSet = []
                 else:
                     if newWord:
@@ -56,15 +67,16 @@ class OpCorpDict():
                         newWord = False
                     else:
                         wordSet.append(line)
+            wholeDictionary.close()
             print 'Finish divide whole dictionary into small parts.'
         except IOError:
-            print 'Wrong path to OpenCorp dictionary. '
-        finally:
-            wholeDictionary.close()
+            print 'Wrong path to OpenCorp dictionary, cant open dictionary file. '
 
-    def findWord(self, words):
+# Метод, выводящий все возможные совпадения слов в словаре со словами из входного предложения
+
+    def findWord(self, sentence):
         matches = []
-        for token in words.split():
+        for token in sentence.split():
             token = token.upper()
             key = ord(token[0])
             dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
@@ -73,9 +85,14 @@ class OpCorpDict():
                 line = unicode(line, 'utf-8')
                 if ''.join([token,'	']) in line[0:len(token)+1]:
                     print line[:-2]
-                    matches.add(line[:-2])
+                    matches.append(line[:-2])
             if matches == []:
                 print 'Nothing >:(\n'
+
+# Метод, возвращающий всю найденную в словаре для данного слова грамматическую информацию
+# Для каждого найденного вхождения возвращается словарь с ключами 'norm' - нормальная форма слова, 'class' - часть речи,
+# 'info' - список остальной информации (падеж, часть речи, лицо, склонение...). Описание обозначений смотреть тут:
+#  [ https://bitbucket.org/kmike/russian-tagsets/src/9592f8906911/russian_tagsets/opencorpora.py ]
 
     def getGramInfo(self, word):
             word = word.upper()
@@ -92,13 +109,20 @@ class OpCorpDict():
                 graminfo.append(tmp)
             return graminfo
 
+# Метод, вовзвращающий все возможные формы слова, найденные в словаре.
+# С помощью этого метода можно например склонять глаголы по падежам.
+# Возвращается список, где каждое вхождение - пара из формы слова и информации по ней
+
     def getAllForms(self, word):
         word = word.upper()
         key = ord(word[0])
         forms = []
         tmp = []
         newEntity = False
-        dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        try:
+            dictionary = open(''.join([self.path,'/',str(key),'part.dict.opcorpora.txt']),'r+')
+        except IOError:
+            return []
         for line in dictionary.readlines():
             line = unicode(line, 'utf-8')
             if line == '\n':
@@ -113,25 +137,24 @@ class OpCorpDict():
                 newEntity = True
         return forms
 
-
-
-
+# Примеры использования
 if __name__ == '__main__':
-    #Examples
-    opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
-    #opcordict.findWord(u'Мама мыла раму')
-    #opcordict.findWord(u'делаю')
-#    all = opcordict.getAllForms(u'военный')
-#    for form in all:
-#        print 'New form:\n'
-#        for ind in form:
-#            print ind['form'], ind['info']
-#    print opcordict.getGramInfo(u'злословия')
-#    all =  opcordict.getAllForms(u'злословия')
-#    print all
-#    for ent in all:
-#        for x in ent:
-#            print x['form']
 
-    # ITS A TRAP!
-    #opcordict.findWord(u'Выходить')
+    # Создание экземпляра словаря
+    opcordict = OpCorpDict('/home/amarch/Documents/CSCenter/Python')
+
+    # Все вхождения для слов из предложения
+    opcordict.findWord(u'Мама мыла раму')
+
+    # Все вхождения слова в словарь
+    opcordict.findWord(u'делаю')
+
+    # Все формы данного слова
+    all = opcordict.getAllForms(u'делаю')
+    for form in all:
+        print 'New form of u\'делаю\':\n'
+        for ind in form:
+            print ind['form'],ind['info']
+
+    # Информация из словаря для данного слова
+    print opcordict.getGramInfo(u'делаю')
