@@ -167,6 +167,9 @@ class ImgStatisticCounter:
             arr = [cls.__color_distance_(image['main_colors'][min_idx], j) for j in ref['main_colors']]
             result += 0.5 * round(math.fabs(min(arr) - min_value))
 
+        expectation_values_distance = cls.__color_distance_(ref['expectation_value'], image['expectation_value'])
+        return (l / 2) * expectation_values_distance + result
+
 
     @classmethod
     def are_similar(cls, ref, image, counted_distance=None):
