@@ -1,3 +1,5 @@
+from __builtin__ import classmethod
+
 __author__ = 'Katerina'
 
 import Image
@@ -32,7 +34,7 @@ class ImgStatisticCounter:
   standard_deviation = 0
 
   __colour_num_ = 256
-  __min_color_difference = ((pow(255, 3) * 3) ** (1 / 3.0)) * 0.01
+  __min_color_difference = ((pow(255, 3) * 3) ** (1 / 3.0)) * 0.05
 
   UPPER_THRESHOLD = 500
   LOWER_THRESHOLD = 250
@@ -130,7 +132,7 @@ class ImgStatisticCounter:
     def value(rgb):
       return 1 - colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2])[2]
 
-    s = (min(saturation(rgb1), saturation(rgb2)) + min(value(rgb1), value(rgb2)))
+    s = (min(saturation(rgb1), saturation(rgb2)) + 0.5 * min(value(rgb1), value(rgb2)))
     s = s if s > 1 else 2
     return cls.point_3d_distance(rgb1, rgb2) / math.log(s)
 
@@ -144,12 +146,27 @@ class ImgStatisticCounter:
     image = image.__dict__ if not isinstance(image, dict) else image
     ref = ref.__dict__ if not isinstance(ref, dict) else ref
 
+    return (cls.__count_img_distance_(ref, image) + cls.__count_img_distance_(image, ref)) / 2.0
+
+  @classmethod
+  def __count_img_distance_(cls, ref, image):
     result = 0
     l = len(image['main_colors'])
 
     for i in ref['main_colors']:
-      arr = [cls.__color_distance_(i, j) for j in image['main_colors']]
-      result += min(arr)
+      min_value = cls.__color_distance_((0, 0, 0), (255, 255, 255))
+      min_idx = 0
+      for j in xrange(l):
+        value = cls.__color_distance_(i, image['main_colors'][j])
+        if value < min_value:
+          min_idx = j
+          min_value = value
+
+      #arr = [cls.__color_distance_(i, j) for j in image['main_colors']]
+      #result += min(arr)
+      result += min_value
+      arr = [cls.__color_distance_(image['main_colors'][min_idx], j) for j in ref['main_colors']]
+      result += 0.5 * round(math.fabs(min(arr) - min_value))
 
     expectation_values_distance = cls.__color_distance_(ref['expectation_value'], image['expectation_value'])
     return (l / 2) * expectation_values_distance + result
@@ -171,7 +188,7 @@ class ImgStatisticCounter:
     ref = ref.__dict__ if not isinstance(ref, dict) else ref
 
     deviation_dist = cls.deviation_distance(image, ref)
-    bounds = [(0.95, 300), (0.5, 350), (0.25, 400), (0.11, 450)]
+    bounds = [(0.95, 350), (0.5, 400), (0.25, 450), (0.11, 500)]
     f = lambda seed, (x, y) : seed or (deviation_dist < x and counted_distance < y)
 
     return reduce(f, bounds, True)
