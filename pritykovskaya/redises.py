@@ -1,5 +1,6 @@
 # coding=utf-8
 import redis
+import sys
 import config
 
 # как стоит делать: импортировать from config import * или только import config ?
@@ -24,4 +25,10 @@ def connect_word_to_bag_ids_quick():
 
 def __redis_connect(redis_id):
     r = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=redis_id)
-    return r
+    try:
+        r.client_list()
+    except redis.exceptions.ConnectionError:
+        print ("No connection to redis. Did you raise server?")
+        sys.exit(1)
+    else:
+        return r

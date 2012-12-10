@@ -1,4 +1,5 @@
 #coding: utf-8
+
 from django.http import HttpResponse
 
 from django.shortcuts import render, redirect
@@ -37,7 +38,7 @@ def result(request):
             return redirect("/search?error=many_t")
     except:
         #return redirect("/search?error=bad_n")
-        return "bad"
+        tweetsN = 20
 
     result = {}
     result['tweets'] = TweetsAnalysis.predictHappiness(TwitterStuff.getTweets(query, tweetsN, result_type))
@@ -48,6 +49,5 @@ def result(request):
 @csrf_exempt
 def recipient(request):
     """Ассинхронный приём новой информации от "учителя" о настроениях """
-
     TweetsAnalysis.addTeachedTweets(request.POST)
     return HttpResponse("OK")
