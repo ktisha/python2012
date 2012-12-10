@@ -69,49 +69,41 @@ class Map:
         lamps = self.get_lamps()
         lamps_coord = lamps.keys()
 
+        sleeping_alcoholics = {}
         for lamp_coord in lamps_coord :
             lamp = lamps[lamp_coord]
-            for lightened_y in xrange(lamp_coord.get_y() - lamp.get_lighting_radius(), lamp_coord.get_y() + lamp.get_lighting_radius()):
-                for lightened_x in xrange(lamp_coord.get_x() - lamp.get_lighting_radius(), lamp_coord.get_x() + lamp.get_lighting_radius()):
+            for lightened_y in xrange(lamp_coord.get_y() - lamp.get_lighting_radius(), lamp_coord.get_y() + lamp.get_lighting_radius() + 1):
+                for lightened_x in xrange(lamp_coord.get_x() - lamp.get_lighting_radius(), lamp_coord.get_x() + lamp.get_lighting_radius() + 1):
                     lightened_coordinate = Coordinate(lightened_x, lightened_y)
                     if lightened_coordinate in self.__actors_dictionary:
                         lightened_actor = self.__actors_dictionary[lightened_coordinate]
                         if isinstance(lightened_actor, Alcoholic):
                             if lightened_actor.is_sleeping() :
-                                dict[lightened_coordinate] = lightened_actor
-            return dict
+                                sleeping_alcoholics[lightened_coordinate] = lightened_actor
+            return sleeping_alcoholics
 
-    def __get_policeman_coord(self):
-        policeman = {}
+    def get_policeman_coord(self):
         coordinates = self.__actors_dictionary.keys()
         actors = self.__actors_dictionary.values()
         for coordinate, actor in zip(coordinates, actors):
             if isinstance(actor, Policeman) :
                return coordinate
 
-    def wave_algorithm(self) :
-        policeman_coord = self.__get_policeman_coord()
-        front = [policeman_coord]
-        visited = [policeman_coord]
-        next_front = []
+    def is_empty_field(self, coordinate):
+        if coordinate in self.__actors_dictionary:
+            return False
+        else :
+            return True
 
-        for front_coord in front :
-            neighbours = self.__get_neighbours(front_coord)
-            if
-
-
-    def __get_neighbours(self, coord):
-        left = Coordinate(coord.get_x() - 1, coord.get_y())
-        right = Coordinate(coord.get_x() + 1, coord.get_y())
-        up = Coordinate(coord.get_x(), coord.get_y() + 1)
-        down = Coordinate(coord.get_x(), coord.get_y() - 1)
-        candidates = [left, right, up, down]
-
-        neighbour = []
-        for coord in candidates :
-            if self.is_in_bounds(coord) :
-                neighbour += coord
-
+    def is_empty_field_except_sleeping_alcoholic(self, coordinate):
+        if coordinate in self.__actors_dictionary:
+            actor = self.__actors_dictionary[coordinate]
+            if(isinstance(actor, Alcoholic)) :
+                if actor.is_sleeping() :
+                    return True
+            return False
+        else :
+            return True
 
 
 

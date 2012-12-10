@@ -23,3 +23,9 @@ class Policeman (Actor):
 
     def start_walking_to_alcoholic(self):
         self.__current_state = PolicemanState.WALKING_TO_ALCOHOLIC
+
+    def start_walking_with_alcoholic(self):
+        self.__current_state = PolicemanState.WALKING_WITH_ALCOHOLIC
+
+    def start_to_be_at_station(self):
+        self.__current_state = PolicemanState.AT_THE_STATION
