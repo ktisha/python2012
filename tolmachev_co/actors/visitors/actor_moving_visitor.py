@@ -4,6 +4,7 @@ from actors.pilllar import Pillar
 from actors.visitors.actor_visitor import ActorVisitor
 import random
 from map.coordinate import Coordinate
+from map.way_finder import WayFinder
 
 class ActorMovingVisitor(ActorVisitor):
     class MovingDirection:
@@ -70,12 +71,31 @@ class ActorMovingVisitor(ActorVisitor):
     def visit_policeman(self, policeman):
         if policeman.is_at_the_station():
             dict = self.__map.get_lightened_sleeping_alcos()
-            if len(dict) > 0 :
+            if dict :
                 policeman.start_walking_to_alcoholic()
         elif policeman.is_walking_to_alcoholic() :
-
+            coordinate = self.__map.get_policeman_coord()
+            dict = self.__map.get_lightened_sleeping_alcos()
+            wayFinder = WayFinder(self.__map, coordinate, dict.keys())
+            path = wayFinder.find_path()
+            if path :
+                new_coord = path[0]
+                if  self.__map.has_actor_at(new_coord):
+                    policeman.start_walking_with_alcoholic()
+                self.__map.remove(coordinate)
+                self.__map.put(new_coord, policeman)
         elif policeman.is_walking_with_alcoholic():
-            pass
+            coordinate = self.__map.get_policeman_coord()
+            end_coords = [Coordinate(3, 14)]
+            wayFinder = WayFinder(self.__map, coordinate, end_coords)
+            path = wayFinder.find_path()
+            if path :
+                new_coord = path[0]
+            else :
+                new_coord = Coordinate(3, 15)
+                policeman.start_to_be_at_station()
+            self.__map.remove(coordinate)
+            self.__map.put(new_coord, policeman)
 
 
     def visit_tavern(self, tavern):
