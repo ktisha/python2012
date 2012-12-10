@@ -1,0 +1,11 @@
+-- SMTP
+mandatory parameters:
+	server-name, port, username
+optional params:
+	--password
+for example: smtp.googlemail.com 465 qwerty@gmail.com --password=12345
+
+-- POP3
+mandatory:
+	server_name, port, username, password
+for example: pop.yandex.ru 110 qwerty@yandex.ru 12345
