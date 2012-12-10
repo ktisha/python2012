@@ -4,6 +4,9 @@ import GENOME
 def sign(x):
     return 1 if(x >= 0) else -1
 
+def absolute_value(x):
+    return x if(x >= 0) else -x
+
 class ANT:
     def __init__(self, size, g = None):
         if g is None:
@@ -25,7 +28,7 @@ class ANT:
         return self.applesWasEat
 
     def makeMoves(self, maxStep, mapSize, appleNumber, mapSource):
-        map = [[mapSource[i][j] for j in range(0, len(mapSource[i]))] for i in range(0, len(mapSource))]
+        torMap = [[mapSource[i][j] for j in range(0, len(mapSource[i]))] for i in range(0, len(mapSource))]
         self.applesWasEat = 0
         self.moveToEatAllApples = 0
         self.livingTime += 1
@@ -37,49 +40,38 @@ class ANT:
         apples = appleNumber
         while not apples == 0 and moves < 1.5 * maxStep:
 
-            if x >= mapSize or x < 0:
-                x -= mapSize * sign(x)
-            if y >= mapSize or y < 0:
-                y -=  mapSize * sign(y)
-
             nextX = x
             nextY = y
-            if rotation == 0:
-                nextX += 1
-            elif rotation == 1:
-                nextY += 1
-            elif rotation == 2:
-                nextX -= 1
-            elif rotation == 3:
-                nextY -= 1
+            if absolute_value(rotation) == 1:
+                nextY += sign(rotation)
+            else:
+                nextX += sign(rotation)
 
             if nextX >= mapSize or nextX < 0:
                 nextX -= mapSize * sign(nextX)
             if nextY >= mapSize or nextY < 0:
                 nextY -= mapSize * sign(nextY)
 
-            action = st.getAction(map[nextY][nextX])
-            outState = st.getOutState(map[nextY][nextX])
+            action = st.getAction(torMap[nextY][nextX])
+            outState = st.getOutState(torMap[nextY][nextX])
             st = self.genome.getState(outState)
             if action == 0:
                 x = nextX
                 y = nextY
-                if map[nextY][nextX] == 1:
+                if torMap[y][x] == 1:
                     apples -= 1
-                    map[nextY][nextX] = 0
+                    torMap[y][x] = 0
                     if moves < maxStep:
                         self.applesWasEat += 1
 
             elif action == 2:
                 rotation -= 1
-                if rotation < 0:
-                    rotation = 3
+                if rotation < -2:
+                    rotation = 1
             elif action == 1:
                 rotation += 1
-                if rotation > 3:
-                    rotation = 0
-            elif action == 3:
-                pass
+                if rotation > 1:
+                    rotation = -2
             moves += 1
         self.moveToEatAllApples = moves
         self.prior = self.applesWasEat + (maxStep - self.moveToEatAllApples) / (float(maxStep))

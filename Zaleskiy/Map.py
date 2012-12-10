@@ -9,6 +9,8 @@ class Map:
         try:
             self.path_to_map = path
             self.map = [[line.strip('\n\t')] for line in open(path)]
+            self.goal_coordinates = 0
+            self.start_coordinates = 0
         except IOError:
             print "You have printed wrong path to file or file name. Be more attentive."
             exit()
@@ -45,7 +47,7 @@ class Map:
         return self.get_cell_at(coordinates.down_coordinates())
 
     def get_cell_at(self, coordinates):
-        if coordinates.getX() > 0 and coordinates.getX() < len(self.map[coordinates.getY()][0])-1 and coordinates.getY() > 0 and coordinates.getY() < len(self.map)-1:
+        if 0 < coordinates.getX() < len(self.map[coordinates.getY()][0])-1 and 0 < coordinates.getY() < len(self.map)-1:
             if self.map[coordinates.getY()][0][coordinates.getX()] in (' ', '#', 'E', 'T'):
                 return self.map[coordinates.getY()][0][coordinates.getX()]
             else:

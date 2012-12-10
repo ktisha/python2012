@@ -1,6 +1,6 @@
 __author__ = 'Kirill Kononov, Sergey Karashevich'
 
-import re, os
+import re, os, psycopg2
 from os.path import join
 
 class Parser:
@@ -8,32 +8,44 @@ class Parser:
     def __init__(self, proclogFileName):
         self.proclog = list()
         self.info = dict()
+        self.info["CAT_ASTR"] = 'empty'
+        self.info["CCD_TEMP"] = 'empty'
+        self.info["FILTER"] = 'empty'
+        self.info["IMG_CENTER_RA"] = 'empty'
+        self.info["IMG_CENTER_DEC"] = 'empty'
+        self.info["LONG"] = 'empty'
+        self.info["LAT"] = 'empty'
+        self.info["ALT"] = 'empty'
 
         with open(proclogFileName, 'r') as input_file:
             for line in input_file:
                 self.proclog.append(line)
-
 
     def parse(self, info_prefix, info_id, info_postfix):
         for line in self.proclog:
             name_prefix = re.search(info_prefix + "\s*", line)
 
             if name_prefix:
-                name = line[name_prefix.end() : line.find(info_postfix, name_prefix.end())]
-                self.info[info_id] = name.strip()
+                name = line[name_prefix.end(): line.find(info_postfix, name_prefix.end())]
+#                print info_id + "::" + name
+                self.info[info_id] = name
 
                 return
 
     def printParser(self):
-        for k, v in self.info.iteritems():
-            print k + " " * (20 - len(k)) + "\"" + v + "\""
+#        for k, v in self.info.iteritems():
+#            print k + " " * (20 - len(k)) + "\"" + v + "\""
+        print(self.info)
 
     def fillDict(self):
         self.parse("Processing image \"", "IMG_NAME", "\"")
-        self.parse("exposure =", "EXPOSURE", "s")
+        self.parse("Exposure duration:", "EXPOSURE", "\n")
         self.parse("CCD temperature =", "CCD_TEMP", "K")
         self.parse("filter \"", "FILTER", "\"")
         self.parse("Observation target:", "OBJECT", "\n")
+        if self.info.get("OBJECT") is None:
+            return
+        self.info["DESIGNATED"] = re.sub(r'\W', '', self.info.get("OBJECT"))
         self.parse("Mid-exposure time:", "EXPTIME", "UTC")
         self.parse("Latitude:", "LAT", "\n")
         self.parse("Longitude:", "LONG", "\n")
@@ -44,7 +56,54 @@ class Parser:
 
     def process(self):
         self.fillDict()
-        self.printParser()
+#        self.printParser()
+        if self.info.get("OBJECT") is not None:
+            self.add_to_database()
+
+    def add_to_database(self):
+        conn = psycopg2.connect("dbname='asteroidb' user='postgres' host='localhost' password='superpass'")
+        cur = conn.cursor()
+
+        d = self.info
+
+        #add new asteroid to DB
+        ast_name = d.get("OBJECT")
+        cur.execute("SELECT id  FROM proclogs_asteroidobs WHERE object_name = '" + ast_name +"';")
+        k = cur.fetchone()
+        if k is None:
+            cur.execute("INSERT INTO proclogs_asteroidobs (object_name, designated_name) VALUES (%s, %s)",
+                (ast_name, re.sub(r'\W', '', ast_name)))
+#            print "DATABASE:: " + ast_name + " has been added to asteroiDB!"
+            cur.execute("SELECT id  FROM proclogs_asteroidobs WHERE object_name = '" + ast_name +"';")
+            k = cur.fetchone()
+            conn.commit()
+        else:
+            pass
+#            print "DATABASE:: Asteroid "+ ast_name + " at asteroiDB exists."
+
+        #add new proclog to DB
+        image_name = d.get("IMG_NAME")
+        cur.execute("SELECT id  FROM proclogs_proclog WHERE pclg_image_name = '" + image_name +"';")
+        l = cur.fetchone()
+        if l is None:
+            cur.execute("INSERT INTO proclogs_proclog (observation_id, pclg_image_name, pclg_exposure, \"pclg_CCD_temp\","
+                        " pclg_filter, pclg_exp_time, pclg_latitude, "
+                        "pclg_longitude, pclg_altitude, pclg_catalog_astrometric,"
+                        " \"pclg_image_center_RA\", \"pclg_image_center_DEC\") VALUES (" + str(k[0]) + ", %s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s )",
+                ( d.get("IMG_NAME"),d.get("EXPOSURE"), d.get("CCD_TEMP"),
+                  d.get("FILTER"), d.get("EXPTIME"), d.get("LAT"),
+                  d.get("LONG"), d.get("ALT"), d.get("CAT_ASTR"),
+                  d.get("IMG_CENTER_RA"), d.get("IMG_CENTER_DEC")))
+#            print("DATABASE:: Proclog with name \"" + image_name + "\" has been added.")
+        else:
+            pass
+#            print("DATABASE:: Proclog with name \"" + image_name + "\" exists.")
+
+        conn.commit()
+
+        #close connections
+        cur.close()
+        conn.close()
 
 
 def isProclog(str):

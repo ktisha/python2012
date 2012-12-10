@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ query }}</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://malsup.github.com/jquery.form.js"></script>
+
+    <style>
+        .neutral {
+            background-color: #87ceeb;
+        }
+
+        .happy {
+            background-color: #98fb98;
+        }
+
+        .negative {
+            background-color: #cd5c5c;
+        }
+
+        .spam {
+            background-color: silver;
+        }
+
+        .manual {
+            border-color: white;
+        }
+
+        td {
+            padding: 1px;
+        }
+
+        tr:hover {
+            border-color: #adff2f;
+        }
+    </style>
+    <script>
+        $('#tweets').ajaxForm(function () {
+            window.location.reload()
+        });
+    </script>
+</head>
+<body>
+<form action="recipient" method="post" id="tweets">
+    <table cellspacing="0" border="1px">
+        <thead>
+        <tr>
+            <td>Текст</td>
+            <td>Счастье</td>
+            <td>Вручную?</td>
+            <td title="Положительный">^_^</td>
+            <td title="Нейтральный">-_-</td>
+            <td title="Отрицательный">X_X</td>
+            <td title="Спам">@_@</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for tweet in tweets %}
+            {% if tweet.isManual %}
+                <tr class="{{ tweet.happiness }} manual">
+                    {% else %}
+                <tr class="{{ tweet.happiness }}">
+            {% endif %}
+        <td>{{ tweet.text }}</td>
+        <td>{{ tweet.happiness }}</td>
+        <td>{{ tweet.isManual }}</td>
+        <td>
+            <input type="radio" name="{{ tweet.id }}" value="happy">
+        </td>
+        <td>
+            <input type="radio" name="{{ tweet.id }}" value="neutral">
+        </td>
+        <td>
+            <input type="radio" name="{{ tweet.id }}" value="negative">
+        </td>
+        <td>
+            <input type="radio" name="{{ tweet.id }}" value="spam">
+        </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="Обновить данные">
+</form>
+<br>
+<br>
+<br>
+
+
+<form action="result">
+    <input name="q" placeholder="поисковый запрос"><br>
+    <input name="rpp" placeholder="# твиттов на странице"><br>
+    <b>Тип твиттов:</b><br>
+    <input type="radio" name="result_type" value="mixed" checked>Смешанные<br>
+    <input type="radio" name="result_type" value="recent">Последние<br>
+    <input type="radio" name="result_type" value="popular">Популярные<br>
+    <input type="submit" value="Поиск">
+</form>
+</body>
+</html>
