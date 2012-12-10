@@ -1,19 +1,20 @@
-from coordinate import Coordinate
+from map.coordinate import Coordinate
 
 class WayFinder:
     def __init__(self, map, start, end):
-        self.__map = map
+        self._map = map
         self.__start = start
         self.__end = end
 
-    def get_path(self, end_vertex):
-        path = []
-        vertex = end_vertex
-        while vertex.get_prev_vertex().get_coordinate() != vertex.get_coordinate():
-            path.append(vertex.get_coordinate())
-            vertex = vertex.get_prev_vertex()
-        path.reverse()
-        return path
+    def valid_field_to_step(self, coordinate):
+        raise NotImplementedError("Abstract method is called")
+
+    def get_next_coordinate_to_go(self):
+        path = self.find_path()
+        if not path:
+            return None
+        else:
+            return path[0]
 
     def find_path(self):
         v = Vertex(self.__start, None, 0)
@@ -27,11 +28,10 @@ class WayFinder:
         next_front = []
 
         while True:
-
             for front_coord in front:
                 if front_coord in self.__end:
                     end_vertex = map[front_coord]
-                    return self.get_path(end_vertex)
+                    return self.__get_path(end_vertex)
 
                 neighbours = self.__get_neighbours(front_coord)
                 for neighbour in neighbours:
@@ -45,9 +45,12 @@ class WayFinder:
 
             front = next_front
             next_front = []
-            if not front :
+            if not front:
                 return []
         return []
+
+    def __get_map(self):
+        return self._map
 
     def __get_neighbours(self, coord):
         left = Coordinate(coord.get_x() - 1, coord.get_y())
@@ -58,9 +61,19 @@ class WayFinder:
 
         neighbours = []
         for coord in candidates:
-            if self.__map.is_in_bounds(coord) and self.__map.is_empty_field_except_sleeping_alcoholic(coord):
+            if (self._map.is_in_bounds(coord) or coord == self.__start or coord in self.__end)\
+            and self.valid_field_to_step(coord):
                 neighbours.append(coord)
         return neighbours
+
+    def __get_path(self, end_vertex):
+        path = []
+        vertex = end_vertex
+        while vertex.get_prev_vertex().get_coordinate() != vertex.get_coordinate():
+            path.append(vertex.get_coordinate())
+            vertex = vertex.get_prev_vertex()
+        path.reverse()
+        return path
 
 
 class Vertex:
