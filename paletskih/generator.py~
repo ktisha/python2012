@@ -1,5 +1,5 @@
 import sys
-f = open('input9.txt', "w")
+f = open('input8.txt', "w")
 i = 1
 n = 12
 m = 10
