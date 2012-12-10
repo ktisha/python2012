@@ -17,6 +17,7 @@ class Ladder:
                     if (len(line) is not lengthOfWord):
                         print "wrong length. Do not add this word"
                         print "continue read words"
+                        continue
                     wordSet.add(str(line).lower())
                 elif (countLines == 1):
                     self.srcWord = str(line).lower()
@@ -56,6 +57,8 @@ class Ladder:
                 if (differentOneSymbol(thisWord, currentWord) is True):
                     self.graph[i].nodeList.append(j)
         for v in self.graph:
+            if len(v.nodeList) == 0:
+                continue
             print v
             print v.number
             print v.nodeList
@@ -68,14 +71,19 @@ class Ladder:
         destinationVertexes = list()
         currentTime = 0
         for vertex in self.graph:
+            vertexInSource = False
             if (differentOneSymbol(self.srcWord, str(vertex)) is True):
                 sourceVertexes.append(vertex)
                 vertex.time = 0
+                vertexInSource = True
             if (differentOneSymbol(self.destWord, str(vertex)) is True):
                 destinationVertexes.append(vertex)
+                if vertexInSource:
+                    self.answer.append(vertex)
+                    return
         oldFront = sourceVertexes
-        findAnswer = True
-        while(findAnswer):
+        notfindAnswer = True
+        while(notfindAnswer):
             for vertex in oldFront:
                 for adjacentVertex in vertex.nodeList:
                     v = self.graph[adjacentVertex]
@@ -85,7 +93,7 @@ class Ladder:
                         newFront.append(v)
             if len(newFront) == 0:
                 print "no chain of words"
-                findAnswer = False
+                notfindAnswer = False
             for destVertex in destinationVertexes:
                 if (destVertex in newFront):
                     print "Ok "
@@ -97,15 +105,15 @@ class Ladder:
                         thisTime = thisVertex.time
                         self.answer.append(thisVertex)
                     self.answer.reverse()
-                    findAnswer = False
+                    notfindAnswer = False
                     break
             oldFront = newFront
             newFront = list()
             currentTime += 1
 
-    def printAnswer(self):
+    def printAnswer(self, filename):
         print [str(x) for x in self.answer]
-        with open("ladder.out", "w") as file:
+        with open(filename, "w") as file:
             file.write(self.srcWord + "\n")
             file.writelines("\n".join([str(x) for x in self.answer]))
             file.write("\n" + self.destWord)
@@ -133,7 +141,7 @@ def main():
     ladder = Ladder("ladder.in")
     ladder.buildGraph()
     ladder.searchChainOfWords()
-    ladder.printAnswer()
+    ladder.printAnswer("ladder.out")
 
 if __name__ == '__main__':
     main()
