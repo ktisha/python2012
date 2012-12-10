@@ -100,7 +100,7 @@ class HashedWordMatrix:
         n = len(self.get_tokens())
         coolset = sortedset()
         for word in self.get_tokens():
-            if word <> "*":
+            if not word.startswith("*"):
                 coolset.add((dist_func(target_column, word), word))
         array = list(coolset[1 : k + 1])
         return array
@@ -109,7 +109,7 @@ class HashedWordMatrix:
         """Gets k top columns having max cooccurence with target_column"""
         coolset = sortedset()
         for word in self.get_tokens():
-            if word <> "*":
+            if not word.startswith("*"):
                 coolset.add((self.get(target_column, target_column, word), word))
         array = list(coolset[len(coolset) - k : len(coolset)])
         array.reverse()

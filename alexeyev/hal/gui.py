@@ -104,12 +104,10 @@ def loadfile():
             global widgets_list
             for widget in widgets_list:
                 widget.pack()
-        except:
-            tkMessageBox.showerror("Error", "Failed to read file \n'%s'"%filename)
+        except Exception,e:
+            tkMessageBox.showerror("Error", str(e))
             return
 
 Button(trainer, text = u"Train", command = loadfile, width = 10).pack()
-
-
 
 root.mainloop()
