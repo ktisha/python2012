@@ -4,7 +4,7 @@ __author__ = 'pritykovskaya'
 # mysql
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD="booW1ham"
+MYSQL_PASSWORD="123"
 MYSQL_CHARSET="utf8"
 
 # redis

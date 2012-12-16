@@ -1,5 +1,8 @@
+#coding: utf-8
+
 import simplejson
 import urllib2
+import sys
 
 __author__ = 'erofeev'
 
@@ -12,7 +15,7 @@ class TwitterStuff:
     def getTweets(query, tweetsN, result_type):
         query = urllib2.quote(query.encode("utf-8"))
         url = "http://search.twitter.com/search.json?q=" + query + "&rpp=" + str(
-            tweetsN) + "&result_type=" + result_type
+            tweetsN) + "&result_type=" + result_type + "&include_entities=true"
         try:
             f = urllib2.urlopen(url)
             tweets = simplejson.load(f)
@@ -25,5 +28,5 @@ class TwitterStuff:
         try:
             f = urllib2.urlopen("https://api.twitter.com/1/statuses/show.json?id=" + id)
             return simplejson.load(f)
-        except urllib2.HTTPError:
+        except urllib2.HTTPError, e:
             return None

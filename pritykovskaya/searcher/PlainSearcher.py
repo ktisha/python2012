@@ -28,7 +28,6 @@ class PlainSearcher(BaseSearcher):
             bag_ids_passed_threshold = self.choose_keys_passed_threshold_with_one_symbol_words(id_wordsInfo, original_len)
 
         return bag_ids_passed_threshold
-
     def choose_keys_passed_threshold(self, id_freq, original_len):
         dict_ids_passed_threshold = {}
         for key in id_freq.keys():
@@ -37,21 +36,17 @@ class PlainSearcher(BaseSearcher):
             if self.is_above_thresholds(inter_to_tag, inter_to_bagOfWord):
                 dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
         return dict_ids_passed_threshold
-
-    def choose_keys_passed_threshold_with_one_symbol_words(self, id_wordsInfo, original_len):
-        dict_ids_passed_threshold = {}
-        for key in id_wordsInfo.keys():
-            # прибавляем к длине тега (без односимвольных слов)
-            # количество односимвольных слов, которые
-            # лежат в рассматриваемом листе
-            actual_original_len = original_len + id_wordsInfo[key][1]
-
-            inter_to_tag = id_wordsInfo[key][0]/float(actual_original_len)
-            inter_to_bagOfWord = id_wordsInfo[key][0]/float(self.bag_id_to_length_redis.get(key))
-
-            if self.is_above_thresholds(inter_to_tag, inter_to_bagOfWord):
-                dict_ids_passed_threshold[key] = [inter_to_tag, inter_to_bagOfWord]
-        return dict_ids_passed_threshold
+    def create_wordInfo_one_symbol_words(self, bag_of_words, candidates = set()):
+        id_wordsInfo = {}
+        for word in bag_of_words:
+            word_ids = self.word_to_bag_ids_redis.smembers(word)
+            for word_id in word_ids:
+                if word_id in id_wordsInfo:
+                    id_wordsInfo[word_id][0] += 1
+                    id_wordsInfo[word_id][1] += 1 if is_one_symbol_word(word) else 0
+                else:
+                    id_wordsInfo[word_id] = [1, 1 if is_one_symbol_word(word) else 0]
+        return id_wordsInfo
 
 # todo
 # если tag пересекается только с категорией (mod key 3 == 2)
