@@ -7,9 +7,10 @@ __author__ = 'Aleksandr Vereshchagin'
 
 class Task:
 
-    __input = None
-    __output = None
-    __action = None
+    def __init__(self):
+        self.__input = None
+        self.__output = None
+        self.__action = None
 
     def __getPaddingSize(self, x, a):
         return ((x - 1) // a + 1) * a - x
