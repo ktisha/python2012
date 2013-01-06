@@ -15,19 +15,20 @@ HEADER_FORMAT = '<2sIHHIIIIHHIIIIII'
 
 class BMPImage:
 
-    __signature = 'BM'
-    __size = 0
-    __offset = 54
-    __headerSize = 40
-    __width = 0
-    __height = 0
-    __planes = 1
-    __bpp = 24
-    __compression = 0
-    __sizeOfData = 0
-    __horizontalRes = 2835
-    __verticalRes = 2835
-    __rawData = None
+    def __init__(self):
+        self.__signature = 'BM'
+        self.__size = 0
+        self.__offset = 54
+        self.__headerSize = 40
+        self.__width = 0
+        self.__height = 0
+        self.__planes = 1
+        self.__bpp = 24
+        self.__compression = 0
+        self.__sizeOfData = 0
+        self.__horizontalRes = 2835
+        self.__verticalRes = 2835
+        self.__rawData = None
 
     def __loadBmpHeader(self, file):
         header = file.read(struct.calcsize(HEADER_FORMAT))
@@ -99,17 +100,18 @@ class BMPImage:
 
 class CustomizableImage:
 
-    __width = 0
-    __height = 0
+    def __init__(self):
+        self.__width = 0
+        self.__height = 0
 
-    # (originalBlockSize, packedBlockSize, numberOfBlocks)
-    __yDescription = None
-    __cbDescription = None
-    __crDescription = None
+        # (originalBlockSize, packedBlockSize, numberOfBlocks)
+        self.__yDescription = None
+        self.__cbDescription = None
+        self.__crDescription = None
 
-    __yData = None
-    __cbData = None
-    __crData = None
+        self.__yData = None
+        self.__cbData = None
+        self.__crData = None
 
     def __readHeader(self, file):
         self.__width, self.__height = struct.unpack('<II', file.read(struct.calcsize('<II')))

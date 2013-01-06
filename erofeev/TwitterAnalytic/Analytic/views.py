@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from Analytic.model.TwitterStuff import TwitterStuff
 from Analytic.model.TweetsAnalysis import TweetsAnalysis
+from Analytic.model.Stat import Stat
 
 def search(request):
     """Страница ввода данных для поиска"""
@@ -37,10 +38,13 @@ def result(request):
             return redirect("/search?error=many_t")
     except:
         #return redirect("/search?error=bad_n")
-        return "bad"
+        tweetsN = 20
 
     result = {}
-    result['tweets'] = TweetsAnalysis.predictHappiness(TwitterStuff.getTweets(query, tweetsN, result_type))
+    tweets = TweetsAnalysis().predictHappiness(TwitterStuff.getTweets(query, tweetsN, result_type))
+    result['tweets'] = tweets
+    result['stat'] = Stat().calc(tweets)
+    print result['stat']
     result['query'] = query
     return render(request, 'result.html', result)
 
@@ -48,6 +52,5 @@ def result(request):
 @csrf_exempt
 def recipient(request):
     """Ассинхронный приём новой информации от "учителя" о настроениях """
-
-    TweetsAnalysis.addTeachedTweets(request.POST)
+    TweetsAnalysis().addTeachedTweets(request.POST)
     return HttpResponse("OK")

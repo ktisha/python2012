@@ -5,7 +5,14 @@ from task import Task
 __author__ = 'Aleksandr Vereshchagin'
 
 def usage():
-    print 'This is usage'
+    print 'Usage:'
+    print 'python main.py <action> -o|--output outputFile inputFile'
+    print '    action is one of:'
+    print '-c, --compress: compress bmp image'
+    print '-x, --extract: extract bmp image'
+    print ''
+    print 'Example:'
+    print 'python main.py -c -o data/dest.cim data/image.bmp'
 
 def processArgs(optlist, inputs, task):
     if len(inputs) > 0:

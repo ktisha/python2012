@@ -1,0 +1,7 @@
+http://api.vk.com/oauth/authorize?client_id=3272739&redirect_uri=http://api.vk.com/blank.html&scope=(status,notify,friends,photos,audio,video,docs,notes,pages,wall,groups,messages,ads)&display=page&response_type=token
+
+b502c74ae5c576c2b55ee74336b5300d71bb501b507c5cce5c2c7421c967390bb134dbc
+
+
+security = "oKKKTjBO87EuzhTj0qKf"
+client_id = 3272739

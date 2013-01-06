@@ -1,3 +1,5 @@
+#coding: utf-8
+
 from django.conf.urls import patterns, include, url
 
 # Uncomment the next two lines to enable the admin:
@@ -10,7 +12,7 @@ urlpatterns = patterns('',
     # url(r'^TwitterAnalytic/', include('TwitterAnalytic.foo.urls')),
 
     url(r'^recipient', 'Analytic.views.recipient'),
-    #url(r'^$', 'Analytic.views.search'),
+    url(r'^$', 'Analytic.views.search'),
     url(r'^search', 'Analytic.views.search'),
     url(r'^result', 'Analytic.views.result'),
 
