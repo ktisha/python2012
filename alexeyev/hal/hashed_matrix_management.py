@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 from _sortedlist import sortedset
+import sys
 
 __author__ = 'Anton M Alexeyev'
 
@@ -93,7 +94,10 @@ class HashedWordMatrix:
         #length0 **= 0.5
         #length1 **= 0.5
 #        return length0 * length1 / collector  #if collector > 0 else 0.000000000001
-        return 1 / collector
+        if collector > 0:
+            return 1 / collector
+        else:
+            return sys.float_info.max
 
     def kn_columns(self, target_column, k, dist_func):
         """Gets k nearest columns to target_column by distance function provided by dist_func"""

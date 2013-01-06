@@ -1,13 +1,14 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 __author__ = 'Anton M Alexeyev'
-# I decided to implement HAL, not SAM -- another method for cognitive studies and recommender systems
+# I decided to implement HAL -- a method for cognitive studies and recommender systems
 
 from nltk.stem import PorterStemmer
 from hashed_matrix_management import HashedWordMatrix
 from nltk.corpus import stopwords
 from nltk import pos_tag
 import re
+from data_printer import graph_to_file
 
 
 window_size = 11
@@ -22,6 +23,12 @@ def train_model(file):
     global stemmer
     global window_size
     global min_freq
+
+    charlist = ["alice", "cat", "gryphon",
+                "hatter", "mouse", "dodo", "time",
+                "duchess", "dormouse", "queen",
+                "rabbit", "king", "turtle", "pigeon"]
+
     matrix = HashedWordMatrix()
 
     print "Loading text..."
@@ -93,6 +100,11 @@ def train_model(file):
     matrix.normalize()
 
     print "Number of terms:", str(len(matrix.get_tokens())) + "."
+
+    print "Writing graph to file"
+
+    graph_to_file(matrix, charlist, 'graph.nwb')
+
     print "Done."
 
 def get_token_by_word(word):
